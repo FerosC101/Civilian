@@ -11,7 +11,7 @@ const WeatherMapDashboard = () => {
         return () => clearInterval(timer);
     }, []);
 
-    const formatTime = (date) => {
+    const formatTime = (date: Date) => {
         return date.toLocaleTimeString('en-US', {
             hour12: false,
             hour: '2-digit',

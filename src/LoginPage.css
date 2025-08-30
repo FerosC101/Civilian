@@ -1,0 +1,429 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #000000;
+    color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Main Container */
+.login-page-container {
+    min-height: 100vh;
+    background: #000000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+/* Gradient Overlays */
+.gradient-overlay {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.08;
+    z-index: 1;
+}
+
+.overlay-1 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
+    top: 10%;
+    right: 15%;
+}
+
+.overlay-2 {
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, #1e40af 0%, transparent 70%);
+    bottom: 15%;
+    left: 20%;
+}
+
+/* Login Container */
+.login-container {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+    background: rgba(15, 23, 42, 0.3);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(30, 41, 59, 0.3);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* Header Section */
+.login-header {
+    margin-bottom: 2rem;
+}
+
+.login-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.15));
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.login-logo:hover {
+    filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.25));
+    transform: scale(1.05);
+}
+
+.login-title {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: rgba(203, 213, 225, 0.8);
+    margin-bottom: 0.25rem;
+}
+
+.brand-name {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #ffffff 0%, rgba(203, 213, 225, 0.8) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1;
+}
+
+/* Form Styles */
+.login-form {
+    text-align: left;
+}
+
+.form-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgba(203, 213, 225, 0.9);
+    margin-bottom: 0.5rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(71, 85, 105, 0.4);
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(15, 23, 42, 0.6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-input::placeholder {
+    color: rgba(148, 163, 184, 0.6);
+}
+
+/* Password Input Container */
+.password-input-container {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(148, 163, 184, 0.7);
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+    color: rgba(203, 213, 225, 0.9);
+}
+
+.eye-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Login Button */
+.login-button {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: rgba(37, 99, 235, 0.9);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 1rem;
+}
+
+.login-button:hover {
+    background: rgba(29, 78, 216, 1);
+    transform: translateY(-1px);
+}
+
+/* Forgot Password Link */
+.forgot-password-link {
+    background: none;
+    border: none;
+    color: rgba(96, 165, 250, 0.9);
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    display: block;
+    text-align: center;
+    width: 100%;
+    padding: 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.forgot-password-link:hover {
+    color: rgba(147, 197, 253, 1);
+}
+
+/* Divider */
+.divider-container {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+    gap: 1rem;
+}
+
+.divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(71, 85, 105, 0.3), transparent);
+}
+
+.divider-text {
+    font-size: 0.75rem;
+    color: rgba(148, 163, 184, 0.7);
+    white-space: nowrap;
+}
+
+/* Social Login Buttons */
+.social-login-container {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.social-login-button {
+    width: 48px;
+    height: 48px;
+    background: rgba(30, 41, 59, 0.3);
+    border: 1px solid rgba(71, 85, 105, 0.3);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: rgba(203, 213, 225, 0.8);
+}
+
+.social-login-button:hover {
+    background: rgba(30, 41, 59, 0.5);
+    border-color: rgba(71, 85, 105, 0.5);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.social-icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* Sign Up Link */
+.signup-link-container {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.signup-text {
+    font-size: 0.875rem;
+    color: rgba(148, 163, 184, 0.8);
+}
+
+.signup-link {
+    background: none;
+    border: none;
+    color: rgba(96, 165, 250, 0.9);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    margin-left: 0.25rem;
+    transition: color 0.2s ease;
+}
+
+.signup-link:hover {
+    color: rgba(147, 197, 253, 1);
+}
+
+/* Footer */
+.login-footer {
+    text-align: center;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(30, 41, 59, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.status-dot {
+    width: 4px;
+    height: 4px;
+    background: rgba(34, 197, 94, 0.8);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.status-text {
+    font-size: 0.75rem;
+    color: rgba(100, 116, 139, 0.7);
+    font-weight: 300;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .login-page-container {
+        position: relative;
+        min-height: 100vh;
+        padding: 1.5rem;
+    }
+
+    .login-container {
+        padding: 2.5rem 2rem;
+        max-width: 380px;
+    }
+
+    .brand-name {
+        font-size: 2rem;
+    }
+
+    .login-logo {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-page-container {
+        position: relative;
+        min-height: 100vh;
+        padding: 1rem;
+    }
+
+    .login-container {
+        padding: 2rem 1.5rem;
+    }
+
+    .brand-name {
+        font-size: 1.75rem;
+    }
+
+    .login-logo {
+        width: 50px;
+        height: 50px;
+    }
+
+    .social-login-container {
+        gap: 0.75rem;
+    }
+
+    .social-login-button {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Improved Form Validation States */
+.form-input:invalid:not(:placeholder-shown) {
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.form-input:valid:not(:placeholder-shown) {
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+/* Focus ring for accessibility */
+.login-button:focus-visible,
+.social-login-button:focus-visible,
+.forgot-password-link:focus-visible,
+.signup-link:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+}
+
+.form-input:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}

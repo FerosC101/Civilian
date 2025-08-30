@@ -13,7 +13,7 @@ const EntryPage: React.FC = () => {
             return;
         }
         console.log('Login clicked');
-        // Handle login navigation
+        navigate('/login'); // Navigate to login page
     };
 
     const handleSignup = () => {
@@ -22,7 +22,7 @@ const EntryPage: React.FC = () => {
             return;
         }
         console.log('Sign up clicked');
-        // Handle signup navigation
+        navigate('/signup'); // Navigate to signup page
     };
 
     const handleGuestLogin = () => {

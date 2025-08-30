@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Filter, MapPin, AlertTriangle, Flame, Wind, Home, BarChart3, Settings, Menu, X } from 'lucide-react';
-import './GIS_Page.css';
 
-// Global map variable
-let globalMap: any = null;
-let globalView: any = null;
-let globalMarkers: any[] = [];
+// Leaflet interfaces
+interface LeafletMap {
+    setView: (center: [number, number], zoom: number) => LeafletMap;
+    on: (event: string, handler: (e: any) => void) => void;
+    addLayer: (layer: any) => void;
+    removeLayer: (layer: any) => void;
+    eachLayer: (fn: (layer: any) => void) => void;
+    invalidateSize: () => void;
+}
 
 interface MarkerData {
     id: string;
@@ -15,6 +19,11 @@ interface MarkerData {
     description: string;
     severity: 'High' | 'Medium' | 'Low' | 'Info';
 }
+
+// Global variables
+let globalMap: LeafletMap | null = null;
+let markersLayer: any = null;
+let currentMarkers: any[] = [];
 
 const GISPage: React.FC = () => {
     const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768);
@@ -28,7 +37,7 @@ const GISPage: React.FC = () => {
     const [mapLoaded, setMapLoaded] = useState<boolean>(false);
     const mapRef = useRef<HTMLDivElement>(null);
 
-    // Sample marker data
+    // Sample marker data - Batangas area coordinates
     const markersData: MarkerData[] = [
         {
             id: '1',
@@ -83,10 +92,11 @@ const GISPage: React.FC = () => {
     // Handle window resize
     useEffect(() => {
         const handleResize = () => {
-            setIsMobile(window.innerWidth <= 768);
+            const newIsMobile = window.innerWidth <= 768;
+            setIsMobile(newIsMobile);
             if (globalMap) {
                 setTimeout(() => {
-                    globalMap.getViewport().dispatchEvent('resize');
+                    globalMap.invalidateSize();
                 }, 100);
             }
         };
@@ -94,390 +104,199 @@ const GISPage: React.FC = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Initialize OpenLayers map
+    // Initialize Leaflet map
     useEffect(() => {
         const initMap = async () => {
             if (mapRef.current && !globalMap) {
                 try {
-                    // Load OpenLayers dynamically
-                    const olScript = document.createElement('script');
-                    olScript.src = 'https://cdn.jsdelivr.net/npm/ol@7.5.2/dist/ol.js';
-                    olScript.onload = () => {
-                        // Load OpenLayers CSS
-                        const olCSS = document.createElement('link');
-                        olCSS.rel = 'stylesheet';
-                        olCSS.href = 'https://cdn.jsdelivr.net/npm/ol@7.5.2/ol.css';
-                        document.head.appendChild(olCSS);
+                    // Load Leaflet CSS
+                    const leafletCSS = document.createElement('link');
+                    leafletCSS.rel = 'stylesheet';
+                    leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+                    leafletCSS.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+                    leafletCSS.crossOrigin = '';
+                    document.head.appendChild(leafletCSS);
 
-                        // Initialize map after script loads
-                        setTimeout(() => {
-                            const ol = (window as any).ol;
+                    // Load Leaflet JS
+                    const leafletScript = document.createElement('script');
+                    leafletScript.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+                    leafletScript.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+                    leafletScript.crossOrigin = '';
 
-                            if (!ol) {
-                                console.error('OpenLayers not loaded');
-                                return;
-                            }
+                    leafletScript.onload = () => {
+                        const L = (window as any).L;
+                        if (!L) {
+                            console.error('Leaflet not loaded properly');
+                            return;
+                        }
 
-                            // Create view
-                            globalView = new ol.View({
-                                center: ol.proj.fromLonLat([121.0409, 14.2456]), // Batangas coordinates
-                                zoom: 12
-                            });
+                        // Initialize map
+                        globalMap = L.map(mapRef.current).setView([14.2456, 121.0409], 12);
 
-                            // Create map
-                            globalMap = new ol.Map({
-                                target: mapRef.current,
-                                layers: [
-                                    new ol.layer.Tile({
-                                        source: new ol.source.OSM()
-                                    })
-                                ],
-                                view: globalView,
-                                controls: ol.control.defaults({
-                                    zoom: true,
-                                    rotate: false,
-                                    attribution: false
-                                })
-                            });
+                        // Add tile layer
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap contributors',
+                            maxZoom: 19,
+                        }).addTo(globalMap);
 
-                            // Create vector source for markers
-                            const vectorSource = new ol.source.Vector();
-                            const vectorLayer = new ol.layer.Vector({
-                                source: vectorSource
-                            });
-                            globalMap.addLayer(vectorLayer);
+                        // Create marker layer group
+                        markersLayer = L.layerGroup().addTo(globalMap);
 
-                            // Add markers
-                            markersData.forEach(marker => {
-                                const feature = new ol.Feature({
-                                    geometry: new ol.geom.Point(ol.proj.fromLonLat([marker.position.lng, marker.position.lat])),
-                                    markerData: marker
-                                });
+                        // Add markers
+                        addMarkersToMap();
 
-                                // Style based on marker type and severity
-                                const colors = {
-                                    flood: '#f97316',
-                                    fire: '#ef4444',
-                                    airPollution: '#eab308'
-                                };
-
-                                const sizes = {
-                                    High: 25,
-                                    Medium: 20,
-                                    Low: 15,
-                                    Info: 18
-                                };
-
-                                const style = new ol.style.Style({
-                                    image: new ol.style.Circle({
-                                        radius: sizes[marker.severity],
-                                        fill: new ol.style.Fill({
-                                            color: colors[marker.type]
-                                        }),
-                                        stroke: new ol.style.Stroke({
-                                            color: '#ffffff',
-                                            width: 3
-                                        })
-                                    })
-                                });
-
-                                feature.setStyle(style);
-                                feature.set('type', marker.type);
-                                vectorSource.addFeature(feature);
-                                globalMarkers.push(feature);
-                            });
-
-                            // Add click handler
-                            globalMap.on('click', (event: any) => {
-                                globalMap.forEachFeatureAtPixel(event.pixel, (feature: any) => {
-                                    const markerData = feature.get('markerData');
-                                    if (markerData) {
-                                        showMarkerPopup(markerData, event.pixel);
-                                    }
-                                });
-                            });
-
-                            // Add pointer cursor on hover
-                            globalMap.on('pointermove', (event: any) => {
-                                const hit = globalMap.hasFeatureAtPixel(event.pixel);
-                                globalMap.getTarget().style.cursor = hit ? 'pointer' : '';
-                            });
-
-                            setMapLoaded(true);
-                        }, 500);
+                        setMapLoaded(true);
                     };
-                    document.head.appendChild(olScript);
 
+                    leafletScript.onerror = () => {
+                        console.error('Failed to load Leaflet');
+                        setMapLoaded(true);
+                    };
+
+                    document.head.appendChild(leafletScript);
                 } catch (error) {
-                    console.error('Error loading OpenLayers:', error);
-                    // Fallback to simple map implementation
-                    initSimpleMap();
+                    console.error('Error initializing map:', error);
+                    setMapLoaded(true);
                 }
             }
         };
 
-        // Simple fallback map
-        const initSimpleMap = () => {
-            if (mapRef.current) {
-                mapRef.current.innerHTML = `
-                    <div style="
-                        width: 100%;
-                        height: 100%;
-                        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        position: relative;
-                        overflow: hidden;
-                    ">
-                        <div style="
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            bottom: 0;
-                            background-image: 
-                                linear-gradient(rgba(107, 114, 128, 0.1) 1px, transparent 1px),
-                                linear-gradient(90deg, rgba(107, 114, 128, 0.1) 1px, transparent 1px);
-                            background-size: 50px 50px;
-                        "></div>
-                        
-                        <!-- Simulated geographic features -->
-                        <div style="
-                            position: absolute;
-                            top: 40%;
-                            left: 0;
-                            right: 0;
-                            height: 8px;
-                            background: #374151;
-                            transform: rotate(-10deg);
-                            transform-origin: left;
-                        "></div>
-                        
-                        <div style="
-                            position: absolute;
-                            top: 20%;
-                            left: 20%;
-                            width: 12px;
-                            height: 60%;
-                            background: #1e293b;
-                            border-radius: 6px;
-                            transform: rotate(15deg);
-                        "></div>
-                        
-                        <!-- Markers -->
-                        ${markersData.map((marker, index) => {
-                    const colors = {
-                        flood: '#f97316',
-                        fire: '#ef4444',
-                        airPollution: '#eab308'
-                    };
-                    const sizes = {
-                        High: '25px',
-                        Medium: '20px',
-                        Low: '15px',
-                        Info: '18px'
-                    };
+        initMap();
 
-                    const x = 20 + (index % 3) * 30 + Math.random() * 20;
-                    const y = 30 + Math.floor(index / 3) * 25 + Math.random() * 20;
-
-                    return `
-                                <div 
-                                    class="simple-marker" 
-                                    data-marker='${JSON.stringify(marker)}'
-                                    style="
-                                        position: absolute;
-                                        left: ${x}%;
-                                        top: ${y}%;
-                                        width: ${sizes[marker.severity]};
-                                        height: ${sizes[marker.severity]};
-                                        background: ${colors[marker.type]};
-                                        border: 3px solid white;
-                                        border-radius: 50%;
-                                        cursor: pointer;
-                                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                                        animation: ${marker.severity === 'High' ? 'pulse 2s infinite' : 'none'};
-                                        transition: all 0.2s ease;
-                                        z-index: 10;
-                                        display: ${activeFilters[marker.type] ? 'block' : 'none'};
-                                    "
-                                    onmouseover="this.style.transform='scale(1.2)'"
-                                    onmouseout="this.style.transform='scale(1)'"
-                                    onclick="window.showSimplePopup(this)"
-                                >
-                                    <div style="
-                                        position: absolute;
-                                        top: 50%;
-                                        left: 50%;
-                                        transform: translate(-50%, -50%);
-                                        width: 30%;
-                                        height: 30%;
-                                        background: white;
-                                        border-radius: 50%;
-                                        opacity: 0.8;
-                                    "></div>
-                                </div>
-                            `;
-                }).join('')}
-                        
-                        <!-- Map Legend -->
-                        <div style="
-                            position: absolute;
-                            bottom: 20px;
-                            left: 20px;
-                            background: rgba(31, 41, 55, 0.9);
-                            backdrop-filter: blur(10px);
-                            border: 1px solid rgba(107, 114, 128, 0.2);
-                            border-radius: 12px;
-                            padding: 16px;
-                            color: white;
-                            font-family: Inter, sans-serif;
-                            font-size: 14px;
-                            min-width: 180px;
-                        ">
-                            <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600;">Map Legend</h3>
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="width: 12px; height: 12px; background: #f97316; border: 2px solid white; border-radius: 50%;"></div>
-                                    <span style="color: #d1d5db; font-size: 12px;">Flood Warning</span>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="width: 12px; height: 12px; background: #ef4444; border: 2px solid white; border-radius: 50%;"></div>
-                                    <span style="color: #d1d5db; font-size: 12px;">Fire Alert</span>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="width: 12px; height: 12px; background: #eab308; border: 2px solid white; border-radius: 50%;"></div>
-                                    <span style="color: #d1d5db; font-size: 12px;">Air Quality</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <style>
-                            @keyframes pulse {
-                                0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 0 rgba(249, 115, 22, 0.4); }
-                                50% { box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 10px rgba(249, 115, 22, 0); }
-                            }
-                        </style>
-                    </div>
-                `;
-
-                // Add global function for simple popup
-                (window as any).showSimplePopup = (element: HTMLElement) => {
-                    const markerData = JSON.parse(element.getAttribute('data-marker') || '{}');
-                    showMarkerPopup(markerData, { x: 0, y: 0 });
-                };
-
-                setMapLoaded(true);
+        // Cleanup
+        return () => {
+            if (globalMap) {
+                globalMap = null;
+                markersLayer = null;
+                currentMarkers = [];
             }
         };
-
-        // Try to initialize map
-        if (mapRef.current) {
-            initMap();
-        }
     }, []);
 
-    // Update marker visibility based on filters
-    useEffect(() => {
-        if (globalMarkers.length > 0) {
-            globalMarkers.forEach(marker => {
-                const markerType = marker.get('type');
-                marker.setStyle(activeFilters[markerType] ? marker.getStyle() : null);
-            });
-        } else {
-            // Update simple markers
-            const simpleMarkers = document.querySelectorAll('.simple-marker');
-            simpleMarkers.forEach((marker) => {
-                const markerData = JSON.parse(marker.getAttribute('data-marker') || '{}');
-                (marker as HTMLElement).style.display = activeFilters[markerData.type] ? 'block' : 'none';
-            });
-        }
-    }, [activeFilters]);
+    const addMarkersToMap = () => {
+        if (!markersLayer) return;
 
-    const showMarkerPopup = (marker: MarkerData, pixel: { x: number; y: number }) => {
-        // Remove existing popups
-        const existingPopups = document.querySelectorAll('.marker-popup');
-        existingPopups.forEach(popup => popup.remove());
+        const L = (window as any).L;
+        if (!L) return;
 
-        // Create popup element
-        const popup = document.createElement('div');
-        popup.className = 'marker-popup';
-        popup.style.position = 'fixed';
-        popup.style.left = `${pixel.x + 10}px`;
-        popup.style.top = `${pixel.y - 10}px`;
-        popup.style.background = 'rgba(31, 41, 55, 0.95)';
-        popup.style.backdropFilter = 'blur(10px)';
-        popup.style.border = '1px solid rgba(107, 114, 128, 0.2)';
-        popup.style.borderRadius = '12px';
-        popup.style.padding = '16px';
-        popup.style.color = '#ffffff';
-        popup.style.fontFamily = 'Inter, sans-serif';
-        popup.style.fontSize = '14px';
-        popup.style.maxWidth = '280px';
-        popup.style.zIndex = '1000';
-        popup.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.5)';
-        popup.style.animation = 'fadeIn 0.3s ease-out';
+        // Clear existing markers
+        currentMarkers.forEach(marker => {
+            markersLayer.removeLayer(marker);
+        });
+        currentMarkers = [];
 
-        const severityColors = {
-            'High': '#ef4444',
-            'Medium': '#f59e0b',
-            'Low': '#10b981',
-            'Info': '#3b82f6'
+        // Color mapping for markers
+        const colors = {
+            flood: '#f97316',
+            fire: '#ef4444',
+            airPollution: '#eab308'
         };
 
-        popup.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                <h3 style="margin: 0; font-size: 16px; font-weight: 600; flex: 1;">${marker.title}</h3>
-                <span style="background: ${severityColors[marker.severity]}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">${marker.severity}</span>
-            </div>
-            <p style="margin: 0; font-size: 14px; color: #d1d5db; line-height: 1.5;">${marker.description}</p>
-            <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(107, 114, 128, 0.3); font-size: 12px; color: #9ca3af;">
-                📍 Lat: ${marker.position.lat.toFixed(4)}, Lng: ${marker.position.lng.toFixed(4)}<br>
-                ⏰ Last updated: ${new Date().toLocaleString()}
-            </div>
-            <button style="
-                position: absolute; 
-                top: 8px; 
-                right: 8px; 
-                background: none; 
-                border: none; 
-                color: #9ca3af; 
-                cursor: pointer; 
-                font-size: 20px;
-                width: 24px;
-                height: 24px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 4px;
-                transition: all 0.2s;
-            " onmouseover="this.style.background='rgba(107, 114, 128, 0.2)'; this.style.color='#ffffff';" onmouseout="this.style.background='none'; this.style.color='#9ca3af';">×</button>
-        `;
-
-        // Add close button functionality
-        const closeBtn = popup.querySelector('button');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => popup.remove());
-        }
-
-        // Add to body instead of map container
-        document.body.appendChild(popup);
-
-        // Auto close after 8 seconds
-        setTimeout(() => {
-            if (popup.parentNode) popup.remove();
-        }, 8000);
-
-        // Close on outside click
-        const closeOnOutside = (e: MouseEvent) => {
-            if (!popup.contains(e.target as Node)) {
-                popup.remove();
-                document.removeEventListener('click', closeOnOutside);
-            }
+        // Size mapping based on severity
+        const sizes = {
+            High: 15,
+            Medium: 12,
+            Low: 9,
+            Info: 11
         };
-        setTimeout(() => document.addEventListener('click', closeOnOutside), 100);
+
+        markersData.forEach(markerData => {
+            if (!activeFilters[markerData.type]) return;
+
+            const customIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `
+          <div style="
+            width: ${sizes[markerData.severity] * 2}px;
+            height: ${sizes[markerData.severity] * 2}px;
+            background: ${colors[markerData.type]};
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            position: relative;
+            ${markerData.severity === 'High' ? 'animation: pulse 2s infinite;' : ''}
+          ">
+            <div style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 30%;
+              height: 30%;
+              background: white;
+              border-radius: 50%;
+              opacity: 0.8;
+            "></div>
+          </div>
+        `,
+                iconSize: [sizes[markerData.severity] * 2, sizes[markerData.severity] * 2],
+                iconAnchor: [sizes[markerData.severity], sizes[markerData.severity]]
+            });
+
+            const marker = L.marker([markerData.position.lat, markerData.position.lng], {
+                icon: customIcon
+            });
+
+            // Create popup content
+            const severityColors = {
+                'High': '#ef4444',
+                'Medium': '#f59e0b',
+                'Low': '#10b981',
+                'Info': '#3b82f6'
+            };
+
+            const popupContent = `
+        <div style="
+          background: rgba(31, 41, 55, 0.95);
+          color: white;
+          font-family: Inter, sans-serif;
+          padding: 16px;
+          border-radius: 12px;
+          min-width: 250px;
+          max-width: 300px;
+        ">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+            <h3 style="margin: 0; font-size: 16px; font-weight: 600; flex: 1;">${markerData.title}</h3>
+            <span style="
+              background: ${severityColors[markerData.severity]}; 
+              color: white; 
+              padding: 4px 8px; 
+              border-radius: 12px; 
+              font-size: 12px; 
+              font-weight: 500;
+            ">${markerData.severity}</span>
+          </div>
+          <p style="margin: 0; font-size: 14px; color: #d1d5db; line-height: 1.5;">${markerData.description}</p>
+          <div style="
+            margin-top: 12px; 
+            padding-top: 8px; 
+            border-top: 1px solid rgba(107, 114, 128, 0.3); 
+            font-size: 12px; 
+            color: #9ca3af;
+          ">
+            📍 Lat: ${markerData.position.lat.toFixed(4)}, Lng: ${markerData.position.lng.toFixed(4)}<br>
+            ⏰ Last updated: ${new Date().toLocaleString()}
+          </div>
+        </div>
+      `;
+
+            marker.bindPopup(popupContent, {
+                className: 'custom-popup',
+                closeButton: true,
+                maxWidth: 350
+            });
+
+            marker.addTo(markersLayer);
+            currentMarkers.push(marker);
+        });
     };
+
+    // Update markers when filters change
+    useEffect(() => {
+        if (mapLoaded && markersLayer) {
+            addMarkersToMap();
+        }
+    }, [activeFilters, mapLoaded]);
 
     const toggleFilter = (filterType: keyof typeof activeFilters) => {
         setActiveFilters(prev => ({
@@ -634,9 +453,10 @@ const GISPage: React.FC = () => {
                     {/* Loading state */}
                     {!mapLoaded && (
                         <div className="map-loading">
+                            <div className="loading-spinner"></div>
                             <div className="loading-text">
                                 <div style={{marginBottom: '10px'}}>🗺️ Loading interactive map...</div>
-                                <div style={{fontSize: '12px', color: '#9ca3af'}}>Initializing OpenLayers mapping system</div>
+                                <div style={{fontSize: '12px', color: '#9ca3af'}}>Initializing Leaflet mapping system</div>
                             </div>
                         </div>
                     )}
@@ -665,35 +485,29 @@ const GISPage: React.FC = () => {
                 )}
             </div>
 
-            {/* Custom styles for animations */}
             <style jsx>{`
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(10px);
+                @keyframes pulse {
+                    0%, 100% {
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 0 rgba(249, 115, 22, 0.4);
                     }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
+                    50% {
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 10px rgba(249, 115, 22, 0);
                     }
                 }
 
-                .ol-zoom {
-                    background: rgba(31, 41, 55, 0.9) !important;
-                    border-radius: 8px !important;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
                 }
 
-                .ol-zoom button {
-                    background: transparent !important;
-                    color: #ffffff !important;
-                    border: none !important;
-                    font-size: 18px !important;
-                    transition: all 0.2s !important;
-                }
-
-                .ol-zoom button:hover {
-                    background: rgba(59, 130, 246, 0.8) !important;
+                .loading-spinner {
+                    width: 32px;
+                    height: 32px;
+                    border: 3px solid rgba(156, 163, 175, 0.3);
+                    border-radius: 50%;
+                    border-top-color: #3b82f6;
+                    animation: spin 1s ease-in-out infinite;
+                    margin-bottom: 16px;
                 }
             `}</style>
         </div>

@@ -24,6 +24,8 @@ body {
     position: relative;
     padding: 2rem 2rem 4rem 2rem;
     overflow-x: hidden;
+    overflow-y: auto;
+    height: 100vh; /* Add this line */
 }
 
 .signup-page-container::before {
@@ -39,14 +41,26 @@ body {
 
 /* Gradient Overlays - Fixed Position */
 .gradient-overlay {
-    position: fixed;
+    position: absolute; /* Change from fixed to absolute */
     border-radius: 50%;
     filter: blur(120px);
     opacity: 0.06;
     z-index: 1;
     pointer-events: none;
 }
+/* Add this to fix the scrolling issue */
+.signup-page-container {
+    overflow-y: auto !important;
+}
 
+.signup-container {
+    min-height: auto !important;
+    height: auto !important;
+}
+
+.gradient-overlay {
+    position: absolute !important;
+}
 .overlay-1 {
     width: 500px;
     height: 500px;
@@ -80,6 +94,8 @@ body {
     margin: 0 auto;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     overflow: visible;
+    min-height: auto;
+    height: auto;
 }
 
 /* Header Section */

@@ -290,6 +290,8 @@ body {
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .page-container {
+        position: relative;
+        min-height: 100vh;
         padding: 1.5rem;
     }
 
@@ -310,6 +312,8 @@ body {
 
 @media (max-width: 480px) {
     .page-container {
+        position: relative;
+        min-height: 100vh;
         padding: 1rem;
     }
 

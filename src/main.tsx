@@ -1,10 +1,17 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import EntryPage from './EntryPage.tsx'
-import './index.css'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import EntryPage from './EntryPage.tsx';
+import GIS_Page from './GIS_Page.tsx';
+import './index.css';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
-        <EntryPage />
+        <Router>
+            <Routes>
+                <Route path="/" element={<EntryPage />} />
+                <Route path="/gis" element={<GIS_Page />} />
+            </Routes>
+        </Router>
     </StrictMode>,
-)
+);

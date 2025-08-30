@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import './EntryPage.css';
 
 const EntryPage: React.FC = () => {
     const [acceptedTerms, setAcceptedTerms] = useState(false);
     const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
+    const navigate = useNavigate();
 
     const handleLogin = () => {
         if (!acceptedTerms || !acceptedPrivacy) {
@@ -25,7 +27,7 @@ const EntryPage: React.FC = () => {
 
     const handleGuestLogin = () => {
         console.log('Guest login clicked');
-        // Handle guest login - redirect to main app
+        navigate('/gis');
     };
 
     return (

@@ -1,230 +1,703 @@
-import { useState, useEffect } from 'react';
-import { MapPin, Wifi, Battery, Signal } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Filter, MapPin, AlertTriangle, Flame, Wind, Home, BarChart3, Settings, Menu, X } from 'lucide-react';
+import './GIS_Page.css';
 
-const WeatherMapDashboard = () => {
-    const [currentTime, setCurrentTime] = useState(new Date());
+// Global map variable
+let globalMap: any = null;
+let globalView: any = null;
+let globalMarkers: any[] = [];
 
+interface MarkerData {
+    id: string;
+    position: { lat: number; lng: number };
+    type: 'flood' | 'fire' | 'airPollution';
+    title: string;
+    description: string;
+    severity: 'High' | 'Medium' | 'Low' | 'Info';
+}
+
+const GISPage: React.FC = () => {
+    const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768);
+    const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+    const [activeFilters, setActiveFilters] = useState({
+        flood: true,
+        fire: true,
+        airPollution: true
+    });
+    const [currentTime, setCurrentTime] = useState<string>(new Date().toLocaleTimeString());
+    const [mapLoaded, setMapLoaded] = useState<boolean>(false);
+    const mapRef = useRef<HTMLDivElement>(null);
+
+    // Sample marker data
+    const markersData: MarkerData[] = [
+        {
+            id: '1',
+            position: { lat: 14.2556, lng: 121.0509 },
+            type: 'flood',
+            title: 'Flood Warning - Bauan',
+            description: 'High risk flood zone - River overflow expected',
+            severity: 'High'
+        },
+        {
+            id: '2',
+            position: { lat: 14.2356, lng: 121.0309 },
+            type: 'fire',
+            title: 'Fire Alert - San Pascual',
+            description: 'Forest fire risk - Dry conditions detected',
+            severity: 'Medium'
+        },
+        {
+            id: '3',
+            position: { lat: 14.2656, lng: 121.0609 },
+            type: 'airPollution',
+            title: 'Air Quality Monitor - Batangas City',
+            description: 'PM2.5 levels elevated - Air quality moderate',
+            severity: 'Low'
+        },
+        {
+            id: '4',
+            position: { lat: 14.2156, lng: 121.0209 },
+            type: 'flood',
+            title: 'Water Level Monitor - Taal',
+            description: 'Lake water level rising - Monitor conditions',
+            severity: 'Medium'
+        },
+        {
+            id: '5',
+            position: { lat: 14.2756, lng: 121.0409 },
+            type: 'fire',
+            title: 'Fire Station - Lipa',
+            description: 'Emergency response unit - Fully operational',
+            severity: 'Info'
+        }
+    ];
+
+    // Update clock every second
     useEffect(() => {
         const timer = setInterval(() => {
-            setCurrentTime(new Date());
+            setCurrentTime(new Date().toLocaleTimeString());
         }, 1000);
         return () => clearInterval(timer);
     }, []);
 
-    const formatTime = (date: Date) => {
-        return date.toLocaleTimeString('en-US', {
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
+    // Handle window resize
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+            if (globalMap) {
+                setTimeout(() => {
+                    globalMap.getViewport().dispatchEvent('resize');
+                }, 100);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
-    const warningTypes = [
-        { type: 'Flood Warning', color: 'bg-orange-500', active: true },
-        { type: 'Fire Warning', color: 'bg-red-500', active: false },
-        { type: 'Air Pollution', color: 'bg-yellow-500', active: false }
-    ];
+    // Initialize OpenLayers map
+    useEffect(() => {
+        const initMap = async () => {
+            if (mapRef.current && !globalMap) {
+                try {
+                    // Load OpenLayers dynamically
+                    const olScript = document.createElement('script');
+                    olScript.src = 'https://cdn.jsdelivr.net/npm/ol@7.5.2/dist/ol.js';
+                    olScript.onload = () => {
+                        // Load OpenLayers CSS
+                        const olCSS = document.createElement('link');
+                        olCSS.rel = 'stylesheet';
+                        olCSS.href = 'https://cdn.jsdelivr.net/npm/ol@7.5.2/ol.css';
+                        document.head.appendChild(olCSS);
 
-    const mapMarkers = [
-        { id: 1, name: 'SM Hypermarket Batangas', lat: 13.7565, lng: 121.0583, type: 'location' },
-        { id: 2, name: 'Butch Seafood & Grill Restaurant', lat: 13.7445, lng: 121.0521, type: 'restaurant' },
-        { id: 3, name: 'JJSF - SECOND HOUSE Home of The Famous', lat: 13.7398, lng: 121.0645, type: 'restaurant' },
-        { id: 4, name: 'Bay City Mall', lat: 13.7234, lng: 121.0456, type: 'mall' },
-        { id: 5, name: 'SM City Batangas', lat: 13.7198, lng: 121.0587, type: 'mall' },
-        { id: 6, name: 'Portofino Estates Batangas City', lat: 13.7156, lng: 121.0734, type: 'residential' }
-    ];
+                        // Initialize map after script loads
+                        setTimeout(() => {
+                            const ol = (window as any).ol;
 
-    const weatherZones = [
-        { id: 1, intensity: 'high', color: 'rgba(239, 68, 68, 0.6)', center: { lat: 13.7234, lng: 121.0456 }, size: 80 },
-        { id: 2, intensity: 'medium', color: 'rgba(251, 146, 60, 0.6)', center: { lat: 13.7565, lng: 121.0583 }, size: 60 }
-    ];
+                            if (!ol) {
+                                console.error('OpenLayers not loaded');
+                                return;
+                            }
 
-    return (
-        <div className="h-screen w-full bg-gray-900 text-white relative overflow-hidden">
-            {/* Mobile Status Bar */}
-            <div className="md:hidden flex justify-between items-center px-4 py-2 bg-white text-black text-sm font-semibold">
-                <span>{formatTime(currentTime)}</span>
-                <div className="flex items-center space-x-1">
-                    <Signal size={16} />
-                    <Wifi size={16} />
-                    <Battery size={16} />
-                </div>
-            </div>
+                            // Create view
+                            globalView = new ol.View({
+                                center: ol.proj.fromLonLat([121.0409, 14.2456]), // Batangas coordinates
+                                zoom: 12
+                            });
 
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 md:p-6">
-                <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                        <MapPin className="text-white" size={20} />
-                    </div>
-                    <div className="hidden md:block">
-                        <h1 className="text-xl font-bold">Weather Monitor</h1>
-                    </div>
-                </div>
+                            // Create map
+                            globalMap = new ol.Map({
+                                target: mapRef.current,
+                                layers: [
+                                    new ol.layer.Tile({
+                                        source: new ol.source.OSM()
+                                    })
+                                ],
+                                view: globalView,
+                                controls: ol.control.defaults({
+                                    zoom: true,
+                                    rotate: false,
+                                    attribution: false
+                                })
+                            });
 
-                {/* Live Indicator */}
-                <div className="flex items-center space-x-2 bg-gray-800 px-3 py-1 rounded-full">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium">Live</span>
-                </div>
-            </div>
+                            // Create vector source for markers
+                            const vectorSource = new ol.source.Vector();
+                            const vectorLayer = new ol.layer.Vector({
+                                source: vectorSource
+                            });
+                            globalMap.addLayer(vectorLayer);
 
-            {/* Warning Types */}
-            <div className="px-4 md:px-6 mb-4">
-                <div className="flex space-x-3 md:space-x-4">
-                    {warningTypes.map((warning, index) => (
-                        <div
-                            key={index}
-                            className={`flex items-center space-x-2 px-3 py-2 rounded-full border-2 transition-all duration-200 ${
-                                warning.active
-                                    ? `${warning.color} border-white`
-                                    : 'bg-gray-700 border-gray-600'
-                            }`}
-                        >
-                            <div className={`w-2 h-2 rounded-full ${warning.active ? 'bg-white' : 'bg-gray-400'}`}></div>
-                            <span className={`text-xs md:text-sm font-medium ${warning.active ? 'text-white' : 'text-gray-300'}`}>
-                {warning.type}
-              </span>
-                        </div>
-                    ))}
-                </div>
-            </div>
+                            // Add markers
+                            markersData.forEach(marker => {
+                                const feature = new ol.Feature({
+                                    geometry: new ol.geom.Point(ol.proj.fromLonLat([marker.position.lng, marker.position.lat])),
+                                    markerData: marker
+                                });
 
-            {/* Map Container */}
-            <div className="flex-1 px-4 md:px-6 pb-20 md:pb-6">
-                <div className="relative w-full h-full bg-gray-100 rounded-xl overflow-hidden">
-                    {/* Simulated Google Maps */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-green-50">
-                        {/* Map Grid Lines */}
-                        <svg className="absolute inset-0 w-full h-full opacity-20">
-                            <defs>
-                                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#94a3b8" strokeWidth="1"/>
-                                </pattern>
-                            </defs>
-                            <rect width="100%" height="100%" fill="url(#grid)" />
-                        </svg>
+                                // Style based on marker type and severity
+                                const colors = {
+                                    flood: '#f97316',
+                                    fire: '#ef4444',
+                                    airPollution: '#eab308'
+                                };
 
-                        {/* Roads */}
-                        <svg className="absolute inset-0 w-full h-full">
-                            <path d="M50 100 Q200 80 350 120 T600 140" stroke="#6b7280" strokeWidth="3" fill="none" />
-                            <path d="M100 50 Q250 200 400 180 T650 200" stroke="#6b7280" strokeWidth="2" fill="none" />
-                            <path d="M0 180 Q150 160 300 170 T500 180" stroke="#6b7280" strokeWidth="2" fill="none" />
-                        </svg>
+                                const sizes = {
+                                    High: 25,
+                                    Medium: 20,
+                                    Low: 15,
+                                    Info: 18
+                                };
 
-                        {/* Weather Zones */}
-                        {weatherZones.map((zone) => (
-                            <div
-                                key={zone.id}
-                                className="absolute rounded-full"
-                                style={{
-                                    backgroundColor: zone.color,
-                                    width: `${zone.size}px`,
-                                    height: `${zone.size}px`,
-                                    left: `${Math.random() * 60 + 20}%`,
-                                    top: `${Math.random() * 60 + 20}%`,
-                                    transform: 'translate(-50%, -50%)'
-                                }}
-                            ></div>
-                        ))}
+                                const style = new ol.style.Style({
+                                    image: new ol.style.Circle({
+                                        radius: sizes[marker.severity],
+                                        fill: new ol.style.Fill({
+                                            color: colors[marker.type]
+                                        }),
+                                        stroke: new ol.style.Stroke({
+                                            color: '#ffffff',
+                                            width: 3
+                                        })
+                                    })
+                                });
 
-                        {/* Location Markers */}
-                        {mapMarkers.map((marker, index) => {
-                            const positions = [
-                                { left: '25%', top: '30%' },
-                                { left: '45%', top: '65%' },
-                                { left: '70%', top: '45%' },
-                                { left: '30%', top: '80%' },
-                                { left: '60%', top: '85%' },
-                                { left: '80%', top: '70%' }
-                            ];
+                                feature.setStyle(style);
+                                feature.set('type', marker.type);
+                                vectorSource.addFeature(feature);
+                                globalMarkers.push(feature);
+                            });
 
-                            return (
-                                <div
-                                    key={marker.id}
-                                    className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
-                                    style={positions[index]}
+                            // Add click handler
+                            globalMap.on('click', (event: any) => {
+                                globalMap.forEachFeatureAtPixel(event.pixel, (feature: any) => {
+                                    const markerData = feature.get('markerData');
+                                    if (markerData) {
+                                        showMarkerPopup(markerData, event.pixel);
+                                    }
+                                });
+                            });
+
+                            // Add pointer cursor on hover
+                            globalMap.on('pointermove', (event: any) => {
+                                const hit = globalMap.hasFeatureAtPixel(event.pixel);
+                                globalMap.getTarget().style.cursor = hit ? 'pointer' : '';
+                            });
+
+                            setMapLoaded(true);
+                        }, 500);
+                    };
+                    document.head.appendChild(olScript);
+
+                } catch (error) {
+                    console.error('Error loading OpenLayers:', error);
+                    // Fallback to simple map implementation
+                    initSimpleMap();
+                }
+            }
+        };
+
+        // Simple fallback map
+        const initSimpleMap = () => {
+            if (mapRef.current) {
+                mapRef.current.innerHTML = `
+                    <div style="
+                        width: 100%;
+                        height: 100%;
+                        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        position: relative;
+                        overflow: hidden;
+                    ">
+                        <div style="
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background-image: 
+                                linear-gradient(rgba(107, 114, 128, 0.1) 1px, transparent 1px),
+                                linear-gradient(90deg, rgba(107, 114, 128, 0.1) 1px, transparent 1px);
+                            background-size: 50px 50px;
+                        "></div>
+                        
+                        <!-- Simulated geographic features -->
+                        <div style="
+                            position: absolute;
+                            top: 40%;
+                            left: 0;
+                            right: 0;
+                            height: 8px;
+                            background: #374151;
+                            transform: rotate(-10deg);
+                            transform-origin: left;
+                        "></div>
+                        
+                        <div style="
+                            position: absolute;
+                            top: 20%;
+                            left: 20%;
+                            width: 12px;
+                            height: 60%;
+                            background: #1e293b;
+                            border-radius: 6px;
+                            transform: rotate(15deg);
+                        "></div>
+                        
+                        <!-- Markers -->
+                        ${markersData.map((marker, index) => {
+                    const colors = {
+                        flood: '#f97316',
+                        fire: '#ef4444',
+                        airPollution: '#eab308'
+                    };
+                    const sizes = {
+                        High: '25px',
+                        Medium: '20px',
+                        Low: '15px',
+                        Info: '18px'
+                    };
+
+                    const x = 20 + (index % 3) * 30 + Math.random() * 20;
+                    const y = 30 + Math.floor(index / 3) * 25 + Math.random() * 20;
+
+                    return `
+                                <div 
+                                    class="simple-marker" 
+                                    data-marker='${JSON.stringify(marker)}'
+                                    style="
+                                        position: absolute;
+                                        left: ${x}%;
+                                        top: ${y}%;
+                                        width: ${sizes[marker.severity]};
+                                        height: ${sizes[marker.severity]};
+                                        background: ${colors[marker.type]};
+                                        border: 3px solid white;
+                                        border-radius: 50%;
+                                        cursor: pointer;
+                                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                                        animation: ${marker.severity === 'High' ? 'pulse 2s infinite' : 'none'};
+                                        transition: all 0.2s ease;
+                                        z-index: 10;
+                                        display: ${activeFilters[marker.type] ? 'block' : 'none'};
+                                    "
+                                    onmouseover="this.style.transform='scale(1.2)'"
+                                    onmouseout="this.style.transform='scale(1)'"
+                                    onclick="window.showSimplePopup(this)"
                                 >
-                                    <div className="w-4 h-4 md:w-6 md:h-6 bg-red-500 rounded-full border-2 border-white shadow-lg group-hover:scale-110 transition-transform">
-                                        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-4 border-transparent border-t-red-500"></div>
-                                    </div>
-
-                                    {/* Tooltip */}
-                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block z-10">
-                                        <div className="bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap shadow-lg">
-                                            {marker.name}
-                                        </div>
-                                    </div>
+                                    <div style="
+                                        position: absolute;
+                                        top: 50%;
+                                        left: 50%;
+                                        transform: translate(-50%, -50%);
+                                        width: 30%;
+                                        height: 30%;
+                                        background: white;
+                                        border-radius: 50%;
+                                        opacity: 0.8;
+                                    "></div>
                                 </div>
-                            );
-                        })}
-
-                        {/* Location Labels */}
-                        <div className="absolute bottom-4 left-4 text-gray-700 text-sm md:text-base font-semibold">
-                            Batangas City
-                        </div>
-                        <div className="absolute top-1/3 left-1/4 text-gray-600 text-xs md:text-sm">
-                            ALANGILAN
-                        </div>
-                        <div className="absolute top-1/2 right-1/4 text-gray-600 text-xs md:text-sm">
-                            TINGGA LABAC
-                        </div>
-
-                        {/* Google Maps Attribution */}
-                        <div className="absolute bottom-2 right-2 text-xs text-gray-500 bg-white px-2 py-1 rounded">
-                            Google
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Bottom Navigation - Mobile Only */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-800 px-4 py-3">
-                <div className="flex justify-around items-center">
-                    <button className="p-2 rounded-full bg-blue-600">
-                        <MapPin size={20} />
-                    </button>
-                    <button className="p-2 rounded-full hover:bg-gray-700 transition-colors">
-                        <div className="w-5 h-5 border-2 border-white rounded"></div>
-                    </button>
-                    <button className="p-2 rounded-full hover:bg-gray-700 transition-colors">
-                        <div className="w-5 h-5">
-                            <div className="flex space-x-1">
-                                <div className="w-1 h-5 bg-white"></div>
-                                <div className="w-1 h-3 bg-white mt-2"></div>
-                                <div className="w-1 h-4 bg-white mt-1"></div>
+                            `;
+                }).join('')}
+                        
+                        <!-- Map Legend -->
+                        <div style="
+                            position: absolute;
+                            bottom: 20px;
+                            left: 20px;
+                            background: rgba(31, 41, 55, 0.9);
+                            backdrop-filter: blur(10px);
+                            border: 1px solid rgba(107, 114, 128, 0.2);
+                            border-radius: 12px;
+                            padding: 16px;
+                            color: white;
+                            font-family: Inter, sans-serif;
+                            font-size: 14px;
+                            min-width: 180px;
+                        ">
+                            <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600;">Map Legend</h3>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 12px; height: 12px; background: #f97316; border: 2px solid white; border-radius: 50%;"></div>
+                                    <span style="color: #d1d5db; font-size: 12px;">Flood Warning</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 12px; height: 12px; background: #ef4444; border: 2px solid white; border-radius: 50%;"></div>
+                                    <span style="color: #d1d5db; font-size: 12px;">Fire Alert</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 12px; height: 12px; background: #eab308; border: 2px solid white; border-radius: 50%;"></div>
+                                    <span style="color: #d1d5db; font-size: 12px;">Air Quality</span>
+                                </div>
                             </div>
                         </div>
-                    </button>
-                    <button className="p-2 rounded-full hover:bg-gray-700 transition-colors">
-                        <div className="w-5 h-5 border-2 border-white rounded-full"></div>
-                    </button>
+                        
+                        <style>
+                            @keyframes pulse {
+                                0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 0 rgba(249, 115, 22, 0.4); }
+                                50% { box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 10px rgba(249, 115, 22, 0); }
+                            }
+                        </style>
+                    </div>
+                `;
+
+                // Add global function for simple popup
+                (window as any).showSimplePopup = (element: HTMLElement) => {
+                    const markerData = JSON.parse(element.getAttribute('data-marker') || '{}');
+                    showMarkerPopup(markerData, { x: 0, y: 0 });
+                };
+
+                setMapLoaded(true);
+            }
+        };
+
+        // Try to initialize map
+        if (mapRef.current) {
+            initMap();
+        }
+    }, []);
+
+    // Update marker visibility based on filters
+    useEffect(() => {
+        if (globalMarkers.length > 0) {
+            globalMarkers.forEach(marker => {
+                const markerType = marker.get('type');
+                marker.setStyle(activeFilters[markerType] ? marker.getStyle() : null);
+            });
+        } else {
+            // Update simple markers
+            const simpleMarkers = document.querySelectorAll('.simple-marker');
+            simpleMarkers.forEach((marker) => {
+                const markerData = JSON.parse(marker.getAttribute('data-marker') || '{}');
+                (marker as HTMLElement).style.display = activeFilters[markerData.type] ? 'block' : 'none';
+            });
+        }
+    }, [activeFilters]);
+
+    const showMarkerPopup = (marker: MarkerData, pixel: { x: number; y: number }) => {
+        // Remove existing popups
+        const existingPopups = document.querySelectorAll('.marker-popup');
+        existingPopups.forEach(popup => popup.remove());
+
+        // Create popup element
+        const popup = document.createElement('div');
+        popup.className = 'marker-popup';
+        popup.style.position = 'fixed';
+        popup.style.left = `${pixel.x + 10}px`;
+        popup.style.top = `${pixel.y - 10}px`;
+        popup.style.background = 'rgba(31, 41, 55, 0.95)';
+        popup.style.backdropFilter = 'blur(10px)';
+        popup.style.border = '1px solid rgba(107, 114, 128, 0.2)';
+        popup.style.borderRadius = '12px';
+        popup.style.padding = '16px';
+        popup.style.color = '#ffffff';
+        popup.style.fontFamily = 'Inter, sans-serif';
+        popup.style.fontSize = '14px';
+        popup.style.maxWidth = '280px';
+        popup.style.zIndex = '1000';
+        popup.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.5)';
+        popup.style.animation = 'fadeIn 0.3s ease-out';
+
+        const severityColors = {
+            'High': '#ef4444',
+            'Medium': '#f59e0b',
+            'Low': '#10b981',
+            'Info': '#3b82f6'
+        };
+
+        popup.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 16px; font-weight: 600; flex: 1;">${marker.title}</h3>
+                <span style="background: ${severityColors[marker.severity]}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">${marker.severity}</span>
+            </div>
+            <p style="margin: 0; font-size: 14px; color: #d1d5db; line-height: 1.5;">${marker.description}</p>
+            <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(107, 114, 128, 0.3); font-size: 12px; color: #9ca3af;">
+                📍 Lat: ${marker.position.lat.toFixed(4)}, Lng: ${marker.position.lng.toFixed(4)}<br>
+                ⏰ Last updated: ${new Date().toLocaleString()}
+            </div>
+            <button style="
+                position: absolute; 
+                top: 8px; 
+                right: 8px; 
+                background: none; 
+                border: none; 
+                color: #9ca3af; 
+                cursor: pointer; 
+                font-size: 20px;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 4px;
+                transition: all 0.2s;
+            " onmouseover="this.style.background='rgba(107, 114, 128, 0.2)'; this.style.color='#ffffff';" onmouseout="this.style.background='none'; this.style.color='#9ca3af';">×</button>
+        `;
+
+        // Add close button functionality
+        const closeBtn = popup.querySelector('button');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => popup.remove());
+        }
+
+        // Add to body instead of map container
+        document.body.appendChild(popup);
+
+        // Auto close after 8 seconds
+        setTimeout(() => {
+            if (popup.parentNode) popup.remove();
+        }, 8000);
+
+        // Close on outside click
+        const closeOnOutside = (e: MouseEvent) => {
+            if (!popup.contains(e.target as Node)) {
+                popup.remove();
+                document.removeEventListener('click', closeOnOutside);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', closeOnOutside), 100);
+    };
+
+    const toggleFilter = (filterType: keyof typeof activeFilters) => {
+        setActiveFilters(prev => ({
+            ...prev,
+            [filterType]: !prev[filterType]
+        }));
+    };
+
+    const FilterButton: React.FC<{
+        type: keyof typeof activeFilters;
+        icon: React.ComponentType<{ size: number }>;
+        label: string;
+        color: string;
+        active: boolean;
+    }> = ({ type, icon: Icon, label, color, active }) => (
+        <button
+            onClick={() => toggleFilter(type)}
+            className={`filter-button ${active ? `active ${color}` : 'inactive'}`}
+        >
+            <Icon size={16} />
+            <span className="filter-label">{label}</span>
+        </button>
+    );
+
+    const Sidebar: React.FC = () => (
+        <div className={`sidebar ${isMobile ? 'mobile' : 'desktop'} ${isMobile && sidebarOpen ? 'open' : ''}`}>
+            <div className="sidebar-header">
+                <div className="logo-container">
+                    <img
+                        src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
+                        alt="CIVILIAN"
+                        className="logo"
+                    />
+                    <span className="logo-text">CIVILIAN</span>
                 </div>
+                {isMobile && (
+                    <button
+                        onClick={() => setSidebarOpen(false)}
+                        className="close-button"
+                    >
+                        <X size={20} />
+                    </button>
+                )}
             </div>
 
-            {/* Desktop Sidebar - Desktop Only */}
-            <div className="hidden md:block fixed right-6 top-1/2 transform -translate-y-1/2 bg-gray-800 rounded-xl p-4 space-y-4">
-                <button className="p-3 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
-                    <MapPin size={20} />
-                </button>
-                <button className="p-3 rounded-lg hover:bg-gray-700 transition-colors">
-                    <div className="w-5 h-5 border-2 border-white rounded"></div>
-                </button>
-                <button className="p-3 rounded-lg hover:bg-gray-700 transition-colors">
-                    <div className="w-5 h-5">
-                        <div className="flex space-x-1">
-                            <div className="w-1 h-5 bg-white"></div>
-                            <div className="w-1 h-3 bg-white mt-2"></div>
-                            <div className="w-1 h-4 bg-white mt-1"></div>
-                        </div>
+            <nav className="sidebar-nav">
+                <div className="nav-items">
+                    <a href="#" className="nav-item">
+                        <Home size={20} />
+                        <span className="nav-label">Dashboard</span>
+                    </a>
+                    <a href="#" className="nav-item active">
+                        <MapPin size={20} />
+                        <span className="nav-label">GIS Map</span>
+                    </a>
+                    <a href="#" className="nav-item">
+                        <BarChart3 size={20} />
+                        <span className="nav-label">Analytics</span>
+                    </a>
+                    <a href="#" className="nav-item">
+                        <Settings size={20} />
+                        <span className="nav-label">Settings</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    );
+
+    return (
+        <div className="gis-page">
+            <Sidebar />
+
+            {/* Mobile overlay */}
+            {isMobile && sidebarOpen && (
+                <div
+                    className="mobile-overlay"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
+            {/* Main content */}
+            <div className="main-content">
+                {/* Header */}
+                <header className="header">
+                    {isMobile && (
+                        <button
+                            onClick={() => setSidebarOpen(true)}
+                            className="menu-button"
+                        >
+                            <Menu size={20} />
+                        </button>
+                    )}
+
+                    <div className="live-indicator">
+                        <div className="live-dot" />
+                        <span className="live-text">LIVE</span>
                     </div>
-                </button>
-                <button className="p-3 rounded-lg hover:bg-gray-700 transition-colors">
-                    <div className="w-5 h-5 border-2 border-white rounded-full"></div>
-                </button>
+
+                    <div className="clock">
+                        {currentTime}
+                    </div>
+                </header>
+
+                {/* Filter controls */}
+                <div className="filters-container">
+                    <div className="filters-wrapper">
+                        <div className="filters-label">
+                            <Filter size={16} />
+                            <span>Filters:</span>
+                        </div>
+
+                        <FilterButton
+                            type="flood"
+                            icon={AlertTriangle}
+                            label="Flood Warning"
+                            color="flood"
+                            active={activeFilters.flood}
+                        />
+
+                        <FilterButton
+                            type="fire"
+                            icon={Flame}
+                            label="Fire Warning"
+                            color="fire"
+                            active={activeFilters.fire}
+                        />
+
+                        <FilterButton
+                            type="airPollution"
+                            icon={Wind}
+                            label="Air Pollution"
+                            color="pollution"
+                            active={activeFilters.airPollution}
+                        />
+                    </div>
+                </div>
+
+                {/* Alert banner */}
+                <div className="alert-banner">
+                    <div className="alert-content">
+                        <AlertTriangle size={16} />
+                        <span>Weather Alert: Heavy rain expected in 2hrs - Monitor flood zones</span>
+                    </div>
+                </div>
+
+                {/* Map container */}
+                <div className="map-container">
+                    <div
+                        ref={mapRef}
+                        className="map"
+                        id="map"
+                    />
+
+                    {/* Loading state */}
+                    {!mapLoaded && (
+                        <div className="map-loading">
+                            <div className="loading-text">
+                                <div style={{marginBottom: '10px'}}>🗺️ Loading interactive map...</div>
+                                <div style={{fontSize: '12px', color: '#9ca3af'}}>Initializing OpenLayers mapping system</div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Mobile bottom navigation */}
+                {isMobile && (
+                    <div className="bottom-nav">
+                        <button className="nav-button">
+                            <Home size={20} />
+                            <span>Home</span>
+                        </button>
+                        <button className="nav-button active">
+                            <MapPin size={20} />
+                            <span>Map</span>
+                        </button>
+                        <button className="nav-button">
+                            <BarChart3 size={20} />
+                            <span>Stats</span>
+                        </button>
+                        <button className="nav-button">
+                            <Settings size={20} />
+                            <span>Settings</span>
+                        </button>
+                    </div>
+                )}
             </div>
+
+            {/* Custom styles for animations */}
+            <style jsx>{`
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .ol-zoom {
+                    background: rgba(31, 41, 55, 0.9) !important;
+                    border-radius: 8px !important;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+                }
+
+                .ol-zoom button {
+                    background: transparent !important;
+                    color: #ffffff !important;
+                    border: none !important;
+                    font-size: 18px !important;
+                    transition: all 0.2s !important;
+                }
+
+                .ol-zoom button:hover {
+                    background: rgba(59, 130, 246, 0.8) !important;
+                }
+            `}</style>
         </div>
     );
 };
 
-export default WeatherMapDashboard;
+export default GISPage;

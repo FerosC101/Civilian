@@ -4,28 +4,44 @@
     box-sizing: border-box;
 }
 
-body {
+html, body {
+    height: 100%;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: #000000;
     color: #ffffff;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
 }
 
-/* Main Container */
+/* Main Container - Full Screen Layout */
 .login-page-container {
-    min-height: 100vh;
-    background: #000000;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    overflow: hidden;
+}
+
+/* Scrollable Wrapper */
+.scroll-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    overflow-y: auto;
+    min-height: 100vh;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Gradient Overlays */
@@ -66,6 +82,7 @@ body {
     border-radius: 24px;
     padding: 3rem 2.5rem;
     animation: fadeIn 0.6s ease-out;
+    margin: auto;
 }
 
 /* Header Section */
@@ -333,15 +350,19 @@ body {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-    .login-page-container {
-        position: relative;
-        min-height: 100vh;
-        padding: 1.5rem;
+    .scroll-wrapper {
+        padding: 1.5rem 1rem;
+        align-items: flex-start;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
     }
 
     .login-container {
         padding: 2.5rem 2rem;
-        max-width: 380px;
+        max-width: 100%;
+        width: 100%;
+        margin-top: 0;
+        margin-bottom: 0;
     }
 
     .brand-name {
@@ -351,18 +372,100 @@ body {
     .login-logo {
         width: 60px;
         height: 60px;
+        margin-bottom: 1.2rem;
+    }
+
+    .login-title {
+        font-size: 1rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .login-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-title {
+        font-size: 1.15rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-input {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .login-button {
+        padding: 1rem;
+        font-size: 0.9rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .forgot-password-link {
+        font-size: 0.85rem;
+        margin-bottom: 1.2rem;
+        padding: 0.4rem;
+    }
+
+    .divider-container {
+        margin: 1.2rem 0;
+    }
+
+    .social-login-container {
+        gap: 0.75rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .social-login-button {
+        width: 44px;
+        height: 44px;
+    }
+
+    .social-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .signup-link-container {
+        margin-bottom: 0.8rem;
+    }
+
+    .signup-text, .signup-link {
+        font-size: 0.8rem;
+    }
+
+    .gradient-overlay {
+        opacity: 0.05;
+    }
+
+    .overlay-1 {
+        width: 300px;
+        height: 300px;
+        top: 5%;
+        right: 10%;
+    }
+
+    .overlay-2 {
+        width: 250px;
+        height: 250px;
+        bottom: 10%;
+        left: 10%;
     }
 }
 
 @media (max-width: 480px) {
-    .login-page-container {
-        position: relative;
-        min-height: 100vh;
-        padding: 1rem;
+    .scroll-wrapper {
+        padding: 1rem 0.75rem;
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
     }
 
     .login-container {
         padding: 2rem 1.5rem;
+        border-radius: 20px;
     }
 
     .brand-name {
@@ -372,15 +475,119 @@ body {
     .login-logo {
         width: 50px;
         height: 50px;
+        margin-bottom: 1rem;
+    }
+
+    .login-title {
+        font-size: 0.95rem;
+    }
+
+    .login-header {
+        margin-bottom: 1.2rem;
+    }
+
+    .form-title {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 0.9rem;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .form-input {
+        padding: 0.9rem;
+        font-size: 0.85rem;
+    }
+
+    .login-button {
+        padding: 0.9rem;
+        font-size: 0.85rem;
+        margin-bottom: 0.7rem;
+    }
+
+    .forgot-password-link {
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+        padding: 0.3rem;
+    }
+
+    .divider-container {
+        margin: 1rem 0;
+        gap: 0.8rem;
+    }
+
+    .divider-text {
+        font-size: 0.7rem;
     }
 
     .social-login-container {
-        gap: 0.75rem;
+        gap: 0.6rem;
+        margin-bottom: 1rem;
     }
 
     .social-login-button {
-        width: 44px;
-        height: 44px;
+        width: 40px;
+        height: 40px;
+    }
+
+    .social-icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .signup-link-container {
+        margin-bottom: 0.7rem;
+    }
+
+    .signup-text, .signup-link {
+        font-size: 0.75rem;
+    }
+
+    .password-toggle {
+        right: 0.75rem;
+        width: 18px;
+        height: 18px;
+    }
+
+    .eye-icon {
+        width: 14px;
+        height: 14px;
+    }
+}
+
+@media (max-height: 700px) and (max-width: 768px) {
+    .scroll-wrapper {
+        align-items: flex-start;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+
+    .login-container {
+        margin-top: 0;
+    }
+
+    .login-header {
+        margin-bottom: 1rem;
+    }
+
+    .login-logo {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 0.8rem;
+    }
+
+    .brand-name {
+        font-size: 1.6rem;
+    }
+
+    .login-title {
+        font-size: 0.9rem;
     }
 }
 
@@ -426,4 +633,11 @@ body {
 .form-input:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* Fix for some mobile browsers */
+@supports (-webkit-touch-callout: none) {
+    .login-page-container {
+        height: -webkit-fill-available;
+    }
 }

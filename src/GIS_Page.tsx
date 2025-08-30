@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Filter, MapPin, AlertTriangle, Flame, Wind, Home, BarChart3, Settings, Menu, X } from 'lucide-react';
+import './GIS_Page.css'
 
 // Leaflet interfaces
 interface LeafletMap {

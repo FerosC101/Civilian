@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Filter, MapPin, AlertTriangle, Flame, Home, BarChart3, Settings, X, Zap, CloudRain, Bell } from 'lucide-react';
+import { Filter, MapPin, AlertTriangle, Flame, Home, BarChart3, Settings, X, Zap, CloudRain, Bell, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAlerts, requestNotificationPermission, showNotification } from './services/alerts/userAlerts';
 import './GIS_Page.css';
 
 const GISPage: React.FC = () => {
     const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768);
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+    const [filtersExpanded, setFiltersExpanded] = useState<boolean>(false);
+    const [alertsExpanded, setAlertsExpanded] = useState<boolean>(false);
+    const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
     const [activeFilters, setActiveFilters] = useState({
         earthquake: true,
         flood: true,
@@ -33,6 +36,10 @@ const GISPage: React.FC = () => {
         const handleResize = () => {
             const newIsMobile = window.innerWidth <= 768;
             setIsMobile(newIsMobile);
+            if (!newIsMobile) {
+                setFiltersExpanded(false);
+                setAlertsExpanded(false);
+            }
         };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
@@ -89,6 +96,10 @@ const GISPage: React.FC = () => {
         }));
     };
 
+    const dismissAlert = (alertId: string) => {
+        setDismissedAlerts(prev => new Set([...prev, alertId]));
+    };
+
     const getAlertIcon = (type: string) => {
         switch (type) {
             case 'earthquake': return Zap;
@@ -119,7 +130,10 @@ const GISPage: React.FC = () => {
         }
     };
 
-    const filteredAlerts = alerts.filter(alert => activeFilters[alert.type as keyof typeof activeFilters]);
+    const filteredAlerts = alerts.filter(alert =>
+        activeFilters[alert.type as keyof typeof activeFilters] &&
+        !dismissedAlerts.has(alert.id)
+    );
 
     const FilterButton: React.FC<{
         type: keyof typeof activeFilters;
@@ -133,8 +147,8 @@ const GISPage: React.FC = () => {
             onClick={() => toggleFilter(type)}
             className={`filter-button ${active ? `active ${color}` : 'inactive'}`}
         >
-            <Icon size={16} />
-            <span className="filter-label">{label}</span>
+            <Icon size={14} />
+            <span className="filter-label">{isMobile ? label.split(' ')[0] : label}</span>
             {count > 0 && <span className="filter-count">{count}</span>}
         </button>
     );
@@ -219,9 +233,9 @@ const GISPage: React.FC = () => {
                     </div>
 
                     <div className="header-alerts">
-                        <Bell size={16} />
-                        <span>{alerts.length} Active Alerts</span>
-                        {!notificationsEnabled && (
+                        <Bell size={14} />
+                        <span className="alerts-count">{filteredAlerts.length}</span>
+                        {!notificationsEnabled && !isMobile && (
                             <button
                                 onClick={async () => {
                                     const permission = await requestNotificationPermission();
@@ -235,104 +249,217 @@ const GISPage: React.FC = () => {
                     </div>
 
                     <div className="clock">
-                        {currentTime}
+                        {isMobile ? currentTime.slice(0, 5) : currentTime}
                     </div>
                 </header>
 
-                {/* Alert Status Bar */}
-                {alertsError && (
-                    <div className="alert-status-bar error">
-                        <AlertTriangle size={16} />
-                        <span>Error loading alerts: {alertsError}</span>
+                {/* Alert Status Messages */}
+                {alertsError && !dismissedAlerts.has('error-alert') && (
+                    <div className="alert-message error">
+                        <div className="alert-message-content">
+                            <div className="alert-message-icon">
+                                <AlertTriangle size={16} />
+                            </div>
+                            <div className="alert-message-text">
+                                <span className="alert-message-title">Connection Error</span>
+                                <span className="alert-message-description">Unable to load real-time alerts. Please check your connection.</span>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => dismissAlert('error-alert')}
+                            className="alert-message-close"
+                        >
+                            <X size={16} />
+                        </button>
                     </div>
                 )}
 
-                {alertsLoading && (
-                    <div className="alert-status-bar loading">
-                        <div className="loading-spinner-small"></div>
-                        <span>Loading alerts...</span>
+                {alertsLoading && !dismissedAlerts.has('loading-alert') && (
+                    <div className="alert-message loading">
+                        <div className="alert-message-content">
+                            <div className="alert-message-icon">
+                                <div className="loading-spinner-small"></div>
+                            </div>
+                            <div className="alert-message-text">
+                                <span className="alert-message-title">Loading Alerts</span>
+                                <span className="alert-message-description">Fetching real-time disaster alerts...</span>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => dismissAlert('loading-alert')}
+                            className="alert-message-close"
+                        >
+                            <X size={16} />
+                        </button>
                     </div>
                 )}
 
-                {/* Filter controls and Map legend combined */}
-                <div className="filters-container">
-                    <div className="filters-wrapper">
-                        <div className="filters-section">
-                            <div className="filters-label">
+                {/* Mobile Alerts Toggle */}
+                {isMobile && filteredAlerts.length > 0 && (
+                    <div className="alerts-mobile-toggle">
+                        <button
+                            onClick={() => setAlertsExpanded(!alertsExpanded)}
+                            className="alerts-toggle-button"
+                        >
+                            <span>
+                                <AlertTriangle size={16} />
+                                Active Alerts ({filteredAlerts.length})
+                            </span>
+                            {alertsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </button>
+                    </div>
+                )}
+
+                {/* Mobile Active Alerts - Expandable */}
+                {isMobile && alertsExpanded && filteredAlerts.length > 0 && (
+                    <div className="alerts-mobile-expanded">
+                        <div className="alerts-mobile-content">
+                            {filteredAlerts.slice(0, 3).map((alert) => {
+                                const Icon = getAlertIcon(alert.type);
+                                return (
+                                    <div
+                                        key={alert.id}
+                                        className="alert-card-mobile"
+                                        style={{ borderLeftColor: getSeverityColor(alert.severity) }}
+                                    >
+                                        <div className="alert-card-mobile-header">
+                                            <div className="alert-card-mobile-icon" style={{ color: getAlertColor(alert.type) }}>
+                                                <Icon size={16} />
+                                            </div>
+                                            <div className="alert-card-mobile-info">
+                                                <h4 className="alert-card-mobile-title">
+                                                    {alert.type.toUpperCase()} - {alert.severity.toUpperCase()}
+                                                </h4>
+                                                <span className="alert-card-mobile-time">
+                                                    {new Date(alert.timestamp).toLocaleTimeString()}
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={() => dismissAlert(alert.id)}
+                                                className="alert-card-mobile-close"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                        <p className="alert-card-mobile-message">{alert.message}</p>
+                                        {alert.affectedAreas && (
+                                            <div className="alert-card-mobile-areas">
+                                                <strong>Areas:</strong> {alert.affectedAreas.slice(0, 2).join(', ')}{alert.affectedAreas.length > 2 && '...'}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                            {filteredAlerts.length > 3 && (
+                                <div className="alerts-mobile-more">
+                                    +{filteredAlerts.length - 3} more alerts
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Collapsible Filters for Mobile */}
+                {isMobile && (
+                    <div className="filters-mobile-toggle">
+                        <button
+                            onClick={() => setFiltersExpanded(!filtersExpanded)}
+                            className="filters-toggle-button"
+                        >
+                            <span>
                                 <Filter size={16} />
-                                <span>Filters:</span>
-                            </div>
+                                Filters ({Object.values(activeFilters).filter(Boolean).length}/4)
+                            </span>
+                            {filtersExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </button>
+                    </div>
+                )}
 
-                            <div className="filter-buttons">
-                                <FilterButton
-                                    type="earthquake"
-                                    // @ts-ignore
-                                    icon={Zap}
-                                    label="Earthquake"
-                                    color="earthquake"
-                                    active={activeFilters.earthquake}
-                                    count={alerts.filter(a => a.type === 'earthquake').length}
-                                />
+                {/* Filter controls and Map legend - Desktop or Expanded Mobile */}
+                {(!isMobile || filtersExpanded) && (
+                    <div className="filters-container">
+                        <div className="filters-wrapper">
+                            <div className="filters-section">
+                                {!isMobile && (
+                                    <div className="filters-label">
+                                        <Filter size={16} />
+                                        <span>Filters:</span>
+                                    </div>
+                                )}
 
-                                <FilterButton
-                                    type="flood"
-                                    // @ts-ignore
-                                    icon={AlertTriangle}
-                                    label="Flood Warning"
-                                    color="flood"
-                                    active={activeFilters.flood}
-                                    count={alerts.filter(a => a.type === 'flood').length}
-                                />
+                                <div className="filter-buttons">
+                                    <FilterButton
+                                        type="earthquake"
+                                        // @ts-ignore
+                                        icon={Zap}
+                                        label="Earthquake"
+                                        color="earthquake"
+                                        active={activeFilters.earthquake}
+                                        count={alerts.filter(a => a.type === 'earthquake' && !dismissedAlerts.has(a.id)).length}
+                                    />
 
-                                <FilterButton
-                                    type="fire"
-                                    // @ts-ignore
-                                    icon={Flame}
-                                    label="Fire Warning"
-                                    color="fire"
-                                    active={activeFilters.fire}
-                                    count={alerts.filter(a => a.type === 'fire').length}
-                                />
+                                    <FilterButton
+                                        type="flood"
+                                        // @ts-ignore
+                                        icon={AlertTriangle}
+                                        label="Flood Warning"
+                                        color="flood"
+                                        active={activeFilters.flood}
+                                        count={alerts.filter(a => a.type === 'flood' && !dismissedAlerts.has(a.id)).length}
+                                    />
 
-                                <FilterButton
-                                    type="weather"
-                                    // @ts-ignore
-                                    icon={CloudRain}
-                                    label="Weather Alert"
-                                    color="weather"
-                                    active={activeFilters.weather}
-                                    count={alerts.filter(a => a.type === 'weather').length}
-                                />
-                            </div>
-                        </div>
+                                    <FilterButton
+                                        type="fire"
+                                        // @ts-ignore
+                                        icon={Flame}
+                                        label="Fire Warning"
+                                        color="fire"
+                                        active={activeFilters.fire}
+                                        count={alerts.filter(a => a.type === 'fire' && !dismissedAlerts.has(a.id)).length}
+                                    />
 
-                        {/* Compact Legend */}
-                        <div className="legend-section">
-                            <span className="legend-title">Legend:</span>
-                            <div className="legend-items">
-                                <div className="legend-item-compact">
-                                    <Zap className="legend-icon earthquake" size={14} />
-                                    <span>Earthquake</span>
-                                </div>
-                                <div className="legend-item-compact">
-                                    <AlertTriangle className="legend-icon flood" size={14} />
-                                    <span>Flood Zones</span>
-                                </div>
-                                <div className="legend-item-compact">
-                                    <Flame className="legend-icon fire" size={14} />
-                                    <span>Fire Hazards</span>
-                                </div>
-                                <div className="legend-item-compact">
-                                    <CloudRain className="legend-icon weather" size={14} />
-                                    <span>Weather Alert</span>
+                                    <FilterButton
+                                        type="weather"
+                                        // @ts-ignore
+                                        icon={CloudRain}
+                                        label="Weather Alert"
+                                        color="weather"
+                                        active={activeFilters.weather}
+                                        count={alerts.filter(a => a.type === 'weather' && !dismissedAlerts.has(a.id)).length}
+                                    />
                                 </div>
                             </div>
+
+                            {/* Compact Legend - Desktop Only */}
+                            {!isMobile && (
+                                <div className="legend-section">
+                                    <span className="legend-title">Legend:</span>
+                                    <div className="legend-items">
+                                        <div className="legend-item-compact">
+                                            <Zap className="legend-icon earthquake" size={12} />
+                                            <span>Earthquake</span>
+                                        </div>
+                                        <div className="legend-item-compact">
+                                            <AlertTriangle className="legend-icon flood" size={12} />
+                                            <span>Flood</span>
+                                        </div>
+                                        <div className="legend-item-compact">
+                                            <Flame className="legend-icon fire" size={12} />
+                                            <span>Fire</span>
+                                        </div>
+                                        <div className="legend-item-compact">
+                                            <CloudRain className="legend-icon weather" size={12} />
+                                            <span>Weather</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
-                </div>
+                )}
 
-                {/* Active Alerts Sidebar */}
-                {filteredAlerts.length > 0 && (
+                {/* Active Alerts Sidebar - Desktop Only */}
+                {!isMobile && filteredAlerts.length > 0 && (
                     <div className="alerts-sidebar">
                         <div className="alerts-sidebar-header">
                             <h3>Active Alerts ({filteredAlerts.length})</h3>
@@ -358,6 +485,12 @@ const GISPage: React.FC = () => {
                                                     {new Date(alert.timestamp).toLocaleTimeString()}
                                                 </span>
                                             </div>
+                                            <button
+                                                onClick={() => dismissAlert(alert.id)}
+                                                className="alert-card-close"
+                                            >
+                                                <X size={16} />
+                                            </button>
                                         </div>
                                         <p className="alert-card-message">{alert.message}</p>
                                         <div className="alert-card-location">
@@ -404,7 +537,7 @@ const GISPage: React.FC = () => {
                                     }}
                                     title={`${alert.type} - ${alert.severity}: ${alert.message}`}
                                 >
-                                    <Icon size={16} />
+                                    <Icon size={isMobile ? 14 : 16} />
                                 </div>
                             );
                         })}
@@ -415,8 +548,8 @@ const GISPage: React.FC = () => {
                         <div className="map-loading">
                             <div className="loading-spinner"></div>
                             <div className="loading-text">
-                                <div style={{marginBottom: '10px'}}>Loading disaster monitoring map...</div>
-                                <div style={{fontSize: '12px', color: '#9ca3af'}}>Initializing Google Maps for Metro Manila</div>
+                                <div style={{marginBottom: '10px'}}>Loading map...</div>
+                                <div style={{fontSize: '12px', color: '#9ca3af'}}>Metro Manila</div>
                             </div>
                         </div>
                     )}
@@ -426,19 +559,19 @@ const GISPage: React.FC = () => {
                 {isMobile && (
                     <div className="bottom-nav">
                         <button className="nav-button">
-                            <Home size={20} />
+                            <Home size={18} />
                             <span>Home</span>
                         </button>
                         <button className="nav-button active">
-                            <MapPin size={20} />
+                            <MapPin size={18} />
                             <span>Map</span>
                         </button>
                         <button className="nav-button">
-                            <BarChart3 size={20} />
+                            <BarChart3 size={18} />
                             <span>Stats</span>
                         </button>
                         <button className="nav-button">
-                            <Settings size={20} />
+                            <Settings size={18} />
                             <span>Settings</span>
                         </button>
                     </div>

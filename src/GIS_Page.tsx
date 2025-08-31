@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Filter, MapPin, AlertTriangle, Flame, Wind, Home, BarChart3, Settings, X, Zap, CloudRain, Bell } from 'lucide-react';
+import { Filter, MapPin, AlertTriangle, Flame, Home, BarChart3, Settings, X, Zap, CloudRain, Bell } from 'lucide-react';
 import { useAlerts, requestNotificationPermission, showNotification } from './services/alerts/userAlerts';
-import { AlertService, Alert } from './services/alerts/alertService';
 import './GIS_Page.css';
 
 const GISPage: React.FC = () => {

@@ -1,5 +1,5 @@
-import { db } from './firebase';
-import { ref, push, set, onValue, query, orderByChild, limitToLast } from 'firebase/database';
+import {db} from '../../firebase.ts';
+import {limitToLast, onValue, orderByChild, push, query, ref, set} from 'firebase/database';
 
 export interface Alert {
     id?: string;
@@ -50,9 +50,13 @@ export class AlertService {
             if (snapshot.exists()) {
                 const alertsData = snapshot.val();
                 const alertsArray = Object.values(alertsData) as Alert[];
-                // Sort by timestamp descending
-                alertsArray.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-                callback(alertsArray);
+
+                // Filter only active alerts and sort by timestamp
+                const activeAlerts = alertsArray
+                    .filter(alert => alert.status === 'active')
+                    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+                callback(activeAlerts);
             } else {
                 callback([]);
             }
@@ -67,5 +71,9 @@ export class AlertService {
             console.error('Error updating alert status:', error);
             throw error;
         }
+    }
+
+    static unsubscribeFromAlerts(unsubscribe: () => void) {
+        unsubscribe();
     }
 }

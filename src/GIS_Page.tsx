@@ -1,30 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Filter, MapPin, AlertTriangle, Flame, Wind, Home, BarChart3, Settings, Menu, X } from 'lucide-react';
+import { Filter, MapPin, AlertTriangle, Flame, Wind, Home, BarChart3, Settings, X } from 'lucide-react';
 import './GIS_Page.css'
-
-// Leaflet interfaces
-interface LeafletMap {
-    setView: (center: [number, number], zoom: number) => LeafletMap;
-    on: (event: string, handler: (e: any) => void) => void;
-    addLayer: (layer: any) => void;
-    removeLayer: (layer: any) => void;
-    eachLayer: (fn: (layer: any) => void) => void;
-    invalidateSize: () => void;
-}
-
-interface MarkerData {
-    id: string;
-    position: { lat: number; lng: number };
-    type: 'flood' | 'fire' | 'airPollution';
-    title: string;
-    description: string;
-    severity: 'High' | 'Medium' | 'Low' | 'Info';
-}
-
-// Global variables
-let globalMap: LeafletMap | null = null;
-let markersLayer: any = null;
-let currentMarkers: any[] = [];
 
 const GISPage: React.FC = () => {
     const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768);
@@ -37,50 +13,6 @@ const GISPage: React.FC = () => {
     const [currentTime, setCurrentTime] = useState<string>(new Date().toLocaleTimeString());
     const [mapLoaded, setMapLoaded] = useState<boolean>(false);
     const mapRef = useRef<HTMLDivElement>(null);
-
-    // Sample marker data - Batangas area coordinates
-    const markersData: MarkerData[] = [
-        {
-            id: '1',
-            position: { lat: 14.2556, lng: 121.0509 },
-            type: 'flood',
-            title: 'Flood Warning - Bauan',
-            description: 'High risk flood zone - River overflow expected',
-            severity: 'High'
-        },
-        {
-            id: '2',
-            position: { lat: 14.2356, lng: 121.0309 },
-            type: 'fire',
-            title: 'Fire Alert - San Pascual',
-            description: 'Forest fire risk - Dry conditions detected',
-            severity: 'Medium'
-        },
-        {
-            id: '3',
-            position: { lat: 14.2656, lng: 121.0609 },
-            type: 'airPollution',
-            title: 'Air Quality Monitor - Batangas City',
-            description: 'PM2.5 levels elevated - Air quality moderate',
-            severity: 'Low'
-        },
-        {
-            id: '4',
-            position: { lat: 14.2156, lng: 121.0209 },
-            type: 'flood',
-            title: 'Water Level Monitor - Taal',
-            description: 'Lake water level rising - Monitor conditions',
-            severity: 'Medium'
-        },
-        {
-            id: '5',
-            position: { lat: 14.2756, lng: 121.0409 },
-            type: 'fire',
-            title: 'Fire Station - Lipa',
-            description: 'Emergency response unit - Fully operational',
-            severity: 'Info'
-        }
-    ];
 
     // Update clock every second
     useEffect(() => {
@@ -95,210 +27,30 @@ const GISPage: React.FC = () => {
         const handleResize = () => {
             const newIsMobile = window.innerWidth <= 768;
             setIsMobile(newIsMobile);
-            if (globalMap) {
-                setTimeout(() => {
-                    // @ts-ignore
-                    globalMap.invalidateSize();
-                }, 100);
-            }
         };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Initialize Leaflet map
+    // Initialize Google Maps embed for Metro Manila
     useEffect(() => {
-        const initMap = async () => {
-            if (mapRef.current && !globalMap) {
-                try {
-                    // Load Leaflet CSS
-                    const leafletCSS = document.createElement('link');
-                    leafletCSS.rel = 'stylesheet';
-                    leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-                    leafletCSS.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
-                    leafletCSS.crossOrigin = '';
-                    document.head.appendChild(leafletCSS);
+        if (mapRef.current && !mapLoaded) {
+            // Create iframe for Google Maps embed (Metro Manila)
+            const iframe = document.createElement('iframe');
+            iframe.src = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d247794.72467128634!2d120.8194!3d14.6091!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c90aac89c11f%3A0x393171db35dd5d80!2sMetro%20Manila!5e0!3m2!1sen!2sph!4v1647890123456!5m2!1sen!2sph&maptype=terrain";
+            iframe.width = "100%";
+            iframe.height = "100%";
+            iframe.style.border = "0";
+            iframe.style.borderRadius = "0";
+            iframe.allowFullscreen = true;
+            iframe.loading = "lazy";
+            iframe.referrerPolicy = "no-referrer-when-downgrade";
+            iframe.title = "Metro Manila Disaster Monitoring Map";
 
-                    // Load Leaflet JS
-                    const leafletScript = document.createElement('script');
-                    leafletScript.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-                    leafletScript.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
-                    leafletScript.crossOrigin = '';
-
-                    leafletScript.onload = () => {
-                        const L = (window as any).L;
-                        if (!L) {
-                            console.error('Leaflet not loaded properly');
-                            return;
-                        }
-
-                        // Initialize map
-                        globalMap = L.map(mapRef.current).setView([14.2456, 121.0409], 12);
-
-                        // Add tile layer
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '© OpenStreetMap contributors',
-                            maxZoom: 19,
-                        }).addTo(globalMap);
-
-                        // Create marker layer group
-                        markersLayer = L.layerGroup().addTo(globalMap);
-
-                        // Add markers
-                        addMarkersToMap();
-
-                        setMapLoaded(true);
-                    };
-
-                    leafletScript.onerror = () => {
-                        console.error('Failed to load Leaflet');
-                        setMapLoaded(true);
-                    };
-
-                    document.head.appendChild(leafletScript);
-                } catch (error) {
-                    console.error('Error initializing map:', error);
-                    setMapLoaded(true);
-                }
-            }
-        };
-
-        initMap();
-
-        // Cleanup
-        return () => {
-            if (globalMap) {
-                globalMap = null;
-                markersLayer = null;
-                currentMarkers = [];
-            }
-        };
-    }, []);
-
-    const addMarkersToMap = () => {
-        if (!markersLayer) return;
-
-        const L = (window as any).L;
-        if (!L) return;
-
-        // Clear existing markers
-        currentMarkers.forEach(marker => {
-            markersLayer.removeLayer(marker);
-        });
-        currentMarkers = [];
-
-        // Color mapping for markers
-        const colors = {
-            flood: '#f97316',
-            fire: '#ef4444',
-            airPollution: '#eab308'
-        };
-
-        // Size mapping based on severity
-        const sizes = {
-            High: 15,
-            Medium: 12,
-            Low: 9,
-            Info: 11
-        };
-
-        markersData.forEach(markerData => {
-            if (!activeFilters[markerData.type]) return;
-
-            const customIcon = L.divIcon({
-                className: 'custom-div-icon',
-                html: `
-          <div style="
-            width: ${sizes[markerData.severity] * 2}px;
-            height: ${sizes[markerData.severity] * 2}px;
-            background: ${colors[markerData.type]};
-            border: 3px solid white;
-            border-radius: 50%;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            position: relative;
-            ${markerData.severity === 'High' ? 'animation: pulse 2s infinite;' : ''}
-          ">
-            <div style="
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              width: 30%;
-              height: 30%;
-              background: white;
-              border-radius: 50%;
-              opacity: 0.8;
-            "></div>
-          </div>
-        `,
-                iconSize: [sizes[markerData.severity] * 2, sizes[markerData.severity] * 2],
-                iconAnchor: [sizes[markerData.severity], sizes[markerData.severity]]
-            });
-
-            const marker = L.marker([markerData.position.lat, markerData.position.lng], {
-                icon: customIcon
-            });
-
-            // Create popup content
-            const severityColors = {
-                'High': '#ef4444',
-                'Medium': '#f59e0b',
-                'Low': '#10b981',
-                'Info': '#3b82f6'
-            };
-
-            const popupContent = `
-        <div style="
-          background: rgba(31, 41, 55, 0.95);
-          color: white;
-          font-family: Inter, sans-serif;
-          padding: 16px;
-          border-radius: 12px;
-          min-width: 250px;
-          max-width: 300px;
-        ">
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-            <h3 style="margin: 0; font-size: 16px; font-weight: 600; flex: 1;">${markerData.title}</h3>
-            <span style="
-              background: ${severityColors[markerData.severity]}; 
-              color: white; 
-              padding: 4px 8px; 
-              border-radius: 12px; 
-              font-size: 12px; 
-              font-weight: 500;
-            ">${markerData.severity}</span>
-          </div>
-          <p style="margin: 0; font-size: 14px; color: #d1d5db; line-height: 1.5;">${markerData.description}</p>
-          <div style="
-            margin-top: 12px; 
-            padding-top: 8px; 
-            border-top: 1px solid rgba(107, 114, 128, 0.3); 
-            font-size: 12px; 
-            color: #9ca3af;
-          ">
-            📍 Lat: ${markerData.position.lat.toFixed(4)}, Lng: ${markerData.position.lng.toFixed(4)}<br>
-            ⏰ Last updated: ${new Date().toLocaleString()}
-          </div>
-        </div>
-      `;
-
-            marker.bindPopup(popupContent, {
-                className: 'custom-popup',
-                closeButton: true,
-                maxWidth: 350
-            });
-
-            marker.addTo(markersLayer);
-            currentMarkers.push(marker);
-        });
-    };
-
-    // Update markers when filters change
-    useEffect(() => {
-        if (mapLoaded && markersLayer) {
-            addMarkersToMap();
+            mapRef.current.appendChild(iframe);
+            setMapLoaded(true);
         }
-    }, [activeFilters, mapLoaded]);
+    }, []);
 
     const toggleFilter = (filterType: keyof typeof activeFilters) => {
         setActiveFilters(prev => ({
@@ -369,8 +121,6 @@ const GISPage: React.FC = () => {
 
     // @ts-ignore
     // @ts-ignore
-    // @ts-ignore
-    // @ts-ignore
     return (
         <div className="gis-page">
             <Sidebar />
@@ -390,9 +140,14 @@ const GISPage: React.FC = () => {
                     {isMobile && (
                         <button
                             onClick={() => setSidebarOpen(true)}
-                            className="menu-button"
+                            className="mobile-logo-button"
                         >
-                            <Menu size={20} />
+                            <img
+                                src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
+                                alt="CIVILIAN"
+                                className="mobile-logo"
+                            />
+                            <span className="mobile-logo-text">CIVILIAN</span>
                         </button>
                     )}
 
@@ -406,48 +161,67 @@ const GISPage: React.FC = () => {
                     </div>
                 </header>
 
-                {/* Filter controls */}
+                {/* Filter controls and Map legend combined */}
                 <div className="filters-container">
                     <div className="filters-wrapper">
-                        <div className="filters-label">
-                            <Filter size={16} />
-                            <span>Filters:</span>
+                        <div className="filters-section">
+                            <div className="filters-label">
+                                <Filter size={16} />
+                                <span>Filters:</span>
+                            </div>
+
+                            <div className="filter-buttons">
+                                <FilterButton
+                                    type="flood"
+                                    // @ts-ignore
+                                    icon={AlertTriangle}
+                                    label="Flood Warning"
+                                    color="flood"
+                                    active={activeFilters.flood}
+                                />
+
+                                <FilterButton
+                                    type="fire"
+                                    // @ts-ignore
+                                    icon={Flame}
+                                    label="Fire Warning"
+                                    color="fire"
+                                    active={activeFilters.fire}
+                                />
+
+                                <FilterButton
+                                    type="airPollution"
+                                    // @ts-ignore
+                                    icon={Wind}
+                                    label="Air Pollution"
+                                    color="pollution"
+                                    active={activeFilters.airPollution}
+                                />
+                            </div>
                         </div>
 
-                        <FilterButton
-                            type="flood"
-                            //@ts-ignore
-                            icon={AlertTriangle}
-                            label="Flood Warning"
-                            color="flood"
-                            active={activeFilters.flood}
-                        />
-
-                        <FilterButton
-                            type="fire"
-                            //@ts-ignore
-                            icon={Flame}
-                            label="Fire Warning"
-                            color="fire"
-                            active={activeFilters.fire}
-                        />
-
-                        <FilterButton
-                            type="airPollution"
-                            //@ts-ignore
-                            icon={Wind}
-                            label="Air Pollution"
-                            color="pollution"
-                            active={activeFilters.airPollution}
-                        />
-                    </div>
-                </div>
-
-                {/* Alert banner */}
-                <div className="alert-banner">
-                    <div className="alert-content">
-                        <AlertTriangle size={16} />
-                        <span>Weather Alert: Heavy rain expected in 2hrs - Monitor flood zones</span>
+                        {/* Compact Legend */}
+                        <div className="legend-section">
+                            <span className="legend-title">Legend:</span>
+                            <div className="legend-items">
+                                <div className="legend-item-compact">
+                                    <AlertTriangle className="legend-icon flood" size={14} />
+                                    <span>Flood Zones</span>
+                                </div>
+                                <div className="legend-item-compact">
+                                    <Flame className="legend-icon fire" size={14} />
+                                    <span>Fire Hazards</span>
+                                </div>
+                                <div className="legend-item-compact">
+                                    <Wind className="legend-icon pollution" size={14} />
+                                    <span>Air Quality</span>
+                                </div>
+                                <div className="legend-item-compact">
+                                    <Home className="legend-icon evacuation" size={14} />
+                                    <span>Evacuation Centers</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -464,8 +238,8 @@ const GISPage: React.FC = () => {
                         <div className="map-loading">
                             <div className="loading-spinner"></div>
                             <div className="loading-text">
-                                <div style={{marginBottom: '10px'}}>🗺️ Loading interactive map...</div>
-                                <div style={{fontSize: '12px', color: '#9ca3af'}}>Initializing Leaflet mapping system</div>
+                                <div style={{marginBottom: '10px'}}>Loading disaster monitoring map...</div>
+                                <div style={{fontSize: '12px', color: '#9ca3af'}}>Initializing Google Maps for Metro Manila</div>
                             </div>
                         </div>
                     )}
@@ -493,7 +267,6 @@ const GISPage: React.FC = () => {
                     </div>
                 )}
             </div>
-
         </div>
     );
 };

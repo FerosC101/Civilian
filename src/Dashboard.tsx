@@ -15,14 +15,18 @@ import {
   X
 } from 'lucide-react';
 import React, { useMemo, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [cityHealth] = useState(87);
   const [sensorsOnline] = useState(243);
   const [riskLevel] = useState<'LOW' | 'MED' | 'HIGH'>('LOW');
   const [currentTime, setCurrentTime] = useState<string>(new Date().toLocaleTimeString());
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
+  const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   const water = [30, 32, 31, 33, 35, 34, 36];
   const air = [60, 58, 61, 62, 64, 63, 65];
@@ -30,7 +34,7 @@ const Dashboard: React.FC = () => {
   const labels = ['1h', '2h', '3h', '4h', '5h', '6h', 'Now'];
 
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
-  const [selectedMetric, setSelectedMetric] = useState<'water' | 'air' | 'temp'>('water');
+  const [selectedMetrics, setSelectedMetrics] = useState<Set<'water' | 'air' | 'temp'>>(new Set(['water']));
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
 
   const iot = { active: 247, weak: 3, offline: 2 };
@@ -63,6 +67,16 @@ const Dashboard: React.FC = () => {
       setCurrentTime(new Date().toLocaleTimeString());
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const newIsMobile = window.innerWidth <= 768;
+      setIsMobile(newIsMobile);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Risk prediction data for the next 48 hours
@@ -104,48 +118,123 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const toggleMetric = (metric: 'water' | 'air' | 'temp') => {
+    setSelectedMetrics(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(metric)) {
+        if (newSet.size > 1) { // Don't allow removing all metrics
+          newSet.delete(metric);
+        }
+      } else {
+        newSet.add(metric);
+      }
+      return newSet;
+    });
+  };
+
+  const handleNavigation = (page: string) => {
+    setSidebarOpen(false);
+    switch (page) {
+      case 'home':
+        navigate('/');
+        break;
+      case 'gis':
+        navigate('/gis');
+        break;
+      case 'analytics':
+        // Already on dashboard/analytics
+        break;
+      case 'settings':
+        navigate('/admin');
+        break;
+      default:
+        break;
+    }
+  };
+
+  const getMetricColor = (metric: 'water' | 'air' | 'temp') => {
+    switch (metric) {
+      case 'water': return '#3b82f6';
+      case 'air': return '#10b981';
+      case 'temp': return '#fb923c';
+    }
+  };
+
+  const Sidebar: React.FC = () => (
+      <div className={`dashboard-sidebar ${isMobile ? 'mobile' : 'desktop'} ${isMobile && sidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <div className="logo-container">
+            <img
+                src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
+                alt="CIVILIAN"
+                className="logo"
+            />
+            <span className="logo-text">CIVILIAN</span>
+          </div>
+          {isMobile && (
+              <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="close-button"
+              >
+                <X size={20} />
+              </button>
+          )}
+        </div>
+
+        <nav className="sidebar-nav">
+          <button onClick={() => handleNavigation('home')} className="nav-item">
+            <Home size={18} />
+            <span className="nav-label">Dashboard</span>
+          </button>
+          <button onClick={() => handleNavigation('gis')} className="nav-item">
+            <MapPin size={18} />
+            <span className="nav-label">Map</span>
+          </button>
+          <button onClick={() => handleNavigation('analytics')} className="nav-item active">
+            <BarChart3 size={18} />
+            <span className="nav-label">Analytics</span>
+          </button>
+          <button onClick={() => handleNavigation('settings')} className="nav-item">
+            <Settings size={18} />
+            <span className="nav-label">Admin</span>
+          </button>
+        </nav>
+      </div>
+  );
+
   return (
       <div className="dashboard-page">
-        <aside className="dashboard-sidebar">
-          <div className="sidebar-header">
-            <div className="logo-container">
-              <img
-                  src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
-                  alt="CIVILIAN"
-                  className="logo"
-              />
-              <span className="logo-text">CIVILIAN</span>
-            </div>
-          </div>
+        <Sidebar />
 
-          <nav className="sidebar-nav">
-            <a href="/home" className="nav-item active">
-              <Home size={18} />
-              <span className="nav-label">Dashboard</span>
-            </a>
-            <a href="/gis" className="nav-item">
-              <MapPin size={18} />
-              <span className="nav-label">Map</span>
-            </a>
-            <a href="/dashboard" className="nav-item">
-              <BarChart3 size={18} />
-              <span className="nav-label">Analytics</span>
-            </a>
-            <a href="/admin" className="nav-item">
-              <Settings size={18} />
-              <span className="nav-label">Admin</span>
-            </a>
-          </nav>
-        </aside>
+        {/* Mobile overlay */}
+        {isMobile && sidebarOpen && (
+            <div
+                className="mobile-overlay"
+                onClick={() => setSidebarOpen(false)}
+            />
+        )}
 
         <main className="dashboard-main">
           <header className="dashboard-topbar">
             <div className="top-left">
+              {isMobile && (
+                  <button
+                      onClick={() => setSidebarOpen(true)}
+                      className="mobile-logo-button"
+                  >
+                    <img
+                        src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
+                        alt="CIVILIAN"
+                        className="mobile-logo"
+                    />
+                    <span className="mobile-logo-text">CIVILIAN</span>
+                  </button>
+              )}
               <div className="live-indicator">
                 <span className="live-dot" />
                 <span className="live-text">LIVE</span>
               </div>
-              <div className="page-title">City Dashboard</div>
+              {!isMobile && <div className="page-title">Analytics Dashboard</div>}
             </div>
 
             <div className="top-right">
@@ -153,7 +242,9 @@ const Dashboard: React.FC = () => {
                 <Bell size={14} />
                 <span className="alerts-count">{activeAlerts.length}</span>
               </div>
-              <div className="clock">{currentTime}</div>
+              <div className="clock">
+                {isMobile ? currentTime.slice(0, 5) : currentTime}
+              </div>
             </div>
           </header>
 
@@ -182,46 +273,48 @@ const Dashboard: React.FC = () => {
           })}
 
           <div className="dashboard-content">
-            <section className="cards-row">
-              <div className="metric-card health">
-                <div className="metric-header">
-                  <div className="metric-icon">
-                    <CheckCircle size={20} />
+            {!isMobile && (
+                <section className="cards-row">
+                  <div className="metric-card health">
+                    <div className="metric-header">
+                      <div className="metric-icon">
+                        <CheckCircle size={20} />
+                      </div>
+                      <div className="metric-info">
+                        <div className="metric-title">CITY HEALTH</div>
+                        <div className="metric-value">{cityHealth}%</div>
+                        <div className="metric-sub">All Systems</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="metric-info">
-                    <div className="metric-title">CITY HEALTH</div>
-                    <div className="metric-value">{cityHealth}%</div>
-                    <div className="metric-sub">All Systems</div>
-                  </div>
-                </div>
-              </div>
 
-              <div className="metric-card sensors">
-                <div className="metric-header">
-                  <div className="metric-icon">
-                    <Wifi size={20} />
+                  <div className="metric-card sensors">
+                    <div className="metric-header">
+                      <div className="metric-icon">
+                        <Wifi size={20} />
+                      </div>
+                      <div className="metric-info">
+                        <div className="metric-title">SENSORS</div>
+                        <div className="metric-value">{sensorsOnline}</div>
+                        <div className="metric-sub">Online</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="metric-info">
-                    <div className="metric-title">SENSORS</div>
-                    <div className="metric-value">{sensorsOnline}</div>
-                    <div className="metric-sub">Online</div>
-                  </div>
-                </div>
-              </div>
 
-              <div className="metric-card risk">
-                <div className="metric-header">
-                  <div className="metric-icon">
-                    <AlertCircle size={20} />
+                  <div className="metric-card risk">
+                    <div className="metric-header">
+                      <div className="metric-icon">
+                        <AlertCircle size={20} />
+                      </div>
+                      <div className="metric-info">
+                        <div className="metric-title">RISK LEVEL</div>
+                        <div className="metric-value">{riskLevel}</div>
+                        <div className="metric-sub">Current Status</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="metric-info">
-                    <div className="metric-title">RISK LEVEL</div>
-                    <div className="metric-value">{riskLevel}</div>
-                    <div className="metric-sub">Current Status</div>
-                  </div>
-                </div>
-              </div>
-            </section>
+                </section>
+            )}
 
             <section className="chart-row">
               <div className="card chart-card">
@@ -232,20 +325,20 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div className="metric-selector">
                     <button
-                        className={`metric-btn ${selectedMetric === 'water' ? 'active' : ''}`}
-                        onClick={() => setSelectedMetric('water')}
+                        className={`metric-btn ${selectedMetrics.has('water') ? 'active' : ''}`}
+                        onClick={() => toggleMetric('water')}
                     >
                       Water Level
                     </button>
                     <button
-                        className={`metric-btn ${selectedMetric === 'air' ? 'active' : ''}`}
-                        onClick={() => setSelectedMetric('air')}
+                        className={`metric-btn ${selectedMetrics.has('air') ? 'active' : ''}`}
+                        onClick={() => toggleMetric('air')}
                     >
                       Air Quality
                     </button>
                     <button
-                        className={`metric-btn ${selectedMetric === 'temp' ? 'active' : ''}`}
-                        onClick={() => setSelectedMetric('temp')}
+                        className={`metric-btn ${selectedMetrics.has('temp') ? 'active' : ''}`}
+                        onClick={() => toggleMetric('temp')}
                     >
                       Temperature
                     </button>
@@ -275,7 +368,7 @@ const Dashboard: React.FC = () => {
                         <line x1="0" y1="75" x2="100" y2="75" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
                         <line x1="0" y1="100" x2="100" y2="100" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
 
-                        {/* Area fill under line */}
+                        {/* Area fills and lines for each selected metric */}
                         <defs>
                           <linearGradient id="waterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                             <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3" />
@@ -291,26 +384,32 @@ const Dashboard: React.FC = () => {
                           </linearGradient>
                         </defs>
 
-                        <polygon
-                            className={`area ${selectedMetric}`}
-                            points={`0,100 ${seriesPoints[selectedMetric].map(p => `${p.x},${p.y}`).join(' ')} 100,100`}
-                            fill={`url(#${selectedMetric}Gradient)`}
-                        />
-
-                        {/* Active metric line */}
-                        <polyline
-                            className={`line ${selectedMetric}`}
-                            points={seriesPoints[selectedMetric].map(p => `${p.x},${p.y}`).join(' ')}
-                            fill="none"
-                            strokeWidth={2.5}
-                        />
+                        {/* Render all selected metrics */}
+                        {Array.from(selectedMetrics).map((metric) => (
+                            <g key={metric}>
+                              <polygon
+                                  className={`area ${metric}`}
+                                  points={`0,100 ${seriesPoints[metric].map(p => `${p.x},${p.y}`).join(' ')} 100,100`}
+                                  fill={`url(#${metric}Gradient)`}
+                              />
+                              <polyline
+                                  className={`line ${metric}`}
+                                  points={seriesPoints[metric].map(p => `${p.x},${p.y}`).join(' ')}
+                                  fill="none"
+                                  stroke={getMetricColor(metric)}
+                                  strokeWidth={2.5}
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                              />
+                            </g>
+                        ))}
 
                         {/* Hover indicator line */}
                         {hoverIndex !== null && (
                             <line
-                                x1={seriesPoints[selectedMetric][hoverIndex].x}
+                                x1={seriesPoints.water[hoverIndex].x}
                                 y1="0"
-                                x2={seriesPoints[selectedMetric][hoverIndex].x}
+                                x2={seriesPoints.water[hoverIndex].x}
                                 y2="100"
                                 stroke="rgba(255,255,255,0.3)"
                                 strokeWidth="1"
@@ -318,17 +417,18 @@ const Dashboard: React.FC = () => {
                             />
                         )}
 
-                        {/* Hover dots */}
-                        {hoverIndex !== null && (
+                        {/* Hover dots for all selected metrics */}
+                        {hoverIndex !== null && Array.from(selectedMetrics).map((metric) => (
                             <circle
-                                cx={seriesPoints[selectedMetric][hoverIndex].x}
-                                cy={seriesPoints[selectedMetric][hoverIndex].y}
+                                key={metric}
+                                cx={seriesPoints[metric][hoverIndex].x}
+                                cy={seriesPoints[metric][hoverIndex].y}
                                 r={4}
-                                className={`hover-dot ${selectedMetric}`}
+                                fill={getMetricColor(metric)}
                                 stroke="#fff"
                                 strokeWidth="2"
                             />
-                        )}
+                        ))}
 
                         {/* Invisible hit areas for hover */}
                         {seriesPoints.water.map((p, idx) => (
@@ -356,59 +456,106 @@ const Dashboard: React.FC = () => {
                         <div
                             className="chart-tooltip"
                             style={{
-                              left: `${25 + (seriesPoints[selectedMetric][hoverIndex].x * 0.75)}%`,
+                              left: `${25 + (seriesPoints.water[hoverIndex].x * 0.75)}%`,
                               top: '20px'
                             }}
                         >
                           <div className="tooltip-time">{labels[hoverIndex] ?? labels[labels.length - 1]}</div>
-                          <div className="tooltip-value">
-                            <span className="value-label">{selectedMetric === 'water' ? 'Water' : selectedMetric === 'air' ? 'Air' : 'Temp'}:</span>
-                            <span className="value-number">
-                          {seriesPoints[selectedMetric][hoverIndex].value}
-                              {selectedMetric === 'temp' ? '°C' : ''}
-                        </span>
-                          </div>
+                          {Array.from(selectedMetrics).map((metric) => (
+                              <div key={metric} className="tooltip-value">
+                          <span className="value-label" style={{ color: getMetricColor(metric) }}>
+                            {metric === 'water' ? 'Water' : metric === 'air' ? 'Air' : 'Temp'}:
+                          </span>
+                                <span className="value-number">
+                            {seriesPoints[metric][hoverIndex].value}
+                                  {metric === 'temp' ? '°C' : ''}
+                          </span>
+                              </div>
+                          ))}
                         </div>
                     )}
                   </div>
                 </div>
               </div>
 
-              <div className="card small-card network-card">
-                <div className="card-header">
-                  <div className="card-title-with-icon">
-                    <Wifi size={18} />
-                    <span>IoT Network Health</span>
-                  </div>
-                </div>
+              {!isMobile && (
+                  <div className="card small-card network-card">
+                    <div className="card-header">
+                      <div className="card-title-with-icon">
+                        <Wifi size={18} />
+                        <span>IoT Network Health</span>
+                      </div>
+                    </div>
 
-                <div className="network-visual">
-                  <div className="network-status">
-                    <div className="status-item">
-                      <div className="status-indicator online"></div>
-                      <div className="status-info">
-                        <div className="status-value">{iot.active}</div>
-                        <div className="status-label">Active Nodes</div>
-                      </div>
-                    </div>
-                    <div className="status-item">
-                      <div className="status-indicator weak"></div>
-                      <div className="status-info">
-                        <div className="status-value">{iot.weak}</div>
-                        <div className="status-label">Weak Signal</div>
-                      </div>
-                    </div>
-                    <div className="status-item">
-                      <div className="status-indicator offline"></div>
-                      <div className="status-info">
-                        <div className="status-value">{iot.offline}</div>
-                        <div className="status-label">Offline</div>
+                    <div className="network-visual">
+                      <div className="network-status">
+                        <div className="status-item">
+                          <div className="status-indicator online"></div>
+                          <div className="status-info">
+                            <div className="status-value">{iot.active}</div>
+                            <div className="status-label">Active Nodes</div>
+                          </div>
+                        </div>
+                        <div className="status-item">
+                          <div className="status-indicator weak"></div>
+                          <div className="status-info">
+                            <div className="status-value">{iot.weak}</div>
+                            <div className="status-label">Weak Signal</div>
+                          </div>
+                        </div>
+                        <div className="status-item">
+                          <div className="status-indicator offline"></div>
+                          <div className="status-info">
+                            <div className="status-value">{iot.offline}</div>
+                            <div className="status-label">Offline</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
+              )}
             </section>
+
+            {/* Mobile Status Cards */}
+            {isMobile && (
+                <section className="mobile-status-grid">
+                  <div className="status-card network-card">
+                    <div className="card-header">
+                      <Wifi size={20} className="card-icon network-icon" />
+                      <span className="card-title">IoT & Nodes</span>
+                    </div>
+                    <div className="card-content">
+                      <div className="status-item">Network Status:</div>
+                      <div className="status-value success">
+                        <div className="status-indicator"></div>
+                        {iot.active} Nodes Active
+                      </div>
+                      <div className="status-value success">
+                        <div className="status-indicator"></div>
+                        Mesh Stable
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="status-card health-card">
+                    <div className="card-header">
+                      <CheckCircle size={20} className="card-icon health-icon" />
+                      <span className="card-title">City Health</span>
+                    </div>
+                    <div className="card-content">
+                      <div className="status-item">Overall Health:</div>
+                      <div className="status-value success">
+                        <div className="status-indicator"></div>
+                        {cityHealth}% Healthy
+                      </div>
+                      <div className="status-value success">
+                        <div className="status-indicator"></div>
+                        All Systems OK
+                      </div>
+                    </div>
+                  </div>
+                </section>
+            )}
 
             <section className="mid-row">
               <div className="card incidents-card">
@@ -537,6 +684,28 @@ const Dashboard: React.FC = () => {
               </div>
             </section>
           </div>
+
+          {/* Mobile bottom navigation */}
+          {isMobile && (
+              <div className="bottom-nav">
+                <button onClick={() => handleNavigation('home')} className="nav-button">
+                  <Home size={20} />
+                  <span>Home</span>
+                </button>
+                <button onClick={() => handleNavigation('gis')} className="nav-button">
+                  <MapPin size={20} />
+                  <span>Map</span>
+                </button>
+                <button onClick={() => handleNavigation('analytics')} className="nav-button active">
+                  <BarChart3 size={20} />
+                  <span>Stats</span>
+                </button>
+                <button onClick={() => handleNavigation('settings')} className="nav-button">
+                  <Settings size={20} />
+                  <span>Settings</span>
+                </button>
+              </div>
+          )}
         </main>
       </div>
   );

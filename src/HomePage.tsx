@@ -58,8 +58,8 @@ const HomePage: React.FC = () => {
             case 'gis':
                 navigate('/gis');
                 break;
-            case 'dashboard':
-                console.log('/dashboard');
+            case 'analytics':
+                console.log('dashboard');
                 break;
             case 'settings':
                 console.log('Navigate to settings');

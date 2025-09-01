@@ -16,6 +16,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/" element={<EntryPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignUpPage />} />
+                <Route path="/dashboard" element={<HomePage />} />
                 <Route path="/gis" element={<GIS_Page />} />
                 <Route path="/admin" element={<AdminPage/>} />
                 <Route path="/dashboard" element={<Dashboard />} />

@@ -182,22 +182,24 @@ const Dashboard: React.FC = () => {
         </div>
 
         <nav className="sidebar-nav">
-          <button onClick={() => handleNavigation('home')} className="nav-item">
-            <Home size={18} />
-            <span className="nav-label">Dashboard</span>
-          </button>
-          <button onClick={() => handleNavigation('gis')} className="nav-item">
-            <MapPin size={18} />
-            <span className="nav-label">Map</span>
-          </button>
-          <button onClick={() => handleNavigation('analytics')} className="nav-item active">
-            <BarChart3 size={18} />
-            <span className="nav-label">Analytics</span>
-          </button>
-          <button onClick={() => handleNavigation('settings')} className="nav-item">
-            <Settings size={18} />
-            <span className="nav-label">Admin</span>
-          </button>
+          <div className="nav-items">
+            <button onClick={() => handleNavigation('home')} className="nav-item">
+              <Home size={18} />
+              <span className="nav-label">Dashboard</span>
+            </button>
+            <button onClick={() => handleNavigation('gis')} className="nav-item">
+              <MapPin size={18} />
+              <span className="nav-label">Map</span>
+            </button>
+            <button onClick={() => handleNavigation('analytics')} className="nav-item active">
+              <BarChart3 size={18} />
+              <span className="nav-label">Analytics</span>
+            </button>
+            <button onClick={() => handleNavigation('settings')} className="nav-item">
+              <Settings size={18} />
+              <span className="nav-label">Settings</span>
+            </button>
+          </div>
         </nav>
       </div>
   );
@@ -273,50 +275,50 @@ const Dashboard: React.FC = () => {
           })}
 
           <div className="dashboard-content">
-            {!isMobile && (
-                <section className="cards-row">
-                  <div className="metric-card health">
-                    <div className="metric-header">
-                      <div className="metric-icon">
-                        <CheckCircle size={20} />
-                      </div>
-                      <div className="metric-info">
-                        <div className="metric-title">CITY HEALTH</div>
-                        <div className="metric-value">{cityHealth}%</div>
-                        <div className="metric-sub">All Systems</div>
-                      </div>
-                    </div>
+            {/* Summary Cards */}
+            <section className="cards-section">
+              <div className="metric-card health">
+                <div className="metric-header">
+                  <div className="metric-icon">
+                    <CheckCircle size={20} />
                   </div>
-
-                  <div className="metric-card sensors">
-                    <div className="metric-header">
-                      <div className="metric-icon">
-                        <Wifi size={20} />
-                      </div>
-                      <div className="metric-info">
-                        <div className="metric-title">SENSORS</div>
-                        <div className="metric-value">{sensorsOnline}</div>
-                        <div className="metric-sub">Online</div>
-                      </div>
-                    </div>
+                  <div className="metric-info">
+                    <div className="metric-title">CITY HEALTH</div>
+                    <div className="metric-value">{cityHealth}%</div>
+                    <div className="metric-sub">All Systems</div>
                   </div>
+                </div>
+              </div>
 
-                  <div className="metric-card risk">
-                    <div className="metric-header">
-                      <div className="metric-icon">
-                        <AlertCircle size={20} />
-                      </div>
-                      <div className="metric-info">
-                        <div className="metric-title">RISK LEVEL</div>
-                        <div className="metric-value">{riskLevel}</div>
-                        <div className="metric-sub">Current Status</div>
-                      </div>
-                    </div>
+              <div className="metric-card sensors">
+                <div className="metric-header">
+                  <div className="metric-icon">
+                    <Wifi size={20} />
                   </div>
-                </section>
-            )}
+                  <div className="metric-info">
+                    <div className="metric-title">SENSORS</div>
+                    <div className="metric-value">{sensorsOnline}</div>
+                    <div className="metric-sub">Online</div>
+                  </div>
+                </div>
+              </div>
 
-            <section className="chart-row">
+              <div className="metric-card risk">
+                <div className="metric-header">
+                  <div className="metric-icon">
+                    <AlertCircle size={20} />
+                  </div>
+                  <div className="metric-info">
+                    <div className="metric-title">RISK LEVEL</div>
+                    <div className="metric-value">{riskLevel}</div>
+                    <div className="metric-sub">Current Status</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Charts Row */}
+            <section className="charts-section">
               <div className="card chart-card">
                 <div className="card-header">
                   <div className="card-title-with-icon">
@@ -397,7 +399,7 @@ const Dashboard: React.FC = () => {
                                   points={seriesPoints[metric].map(p => `${p.x},${p.y}`).join(' ')}
                                   fill="none"
                                   stroke={getMetricColor(metric)}
-                                  strokeWidth={2.5}
+                                  strokeWidth={3}
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
                               />
@@ -430,13 +432,13 @@ const Dashboard: React.FC = () => {
                             />
                         ))}
 
-                        {/* Invisible hit areas for hover */}
+                        {/* Invisible hit areas for hover - Make them wider */}
                         {seriesPoints.water.map((p, idx) => (
                             <rect
                                 key={idx}
-                                x={p.x - 7}
+                                x={p.x - 12}
                                 y={0}
-                                width="14"
+                                width="24"
                                 height={100}
                                 fill="transparent"
                                 onMouseEnter={() => setHoverIndex(idx)}
@@ -478,86 +480,60 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
 
-              {!isMobile && (
-                  <div className="card small-card network-card">
-                    <div className="card-header">
-                      <div className="card-title-with-icon">
-                        <Wifi size={18} />
-                        <span>IoT Network Health</span>
+              <div className="card small-card network-card">
+                <div className="card-header">
+                  <div className="card-title-with-icon">
+                    <Wifi size={18} />
+                    <span>IoT Network Health</span>
+                  </div>
+                </div>
+
+                <div className="network-visual">
+                  <div className="network-grid">
+                    <div className="network-status-card active">
+                      <div className="network-header">
+                        <div className="status-indicator online"></div>
+                        <span className="network-label">Active</span>
                       </div>
+                      <div className="network-value">{iot.active}</div>
+                      <div className="network-sub">Nodes Online</div>
                     </div>
 
-                    <div className="network-visual">
-                      <div className="network-status">
-                        <div className="status-item">
-                          <div className="status-indicator online"></div>
-                          <div className="status-info">
-                            <div className="status-value">{iot.active}</div>
-                            <div className="status-label">Active Nodes</div>
-                          </div>
-                        </div>
-                        <div className="status-item">
-                          <div className="status-indicator weak"></div>
-                          <div className="status-info">
-                            <div className="status-value">{iot.weak}</div>
-                            <div className="status-label">Weak Signal</div>
-                          </div>
-                        </div>
-                        <div className="status-item">
-                          <div className="status-indicator offline"></div>
-                          <div className="status-info">
-                            <div className="status-value">{iot.offline}</div>
-                            <div className="status-label">Offline</div>
-                          </div>
-                        </div>
+                    <div className="network-status-card weak">
+                      <div className="network-header">
+                        <div className="status-indicator weak"></div>
+                        <span className="network-label">Weak</span>
                       </div>
+                      <div className="network-value">{iot.weak}</div>
+                      <div className="network-sub">Signal Issues</div>
+                    </div>
+
+                    <div className="network-status-card offline">
+                      <div className="network-header">
+                        <div className="status-indicator offline"></div>
+                        <span className="network-label">Offline</span>
+                      </div>
+                      <div className="network-value">{iot.offline}</div>
+                      <div className="network-sub">Not Responding</div>
                     </div>
                   </div>
-              )}
+
+                  <div className="network-summary">
+                    <div className="summary-stat">
+                      <span className="summary-label">Total Coverage</span>
+                      <span className="summary-value">98.2%</span>
+                    </div>
+                    <div className="summary-stat">
+                      <span className="summary-label">Avg Signal</span>
+                      <span className="summary-value">Strong</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </section>
 
-            {/* Mobile Status Cards */}
-            {isMobile && (
-                <section className="mobile-status-grid">
-                  <div className="status-card network-card">
-                    <div className="card-header">
-                      <Wifi size={20} className="card-icon network-icon" />
-                      <span className="card-title">IoT & Nodes</span>
-                    </div>
-                    <div className="card-content">
-                      <div className="status-item">Network Status:</div>
-                      <div className="status-value success">
-                        <div className="status-indicator"></div>
-                        {iot.active} Nodes Active
-                      </div>
-                      <div className="status-value success">
-                        <div className="status-indicator"></div>
-                        Mesh Stable
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="status-card health-card">
-                    <div className="card-header">
-                      <CheckCircle size={20} className="card-icon health-icon" />
-                      <span className="card-title">City Health</span>
-                    </div>
-                    <div className="card-content">
-                      <div className="status-item">Overall Health:</div>
-                      <div className="status-value success">
-                        <div className="status-indicator"></div>
-                        {cityHealth}% Healthy
-                      </div>
-                      <div className="status-value success">
-                        <div className="status-indicator"></div>
-                        All Systems OK
-                      </div>
-                    </div>
-                  </div>
-                </section>
-            )}
-
-            <section className="mid-row">
+            {/* Analytics Row */}
+            <section className="analytics-section">
               <div className="card incidents-card">
                 <div className="card-header">
                   <div className="card-title-with-icon">
@@ -643,7 +619,8 @@ const Dashboard: React.FC = () => {
               </div>
             </section>
 
-            <section className="bottom-row">
+            {/* Performance Section */}
+            <section className="performance-section">
               <div className="card perf-card full-width">
                 <div className="card-header">
                   <div className="card-title-with-icon">

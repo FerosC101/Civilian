@@ -75,15 +75,15 @@ const Dashboard: React.FC = () => {
         </div>
 
         <nav className="sidebar-nav">
-          <a href="/dashboard" className="nav-item active">
+          <a href="/home" className="nav-item active">
             <Home size={18} />
             <span className="nav-label">Dashboard</span>
           </a>
           <a href="/gis" className="nav-item">
             <MapPin size={18} />
-            <span className="nav-label">GIS Map</span>
+            <span className="nav-label">Map</span>
           </a>
-          <a href="#" className="nav-item">
+          <a href="/dashboard" className="nav-item">
             <BarChart3 size={18} />
             <span className="nav-label">Analytics</span>
           </a>

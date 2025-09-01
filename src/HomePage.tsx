@@ -85,15 +85,15 @@ const HomePage: React.FC = () => {
 
             <nav className="sidebar-nav">
                 <div className="nav-items">
-                    <button onClick={() => handleNavigation('dashboard')} className="nav-item active">
+                    <button onClick={() => handleNavigation('home')} className="nav-item active">
                         <Home size={20} />
                         <span className="nav-label">Dashboard</span>
                     </button>
                     <button onClick={() => handleNavigation('gis')} className="nav-item">
                         <MapPin size={20} />
-                        <span className="nav-label">GIS Map</span>
+                        <span className="nav-label">Map</span>
                     </button>
-                    <button onClick={() => handleNavigation('analytics')} className="nav-item">
+                    <button onClick={() => handleNavigation('dashboard')} className="nav-item">
                         <BarChart3 size={20} />
                         <span className="nav-label">Analytics</span>
                     </button>

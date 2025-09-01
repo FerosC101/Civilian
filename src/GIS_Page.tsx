@@ -360,15 +360,15 @@ const GISPage: React.FC = () => {
 
             <nav className="sidebar-nav">
                 <div className="nav-items">
-                    <a href="/dashboard" className="nav-item">
+                    <a href="/home" className="nav-item">
                         <Home size={20} />
                         <span className="nav-label">Dashboard</span>
                     </a>
-                    <a href="#" className="nav-item active">
+                    <a href="/gis" className="nav-item active">
                         <MapPin size={20} />
-                        <span className="nav-label">GIS Map</span>
+                        <span className="nav-label">Map</span>
                     </a>
-                    <a href="#" className="nav-item">
+                    <a href="/dashboard" className="nav-item">
                         <BarChart3 size={20} />
                         <span className="nav-label">Analytics</span>
                     </a>

@@ -8,6 +8,7 @@ import GIS_Page from './GIS_Page.tsx';
 import './index.css';
 import LoginPage from './LoginPage.tsx';
 import SignUpPage from './SignUpPage.tsx';
+import HomePage from "./HomePage.tsx";
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -16,7 +17,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/" element={<EntryPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignUpPage />} />
-                <Route path="/dashboard" element={<HomePage />} />
+                <Route path="/home" element={<HomePage />} />
                 <Route path="/gis" element={<GIS_Page />} />
                 <Route path="/admin" element={<AdminPage/>} />
                 <Route path="/dashboard" element={<Dashboard />} />

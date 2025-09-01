@@ -1,17 +1,17 @@
 import {
-    Activity,
-    AlertCircle,
-    BarChart3,
-    Battery,
-    Bell,
-    CheckCircle,
-    Cpu,
-    Gauge,
-    Home,
-    MapPin,
-    Settings,
-    TrendingUp,
-    Wifi
+  Activity,
+  AlertCircle,
+  BarChart3,
+  Battery,
+  Bell,
+  CheckCircle,
+  Cpu,
+  Gauge,
+  Home,
+  MapPin,
+  Settings,
+  TrendingUp,
+  Wifi
 } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import './Dashboard.css';
@@ -177,65 +177,75 @@ const Dashboard: React.FC = () => {
                   <span>0</span>
                 </div>
                 <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-                  {/* Grid lines */}
-                  <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-                  <line x1="0" y1="25" x2="100" y2="25" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-                  <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-                  <line x1="0" y1="75" x2="100" y2="75" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-                  <line x1="0" y1="100" x2="100" y2="100" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-                  
-                  {/* Active metric line */}
-                  <polyline
-                    className={`line ${selectedMetric}`}
-                    points={seriesPoints[selectedMetric].map(p => `${p.x},${p.y}`).join(' ')}
-                    fill="none"
-                    strokeWidth={2.5}
-                  />
-                  
-                  {/* Area fill under line */}
-                  <polygon
-                    className={`area ${selectedMetric}`}
-                    points={`0,100 ${seriesPoints[selectedMetric].map(p => `${p.x},${p.y}`).join(' ')} 100,100`}
-                  />
-
-                  {/* Hover indicator line */}
-                  {hoverIndex !== null && (
-                    <line
-                      x1={seriesPoints[selectedMetric][hoverIndex].x}
-                      y1="0"
-                      x2={seriesPoints[selectedMetric][hoverIndex].x}
-                      y2="100"
-                      stroke="rgba(255,255,255,0.2)"
-                      strokeWidth="1"
-                      strokeDasharray="2,2"
+                  <defs>
+                    <clipPath id="chartClip">
+                      <rect x="0" y="0" width="100" height="100" />
+                    </clipPath>
+                  </defs>
+                  <g clipPath="url(#chartClip)">
+                    {/* Grid lines */}
+                    <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+                    <line x1="0" y1="25" x2="100" y2="25" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+                    <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+                    <line x1="0" y1="75" x2="100" y2="75" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+                    <line x1="0" y1="100" x2="100" y2="100" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+                    
+                    {/* Active metric line */}
+                    <polyline
+                      className={`line ${selectedMetric}`}
+                      points={seriesPoints[selectedMetric].map(p => `${p.x},${p.y}`).join(' ')}
+                      fill="none"
+                      strokeWidth={2.5}
                     />
-                  )}
-
-                  {/* Hover dots */}
-                  {hoverIndex !== null && (
-                    <circle
-                      cx={seriesPoints[selectedMetric][hoverIndex].x}
-                      cy={seriesPoints[selectedMetric][hoverIndex].y}
-                      r={3}
-                      className={`hover-dot ${selectedMetric}`}
-                      stroke="#fff"
-                      strokeWidth="1.5"
+                    
+                    {/* Area fill under line */}
+                    <polygon
+                      className={`area ${selectedMetric}`}
+                      points={`0,100 ${seriesPoints[selectedMetric].map(p => `${p.x},${p.y}`).join(' ')} 100,100`}
                     />
-                  )}
 
-                  {/* Invisible hit areas for hover */}
-                  {seriesPoints.water.map((p, idx) => (
-                    <rect
-                      key={idx}
-                      x={p.x - 5}
-                      y={0}
-                      width="10"
-                      height={100}
-                      fill="transparent"
-                      onMouseEnter={() => setHoverIndex(idx)}
-                      style={{ cursor: 'crosshair' }}
-                    />
-                  ))}
+                    {/* Hover indicator line - FIXED */}
+                    {hoverIndex !== null && (
+                      <line
+                        x1={seriesPoints[selectedMetric][hoverIndex].x}
+                        y1="2"
+                        x2={seriesPoints[selectedMetric][hoverIndex].x}
+                        y2="98"
+                        stroke="rgba(255,255,255,0.3)"
+                        strokeWidth="0.15"
+                        strokeDasharray="0.5,0.5"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    )}
+
+                    {/* Hover dots */}
+                    {hoverIndex !== null && (
+                      <circle
+                        cx={seriesPoints[selectedMetric][hoverIndex].x}
+                        cy={seriesPoints[selectedMetric][hoverIndex].y}
+                        r={2.5}
+                        className={`hover-dot ${selectedMetric}`}
+                        stroke="#fff"
+                        strokeWidth="1"
+                        vectorEffect="non-scaling-stroke"
+                        style={{ transformOrigin: `${seriesPoints[selectedMetric][hoverIndex].x}% ${seriesPoints[selectedMetric][hoverIndex].y}%`, transform: 'scaleX(0.3)' }}
+                      />
+                    )}
+
+                    {/* Invisible hit areas for hover */}
+                    {seriesPoints.water.map((p, idx) => (
+                      <rect
+                        key={idx}
+                        x={p.x - 5}
+                        y={0}
+                        width="10"
+                        height={100}
+                        fill="transparent"
+                        onMouseEnter={() => setHoverIndex(idx)}
+                        style={{ cursor: 'crosshair' }}
+                      />
+                    ))}
+                  </g>
                 </svg>
 
                 <div className="chart-x-axis">

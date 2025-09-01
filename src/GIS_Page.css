@@ -1,4 +1,4 @@
-/* GIS Disaster Map CSS - Mobile Optimized Layout with Alert Messages */
+/* GIS Disaster Map CSS - Mobile Optimized Layout with Alert Messages and Location Pins */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 * {
@@ -549,6 +549,15 @@ body {
     line-height: 1.4;
 }
 
+.alert-card-mobile-location {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #9ca3af;
+    font-size: 10px;
+    margin-bottom: 4px;
+}
+
 .alert-card-mobile-areas {
     color: #9ca3af;
     font-size: 9px;
@@ -909,36 +918,102 @@ body {
     overflow: hidden;
 }
 
-.map iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    transition: all 0.3s ease;
+.map > div {
+    width: 100% !important;
+    height: 100% !important;
 }
 
-.map-overlay {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 2;
+/* Google Maps Container Styles */
+.gm-style {
+    font-family: 'Inter', sans-serif !important;
 }
 
-.alert-marker {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
+.gm-style .gm-style-iw {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.gm-style .gm-style-iw-c {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.gm-style .gm-style-iw-d {
+    overflow: visible !important;
+}
+
+/* Custom Map Marker Styles */
+.custom-marker {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    transition: all 0.2s;
-    pointer-events: auto;
+    transition: all 0.2s ease;
     cursor: pointer;
 }
 
-.alert-marker:hover {
+.custom-marker:hover {
     transform: scale(1.1);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.custom-marker.critical {
+    animation: pulse-marker 2s infinite;
+}
+
+@keyframes pulse-marker {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+/* Map Info Window Styles */
+.map-info-window {
+    font-family: 'Inter', sans-serif;
+    min-width: 250px;
+    max-width: 300px;
+}
+
+.map-info-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.map-info-severity-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.map-info-content {
+    color: #374151;
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 8px 0;
+}
+
+.map-info-details {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.map-info-details div {
+    margin: 2px 0;
 }
 
 .map-loading {
@@ -1093,10 +1168,45 @@ body {
         display: none;
     }
 
-    /* Mobile map markers smaller */
-    .alert-marker {
-        width: 20px;
-        height: 20px;
+    /* Mobile alert cards adjustments */
+    .alert-card-mobile {
+        padding: 12px;
+    }
+
+    .alert-card-mobile-header {
+        margin-bottom: 8px;
+    }
+
+    .alert-card-mobile-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .alert-card-mobile-title {
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .alert-card-mobile-time {
+        font-size: 10px;
+    }
+
+    .alert-card-mobile-message {
+        font-size: 11px;
+        margin-bottom: 8px;
+    }
+
+    .alert-card-mobile-location {
+        font-size: 10px;
+        margin-bottom: 6px;
+    }
+
+    .alert-card-mobile-areas {
+        font-size: 10px;
+    }
+
+    .alert-card-mobile-close {
+        padding: 4px;
     }
 }
 
@@ -1180,19 +1290,23 @@ body {
     }
 
     .alert-card-mobile {
-        padding: 8px;
+        padding: 10px;
     }
 
     .alert-card-mobile-title {
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .alert-card-mobile-message {
+        font-size: 10px;
+    }
+
+    .alert-card-mobile-location {
         font-size: 9px;
     }
 
     .alert-card-mobile-areas {
-        font-size: 8px;
+        font-size: 9px;
     }
 }
 
@@ -1236,7 +1350,7 @@ body {
         background: none;
     }
 
-    .alert-marker:hover {
+    .custom-marker:hover {
         transform: none;
     }
 
@@ -1248,5 +1362,106 @@ body {
     .alert-card:hover,
     .alert-card-mobile:hover {
         transform: none;
+    }
+
+    .legend-item-compact:hover {
+        transform: none;
+    }
+}
+
+/* High DPI Display Support */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .loading-spinner,
+    .loading-spinner-small {
+        border-width: 1px;
+    }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+    .map-info-window {
+        background: #1f2937;
+        color: #f9fafb;
+    }
+
+    .map-info-header {
+        border-bottom-color: #374151;
+    }
+
+    .map-info-content {
+        color: #d1d5db;
+    }
+
+    .map-info-details {
+        color: #9ca3af;
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .live-dot {
+        animation: none;
+    }
+
+    .loading-spinner,
+    .loading-spinner-small {
+        animation: none;
+        border-top-color: #3b82f6;
+        opacity: 0.5;
+    }
+
+    .custom-marker.critical {
+        animation: none;
+    }
+
+    .pulse-marker {
+        animation: none;
+    }
+}
+
+/* Focus styles for keyboard navigation */
+.filter-button:focus,
+.nav-button:focus,
+.alerts-toggle-button:focus,
+.filters-toggle-button:focus,
+.mobile-logo-button:focus,
+.nav-item:focus,
+.alert-card-close:focus,
+.alert-message-close:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    .gis-page {
+        background: white;
+        color: black;
+    }
+
+    .sidebar,
+    .header,
+    .bottom-nav,
+    .alert-message,
+    .filters-container,
+    .alerts-sidebar {
+        display: none;
+    }
+
+    .main-content {
+        margin: 0;
+        padding: 0;
+    }
+
+    .map-container {
+        width: 100%;
+        height: 100vh;
+        position: relative;
     }
 }

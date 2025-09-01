@@ -18,6 +18,10 @@ const GISPage: React.FC = () => {
     const [currentTime, setCurrentTime] = useState<string>(new Date().toLocaleTimeString());
     const [mapLoaded, setMapLoaded] = useState<boolean>(false);
     const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(false);
+    // @ts-ignore
+    const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
+    // @ts-ignore
+    const [alertMarkers, setAlertMarkers] = useState<google.maps.Marker[]>([]);
     const mapRef = useRef<HTMLDivElement>(null);
 
     // Get real-time alerts
@@ -69,25 +73,204 @@ const GISPage: React.FC = () => {
         }
     }, [alerts, notificationsEnabled]);
 
-    // Initialize map with alert markers
+    // Initialize Google Maps
     useEffect(() => {
-        if (mapRef.current && !mapLoaded) {
-            // Create iframe for Google Maps embed (Metro Manila)
-            const iframe = document.createElement('iframe');
-            iframe.src = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d247794.72467128634!2d120.8194!3d14.6091!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c90aac89c11f%3A0x393171db35dd5d80!2sMetro%20Manila!5e0!3m2!1sen!2sph!4v1647890123456!5m2!1sen!2sph&maptype=terrain";
-            iframe.width = "100%";
-            iframe.height = "100%";
-            iframe.style.border = "0";
-            iframe.style.borderRadius = "0";
-            iframe.allowFullscreen = true;
-            iframe.loading = "lazy";
-            iframe.referrerPolicy = "no-referrer-when-downgrade";
-            iframe.title = "Metro Manila Disaster Monitoring Map";
+        const initMap = () => {
+            if (mapRef.current && !mapInstance) {
+                // @ts-ignore
+                const map = new google.maps.Map(mapRef.current, {
+                    center: { lat: 14.6091, lng: 121.0223 }, // Metro Manila center
+                    zoom: 11,
+                    mapTypeId: 'terrain',
+                    styles: [
+                        {
+                            "elementType": "geometry",
+                            "stylers": [{ "color": "#1f2937" }]
+                        },
+                        {
+                            "elementType": "labels.text.stroke",
+                            "stylers": [{ "color": "#1f2937" }]
+                        },
+                        {
+                            "elementType": "labels.text.fill",
+                            "stylers": [{ "color": "#8ec3b9" }]
+                        },
+                        {
+                            "featureType": "administrative.locality",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{ "color": "#d59563" }]
+                        },
+                        {
+                            "featureType": "poi",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{ "color": "#d59563" }]
+                        },
+                        {
+                            "featureType": "poi.park",
+                            "elementType": "geometry",
+                            "stylers": [{ "color": "#263c3f" }]
+                        },
+                        {
+                            "featureType": "poi.park",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{ "color": "#6b9a76" }]
+                        },
+                        {
+                            "featureType": "road",
+                            "elementType": "geometry",
+                            "stylers": [{ "color": "#38414e" }]
+                        },
+                        {
+                            "featureType": "road",
+                            "elementType": "geometry.stroke",
+                            "stylers": [{ "color": "#212a37" }]
+                        },
+                        {
+                            "featureType": "road",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{ "color": "#9ca5b3" }]
+                        },
+                        {
+                            "featureType": "road.highway",
+                            "elementType": "geometry",
+                            "stylers": [{ "color": "#746855" }]
+                        },
+                        {
+                            "featureType": "road.highway",
+                            "elementType": "geometry.stroke",
+                            "stylers": [{ "color": "#1f2937" }]
+                        },
+                        {
+                            "featureType": "road.highway",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{ "color": "#f3d19c" }]
+                        },
+                        {
+                            "featureType": "transit",
+                            "elementType": "geometry",
+                            "stylers": [{ "color": "#2f3948" }]
+                        },
+                        {
+                            "featureType": "transit.station",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{ "color": "#d59563" }]
+                        },
+                        {
+                            "featureType": "water",
+                            "elementType": "geometry",
+                            "stylers": [{ "color": "#17263c" }]
+                        },
+                        {
+                            "featureType": "water",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{ "color": "#515c6d" }]
+                        },
+                        {
+                            "featureType": "water",
+                            "elementType": "labels.text.stroke",
+                            "stylers": [{ "color": "#17263c" }]
+                        }
+                    ]
+                });
 
-            mapRef.current.appendChild(iframe);
-            setMapLoaded(true);
+                setMapInstance(map);
+                setMapLoaded(true);
+            }
+        };
+
+        // Check if Google Maps is already loaded
+        // @ts-ignore
+        if (window.google && window.google.maps) {
+            initMap();
+        } else {
+            // Load Google Maps API
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBMoAvZUPltUYaThhyQSmpFnufPrWpE7kg&callback=initMap`;
+            script.async = true;
+            script.defer = true;
+            // @ts-ignore
+            window.initMap = initMap;
+            document.head.appendChild(script);
         }
-    }, []);
+    }, [mapInstance]);
+
+    // Update alert markers when alerts change
+    useEffect(() => {
+        if (!mapInstance) return;
+
+        // Clear existing markers
+        alertMarkers.forEach(marker => marker.setMap(null));
+
+        // Filter active alerts
+        const activeAlerts = alerts.filter(alert =>
+            activeFilters[alert.type as keyof typeof activeFilters] &&
+            !dismissedAlerts.has(alert.id as string)
+        );
+
+        // Create new markers
+        const newMarkers = activeAlerts.map(alert => {
+            const position = { lat: alert.location.lat, lng: alert.location.lng };
+
+            // Create custom marker icon based on alert type and severity
+            const markerIcon = {
+                // @ts-ignore
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: getSeverityColor(alert.severity),
+                fillOpacity: 0.8,
+                strokeColor: '#ffffff',
+                strokeWeight: 2,
+                scale: alert.severity === 'critical' ? 12 : alert.severity === 'high' ? 10 : 8,
+            };
+            // @ts-ignore
+            const marker = new google.maps.Marker({
+                position,
+                map: mapInstance,
+                icon: markerIcon,
+                title: `${alert.type.toUpperCase()} - ${alert.severity.toUpperCase()}`,
+                // @ts-ignore
+                animation: alert.severity === 'critical' ? google.maps.Animation.BOUNCE : undefined,
+            });
+
+            // Create info window
+            // language=HTML
+            const infoContent = `
+                <div style="color: #1f2937; font-family: 'Inter', sans-serif; min-width: 250px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
+                        <div style="width: 16px; height: 16px; border-radius: 50%; background: ${getSeverityColor(alert.severity)};"></div>
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">
+                            ${alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} Alert
+                        </h3>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="background: ${getSeverityColor(alert.severity)}20; color: ${getSeverityColor(alert.severity)}; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                            ${alert.severity.toUpperCase()}
+                        </span>
+                    </div>
+                    <p style="margin: 8px 0; font-size: 14px; line-height: 1.4; color: #374151;">
+                        ${alert.message}
+                    </p>
+                    <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
+                        <div><strong>Time:</strong> ${new Date(alert.timestamp).toLocaleString()}</div>
+                        <div><strong>Location:</strong> ${alert.location.lat.toFixed(4)}, ${alert.location.lng.toFixed(4)}</div>
+                        ${alert.affectedAreas ? `<div><strong>Areas:</strong> ${alert.affectedAreas.join(', ')}</div>` : ''}
+                    </div>
+                </div>
+            `;
+            // @ts-ignore
+            const infoWindow = new google.maps.InfoWindow({
+                content: infoContent,
+                maxWidth: 300
+            });
+
+            marker.addListener('click', () => {
+                infoWindow.open(mapInstance, marker);
+            });
+
+            return marker;
+        });
+
+        setAlertMarkers(newMarkers);
+    }, [alerts, activeFilters, dismissedAlerts, mapInstance]);
 
     const toggleFilter = (filterType: keyof typeof activeFilters) => {
         setActiveFilters(prev => ({
@@ -325,27 +508,33 @@ const GISPage: React.FC = () => {
                                     >
                                         <div className="alert-card-mobile-header">
                                             <div className="alert-card-mobile-icon" style={{ color: getAlertColor(alert.type) }}>
-                                                <Icon size={16} />
+                                                <Icon size={20} />
                                             </div>
                                             <div className="alert-card-mobile-info">
                                                 <h4 className="alert-card-mobile-title">
-                                                    {alert.type.toUpperCase()} - {alert.severity.toUpperCase()}
+                                                    {alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} Alert - {alert.severity.toUpperCase()}
                                                 </h4>
                                                 <span className="alert-card-mobile-time">
-                                                    {new Date(alert.timestamp).toLocaleTimeString()}
+                                                    {new Date(alert.timestamp).toLocaleString()}
                                                 </span>
                                             </div>
                                             <button
                                                 onClick={() => dismissAlert(alert.id)}
                                                 className="alert-card-mobile-close"
                                             >
-                                                <X size={14} />
+                                                <X size={16} />
                                             </button>
                                         </div>
                                         <p className="alert-card-mobile-message">{alert.message}</p>
+                                        <div className="alert-card-mobile-location">
+                                            <MapPin size={12} />
+                                            <span>
+                                                Location: {alert.location.lat.toFixed(4)}, {alert.location.lng.toFixed(4)}
+                                            </span>
+                                        </div>
                                         {alert.affectedAreas && (
                                             <div className="alert-card-mobile-areas">
-                                                <strong>Areas:</strong> {alert.affectedAreas.slice(0, 2).join(', ')}{alert.affectedAreas.length > 2 && '...'}
+                                                <strong>Affected Areas:</strong> {alert.affectedAreas.slice(0, 2).join(', ')}{alert.affectedAreas.length > 2 && '...'}
                                             </div>
                                         )}
                                     </div>
@@ -459,7 +648,7 @@ const GISPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Active Alerts Sidebar - Desktop Only */}
+                {/* Active Alerts Sidebar - Desktop Only - Redesigned to match mobile */}
                 {!isMobile && filteredAlerts.length > 0 && (
                     <div className="alerts-sidebar">
                         <div className="alerts-sidebar-header">
@@ -480,10 +669,10 @@ const GISPage: React.FC = () => {
                                             </div>
                                             <div className="alert-card-info">
                                                 <h4 className="alert-card-title">
-                                                    {alert.type.toUpperCase()} - {alert.severity.toUpperCase()}
+                                                    {alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} Alert - {alert.severity.toUpperCase()}
                                                 </h4>
                                                 <span className="alert-card-time">
-                                                    {new Date(alert.timestamp).toLocaleTimeString()}
+                                                    {new Date(alert.timestamp).toLocaleString()}
                                                 </span>
                                             </div>
                                             <button
@@ -497,7 +686,7 @@ const GISPage: React.FC = () => {
                                         <div className="alert-card-location">
                                             <MapPin size={14} />
                                             <span>
-                                                {alert.location.lat.toFixed(4)}, {alert.location.lng.toFixed(4)}
+                                                Location: {alert.location.lat.toFixed(4)}, {alert.location.lng.toFixed(4)}
                                             </span>
                                         </div>
                                         {alert.affectedAreas && (
@@ -519,30 +708,6 @@ const GISPage: React.FC = () => {
                         className="map"
                         id="map"
                     />
-
-                    {/* Alert markers overlay */}
-                    <div className="map-overlay">
-                        {filteredAlerts.map((alert) => {
-                            const Icon = getAlertIcon(alert.type);
-                            return (
-                                <div
-                                    key={alert.id}
-                                    className="alert-marker"
-                                    style={{
-                                        position: 'absolute',
-                                        // This is a simplified positioning - in a real app you'd convert lat/lng to screen coordinates
-                                        left: `${50 + (alert.location.lng - 121) * 500}%`,
-                                        top: `${50 - (alert.location.lat - 14.6) * 500}%`,
-                                        backgroundColor: getSeverityColor(alert.severity),
-                                        color: 'white'
-                                    }}
-                                    title={`${alert.type} - ${alert.severity}: ${alert.message}`}
-                                >
-                                    <Icon size={isMobile ? 14 : 16} />
-                                </div>
-                            );
-                        })}
-                    </div>
 
                     {/* Loading state */}
                     {!mapLoaded && (

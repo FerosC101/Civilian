@@ -689,28 +689,29 @@ body {
     transform: translateY(-1px);
 }
 
+/* Toned down filter colors */
 .filter-button.active.earthquake {
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    background: rgba(139, 92, 246, 0.3);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    color: #c4b5fd;
 }
 
 .filter-button.active.flood {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.3);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: #93c5fd;
 }
 
 .filter-button.active.fire {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.3);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
 }
 
 .filter-button.active.weather {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.3);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #6ee7b7;
 }
 
 .filter-label {
@@ -788,81 +789,88 @@ body {
     color: #10b981;
 }
 
-/* Active Alerts Sidebar - Desktop Only */
-.alerts-sidebar {
-    background: rgba(31, 41, 55, 0.8);
+/* Desktop Alerts Sidebar - Redesigned to be less intrusive */
+.alerts-sidebar-desktop {
+    background: rgba(31, 41, 55, 0.7);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(107, 114, 128, 0.1);
-    max-height: 200px;
-    overflow-y: auto;
     flex-shrink: 0;
     z-index: 20;
+    transition: all 0.3s ease;
 }
 
 .alerts-sidebar-header {
-    padding: 12px 16px;
+    padding: 8px 16px;
     border-bottom: 1px solid rgba(107, 114, 128, 0.1);
 }
 
-.alerts-sidebar-header h3 {
+.alerts-sidebar-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     color: #ffffff;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
 }
 
 .alerts-sidebar-content {
     padding: 8px 16px;
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
-.alert-card {
-    background: rgba(55, 65, 81, 0.5);
+.alert-card-desktop {
+    background: rgba(55, 65, 81, 0.6);
     border-radius: 8px;
-    padding: 10px;
+    padding: 12px;
     border-left: 3px solid transparent;
     transition: all 0.2s;
-}
-
-.alert-card:hover {
-    background: rgba(75, 85, 99, 0.5);
-    transform: translateY(-1px);
-}
-
-.alert-card-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
-}
-
-.alert-card-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
+    min-width: 280px;
     flex-shrink: 0;
 }
 
-.alert-card-info {
-    flex: 1;
+.alert-card-desktop:hover {
+    background: rgba(75, 85, 99, 0.6);
+    transform: translateY(-1px);
 }
 
-.alert-card-title {
+.alert-card-desktop-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.alert-card-desktop-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.alert-card-desktop-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.alert-card-desktop-title {
     color: #ffffff;
     font-size: 12px;
     font-weight: 600;
     margin-bottom: 2px;
+    line-height: 1.3;
 }
 
-.alert-card-time {
+.alert-card-desktop-time {
     color: #9ca3af;
     font-size: 10px;
 }
 
-.alert-card-close {
+.alert-card-desktop-close {
     background: none;
     border: none;
     color: #9ca3af;
@@ -873,31 +881,38 @@ body {
     flex-shrink: 0;
 }
 
-.alert-card-close:hover {
+.alert-card-desktop-close:hover {
     color: #ffffff;
     background: rgba(107, 114, 128, 0.2);
 }
 
-.alert-card-message {
+.alert-card-desktop-message {
     color: #d1d5db;
     font-size: 11px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     line-height: 1.4;
 }
 
-.alert-card-location {
+.alert-card-desktop-location {
     display: flex;
     align-items: center;
     gap: 4px;
     color: #9ca3af;
     font-size: 10px;
-    margin-bottom: 4px;
 }
 
-.alert-card-areas {
+.alerts-desktop-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #9ca3af;
-    font-size: 10px;
-    line-height: 1.3;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 12px;
+    background: rgba(55, 65, 81, 0.3);
+    border-radius: 8px;
+    min-width: 120px;
+    flex-shrink: 0;
 }
 
 /* Map Container - Maximized */
@@ -1036,7 +1051,7 @@ body {
     text-align: center;
 }
 
-/* Bottom Navigation (Mobile) */
+/* Bottom Navigation (Mobile) - Fixed to match HomePage */
 .bottom-nav {
     background: rgba(31, 41, 55, 0.95);
     backdrop-filter: blur(20px);
@@ -1089,6 +1104,24 @@ body {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(31, 41, 55, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(107, 114, 128, 0.5);
+    border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(156, 163, 175, 0.7);
 }
 
 /* Responsive Design */
@@ -1158,8 +1191,8 @@ body {
         min-width: 42px;
     }
 
-    /* Hide alerts sidebar on mobile */
-    .alerts-sidebar {
+    /* Hide desktop alerts sidebar on mobile */
+    .alerts-sidebar-desktop {
         display: none;
     }
 
@@ -1317,24 +1350,6 @@ body {
     contain: layout style paint;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-    width: 4px;
-}
-
-::-webkit-scrollbar-track {
-    background: rgba(31, 41, 55, 0.5);
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(107, 114, 128, 0.5);
-    border-radius: 2px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(156, 163, 175, 0.7);
-}
-
 /* Fix for touch devices */
 @media (hover: none) and (pointer: coarse) {
     .nav-item:hover {
@@ -1360,12 +1375,18 @@ body {
     }
 
     .alert-card:hover,
-    .alert-card-mobile:hover {
+    .alert-card-mobile:hover,
+    .alert-card-desktop:hover {
         transform: none;
     }
 
     .legend-item-compact:hover {
         transform: none;
+    }
+
+    .nav-button:hover {
+        transform: none;
+        background: none;
     }
 }
 
@@ -1433,6 +1454,7 @@ body {
 .mobile-logo-button:focus,
 .nav-item:focus,
 .alert-card-close:focus,
+.alert-card-desktop-close:focus,
 .alert-message-close:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
@@ -1450,7 +1472,7 @@ body {
     .bottom-nav,
     .alert-message,
     .filters-container,
-    .alerts-sidebar {
+    .alerts-sidebar-desktop {
         display: none;
     }
 

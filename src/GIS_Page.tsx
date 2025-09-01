@@ -314,6 +314,25 @@ const GISPage: React.FC = () => {
         }
     };
 
+    const handleNavigation = (page: string) => {
+        setSidebarOpen(false);
+        switch (page) {
+            case 'home':
+                window.location.href = '/home';
+                break;
+            case 'gis':
+                break;
+            case 'analytics':
+                window.location.href = '/dashboard';
+                break;
+            case 'settings':
+                console.log('Navigate to settings');
+                break;
+            default:
+                break;
+        }
+    };
+
     const filteredAlerts = alerts.filter(alert =>
         activeFilters[alert.type as keyof typeof activeFilters] &&
         !dismissedAlerts.has(alert.id as string)
@@ -648,55 +667,58 @@ const GISPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Active Alerts Sidebar - Desktop Only - Redesigned to match mobile */}
+                {/* Active Alerts Sidebar - Desktop Only - Redesigned to be less intrusive */}
                 {!isMobile && filteredAlerts.length > 0 && (
-                    <div className="alerts-sidebar">
+                    <div className="alerts-sidebar-desktop">
                         <div className="alerts-sidebar-header">
-                            <h3>Active Alerts ({filteredAlerts.length})</h3>
+                            <div className="alerts-sidebar-title">
+                                <AlertTriangle size={16} />
+                                <span>Active Alerts ({filteredAlerts.length})</span>
+                            </div>
                         </div>
                         <div className="alerts-sidebar-content">
-                            {filteredAlerts.map((alert) => {
+                            {filteredAlerts.slice(0, 2).map((alert) => {
                                 const Icon = getAlertIcon(alert.type);
                                 return (
                                     <div
                                         key={alert.id}
-                                        className="alert-card"
+                                        className="alert-card-desktop"
                                         style={{ borderLeftColor: getSeverityColor(alert.severity) }}
                                     >
-                                        <div className="alert-card-header">
-                                            <div className="alert-card-icon" style={{ color: getAlertColor(alert.type) }}>
-                                                <Icon size={20} />
+                                        <div className="alert-card-desktop-header">
+                                            <div className="alert-card-desktop-icon" style={{ color: getAlertColor(alert.type) }}>
+                                                <Icon size={16} />
                                             </div>
-                                            <div className="alert-card-info">
-                                                <h4 className="alert-card-title">
-                                                    {alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} Alert - {alert.severity.toUpperCase()}
+                                            <div className="alert-card-desktop-info">
+                                                <h4 className="alert-card-desktop-title">
+                                                    {alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} - {alert.severity.toUpperCase()}
                                                 </h4>
-                                                <span className="alert-card-time">
-                                                    {new Date(alert.timestamp).toLocaleString()}
+                                                <span className="alert-card-desktop-time">
+                                                    {new Date(alert.timestamp).toLocaleTimeString()}
                                                 </span>
                                             </div>
                                             <button
                                                 onClick={() => dismissAlert(alert.id)}
-                                                className="alert-card-close"
+                                                className="alert-card-desktop-close"
                                             >
-                                                <X size={16} />
+                                                <X size={14} />
                                             </button>
                                         </div>
-                                        <p className="alert-card-message">{alert.message}</p>
-                                        <div className="alert-card-location">
-                                            <MapPin size={14} />
+                                        <p className="alert-card-desktop-message">{alert.message}</p>
+                                        <div className="alert-card-desktop-location">
+                                            <MapPin size={12} />
                                             <span>
-                                                Location: {alert.location.lat.toFixed(4)}, {alert.location.lng.toFixed(4)}
+                                                {alert.location.lat.toFixed(4)}, {alert.location.lng.toFixed(4)}
                                             </span>
                                         </div>
-                                        {alert.affectedAreas && (
-                                            <div className="alert-card-areas">
-                                                <strong>Affected Areas:</strong> {alert.affectedAreas.join(', ')}
-                                            </div>
-                                        )}
                                     </div>
                                 );
                             })}
+                            {filteredAlerts.length > 2 && (
+                                <div className="alerts-desktop-more">
+                                    +{filteredAlerts.length - 2} more alerts
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
@@ -721,25 +743,25 @@ const GISPage: React.FC = () => {
                     )}
                 </div>
 
-                {/* Mobile bottom navigation */}
+                {/* Mobile bottom navigation - Fixed */}
                 {isMobile && (
-                    <div className="nav-items">
-                        <a href="/home" className="nav-item">
+                    <div className="bottom-nav">
+                        <button onClick={() => handleNavigation('home')} className="nav-button">
                             <Home size={18} />
                             <span className="nav-label">Dashboard</span>
-                        </a>
-                        <a href="/gis" className="nav-item active">
+                        </button>
+                        <button onClick={() => handleNavigation('gis')} className="nav-button active">
                             <MapPin size={18} />
                             <span className="nav-label">Map</span>
-                        </a>
-                        <a href="/dashboard" className="nav-item">
+                        </button>
+                        <button onClick={() => handleNavigation('analytics')} className="nav-button">
                             <BarChart3 size={18} />
                             <span className="nav-label">Analytics</span>
-                        </a>
-                        <a href="#" className="nav-item">
+                        </button>
+                        <button onClick={() => handleNavigation('settings')} className="nav-button">
                             <Settings size={18} />
                             <span className="nav-label">Settings</span>
-                        </a>
+                        </button>
                     </div>
                 )}
             </div>

@@ -6,6 +6,7 @@ import LoginPage from './LoginPage.tsx';
 import SignUpPage from './SignUpPage.tsx';
 import HomePage from './HomePage.tsx';
 import GIS_Page from './GIS_Page.tsx';
+import AdminPage from './AdminPage.tsx';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
@@ -17,6 +18,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/signup" element={<SignUpPage />} />
                 <Route path="/dashboard" element={<HomePage />} />
                 <Route path="/gis" element={<GIS_Page />} />
+                <Route path="/admin" element={<AdminPage/>} />
             </Routes>
         </Router>
     </StrictMode>,

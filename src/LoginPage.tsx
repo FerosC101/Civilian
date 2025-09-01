@@ -6,17 +6,62 @@ const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
+    // Built-in accounts
+    const ADMIN_CREDENTIALS = {
+        email: 'admin@civilian.gov',
+        password: 'CivilianAdmin2024!'
+    };
+
+    const USER_CREDENTIALS = {
+        email: 'user@civilian.gov',
+        password: 'CivilianUser2024!'
+    };
+
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email || !password) {
             alert('Please fill in all fields.');
             return;
         }
-        console.log('Login attempt:', { email, password });
-        // Handle login logic here
-        navigate('/dashboard'); // Navigate to dashboard or appropriate route
+
+        setIsLoading(true);
+
+        try {
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // Check credentials
+            if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+                // Admin login successful
+                localStorage.setItem('userRole', 'admin');
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('loginTime', new Date().toISOString());
+
+                console.log('Admin login successful');
+                navigate('/admin');
+
+            } else if (email === USER_CREDENTIALS.email && password === USER_CREDENTIALS.password) {
+                // Regular user login successful
+                localStorage.setItem('userRole', 'user');
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('loginTime', new Date().toISOString());
+
+                console.log('User login successful');
+                navigate('/gis');
+
+            } else {
+                // Invalid credentials
+                alert('Invalid email or password. Please try again.');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            alert('Login failed. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleSocialLogin = (provider: string) => {

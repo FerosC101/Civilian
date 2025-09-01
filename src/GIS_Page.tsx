@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+
 import { Filter, MapPin, AlertTriangle, Flame, Home, BarChart3, Settings, X, Zap, CloudRain, Bell, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAlerts, requestNotificationPermission, showNotification } from './services/alerts/userAlerts';
 import './GIS_Page.css';
 
 const GISPage: React.FC = () => {
+    const navigate = useNavigate();
     const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768);
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
     const [filtersExpanded, setFiltersExpanded] = useState<boolean>(false);
@@ -319,6 +321,7 @@ const GISPage: React.FC = () => {
         !dismissedAlerts.has(alert.id as string)
     );
 
+
     const FilterButton: React.FC<{
         type: keyof typeof activeFilters;
         icon: React.ComponentType<{ size: number }>;
@@ -360,22 +363,22 @@ const GISPage: React.FC = () => {
 
             <nav className="sidebar-nav">
                 <div className="nav-items">
-                    <a href="#" className="nav-item">
+                    <button onClick={() => handleNavigation('dashboard')} className="nav-item">
                         <Home size={20} />
                         <span className="nav-label">Dashboard</span>
-                    </a>
-                    <a href="#" className="nav-item active">
+                    </button>
+                    <button onClick={() => handleNavigation('gis')} className="nav-item active">
                         <MapPin size={20} />
                         <span className="nav-label">GIS Map</span>
-                    </a>
-                    <a href="#" className="nav-item">
+                    </button>
+                    <button onClick={() => handleNavigation('analytics')} className="nav-item">
                         <BarChart3 size={20} />
                         <span className="nav-label">Analytics</span>
-                    </a>
-                    <a href="#" className="nav-item">
+                    </button>
+                    <button onClick={() => handleNavigation('settings')} className="nav-item">
                         <Settings size={20} />
                         <span className="nav-label">Settings</span>
-                    </a>
+                    </button>
                 </div>
             </nav>
         </div>
@@ -724,6 +727,7 @@ const GISPage: React.FC = () => {
                 {/* Mobile bottom navigation */}
                 {isMobile && (
                     <div className="bottom-nav">
+
                         <button className="nav-button">
                             <Home size={18} />
                             <span>Home</span>

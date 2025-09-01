@@ -723,23 +723,23 @@ const GISPage: React.FC = () => {
 
                 {/* Mobile bottom navigation */}
                 {isMobile && (
-                    <div className="bottom-nav">
-                        <button className="nav-button">
+                    <div className="nav-items">
+                        <a href="/home" className="nav-item">
                             <Home size={18} />
-                            <span>Home</span>
-                        </button>
-                        <button className="nav-button active">
+                            <span className="nav-label">Dashboard</span>
+                        </a>
+                        <a href="/gis" className="nav-item active">
                             <MapPin size={18} />
-                            <span>Map</span>
-                        </button>
-                        <button className="nav-button">
+                            <span className="nav-label">Map</span>
+                        </a>
+                        <a href="/dashboard" className="nav-item">
                             <BarChart3 size={18} />
-                            <span>Stats</span>
-                        </button>
-                        <button className="nav-button">
+                            <span className="nav-label">Analytics</span>
+                        </a>
+                        <a href="#" className="nav-item">
                             <Settings size={18} />
-                            <span>Settings</span>
-                        </button>
+                            <span className="nav-label">Settings</span>
+                        </a>
                     </div>
                 )}
             </div>

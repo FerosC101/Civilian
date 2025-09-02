@@ -136,13 +136,12 @@ const Dashboard: React.FC = () => {
     setSidebarOpen(false);
     switch (page) {
       case 'home':
-        navigate('/');
+        navigate('/home');
         break;
       case 'gis':
         navigate('/gis');
         break;
       case 'analytics':
-        // Already on dashboard/analytics
         break;
       case 'settings':
         navigate('/admin');
@@ -191,7 +190,7 @@ const Dashboard: React.FC = () => {
               <MapPin size={18} />
               <span className="nav-label">Map</span>
             </button>
-            <button onClick={() => handleNavigation('analytics')} className="nav-item active">
+            <button onClick={() => handleNavigation('dashboard')} className="nav-item active">
               <BarChart3 size={18} />
               <span className="nav-label">Analytics</span>
             </button>

@@ -58,8 +58,8 @@ const HomePage: React.FC = () => {
             case 'gis':
                 navigate('/gis');
                 break;
-            case 'analytics':
-                console.log('dashboard');
+            case 'dashboard':
+                navigate('/dashboard');
                 break;
             case 'settings':
                 console.log('Navigate to settings');
@@ -100,7 +100,7 @@ const HomePage: React.FC = () => {
                         <MapPin size={20} />
                         <span className="nav-label">Map</span>
                     </button>
-                    <button onClick={() => handleNavigation('analytics')} className="nav-item">
+                    <button onClick={() => handleNavigation('dashboard')} className="nav-item">
                         <BarChart3 size={20} />
                         <span className="nav-label">Analytics</span>
                     </button>

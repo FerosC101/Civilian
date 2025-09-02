@@ -322,7 +322,7 @@ const GISPage: React.FC = () => {
                 break;
             case 'gis':
                 break;
-            case 'analytics':
+            case 'dashboard':
                 window.location.href = '/dashboard';
                 break;
             case 'settings':
@@ -754,7 +754,7 @@ const GISPage: React.FC = () => {
                             <MapPin size={18} />
                             <span className="nav-label">Map</span>
                         </button>
-                        <button onClick={() => handleNavigation('analytics')} className="nav-button">
+                        <button onClick={() => handleNavigation('dashboard')} className="nav-button">
                             <BarChart3 size={18} />
                             <span className="nav-label">Analytics</span>
                         </button>

@@ -73,12 +73,17 @@ const HomePage: React.FC = () => {
         <div className={`sidebar ${isMobile ? 'mobile' : 'desktop'} ${isMobile && sidebarOpen ? 'open' : ''}`}>
             <div className="sidebar-header">
                 <div className="logo-container">
-                    <img
-                        src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
-                        alt="CIVILIAN"
-                        className="logo"
-                    />
-                    <span className="logo-text">CIVILIAN</span>
+                    <button 
+                        onClick={() => navigate('/menu')}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+                    >
+                        <img
+                            src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
+                            alt="CIVILIAN"
+                            className="logo"
+                        />
+                        <span className="logo-text">CIVILIAN</span>
+                    </button>
                 </div>
                 {isMobile && (
                     <button
@@ -92,22 +97,22 @@ const HomePage: React.FC = () => {
 
             <nav className="sidebar-nav">
                 <div className="nav-items">
-                    <button onClick={() => handleNavigation('home')} className="nav-item active">
+                    <a href="/home" className="nav-item active">
                         <Home size={20} />
                         <span className="nav-label">Dashboard</span>
-                    </button>
-                    <button onClick={() => handleNavigation('gis')} className="nav-item">
+                    </a>
+                    <a href="/gis" className="nav-item">
                         <MapPin size={20} />
                         <span className="nav-label">Map</span>
-                    </button>
-                    <button onClick={() => handleNavigation('analytics')} className="nav-item">
+                    </a>
+                    <a href="/dashboard" className="nav-item">
                         <BarChart3 size={20} />
                         <span className="nav-label">Analytics</span>
-                    </button>
-                    <button onClick={() => handleNavigation('settings')} className="nav-item">
+                    </a>
+                    <a href="#" className="nav-item">
                         <Settings size={20} />
                         <span className="nav-label">Settings</span>
-                    </button>
+                    </a>
                 </div>
             </nav>
         </div>

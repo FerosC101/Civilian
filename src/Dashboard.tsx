@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import React, { useMemo, useState, useEffect } from 'react';
 import './Dashboard.css';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
   const [cityHealth] = useState(87);
@@ -36,6 +37,7 @@ const Dashboard: React.FC = () => {
   const iot = { active: 247, weak: 3, offline: 2 };
   const incidents = { resolved: 25, active: 3, critical: 1, daily: [3, 4, 5, 2, 6, 3, 2] };
   const perf = { response: '2.4s', accuracy: '99.8%', battery: '78%' };
+  const navigate = useNavigate();
 
   // Mock alerts for demonstration
   const mockAlerts = [
@@ -108,18 +110,20 @@ const Dashboard: React.FC = () => {
       <div className="dashboard-page">
         <aside className="dashboard-sidebar">
           <div className="sidebar-header">
-            <div className="logo-container">
+            <button 
+              onClick={() => navigate('/menu')} 
+              className="logo-container-button">
               <img
-                  src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
-                  alt="CIVILIAN"
-                  className="logo"
+                src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
+                alt="CIVILIAN"
+                className="logo"
               />
               <span className="logo-text">CIVILIAN</span>
-            </div>
+            </button>
           </div>
 
           <nav className="sidebar-nav">
-            <a href="/home" className="nav-item active">
+            <a href="/home" className="nav-item">
               <Home size={18} />
               <span className="nav-label">Dashboard</span>
             </a>
@@ -127,7 +131,7 @@ const Dashboard: React.FC = () => {
               <MapPin size={18} />
               <span className="nav-label">Map</span>
             </a>
-            <a href="/dashboard" className="nav-item">
+            <a href="/dashboard" className="nav-item active">
               <BarChart3 size={18} />
               <span className="nav-label">Analytics</span>
             </a>

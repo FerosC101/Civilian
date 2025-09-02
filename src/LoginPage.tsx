@@ -50,7 +50,7 @@ const LoginPage: React.FC = () => {
                 localStorage.setItem('loginTime', new Date().toISOString());
 
                 console.log('User login successful');
-                navigate('/gis');
+                navigate('/home');
 
             } else {
                 // Invalid credentials

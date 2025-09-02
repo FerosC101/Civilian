@@ -92,22 +92,22 @@ const HomePage: React.FC = () => {
 
             <nav className="sidebar-nav">
                 <div className="nav-items">
-                    <button onClick={() => handleNavigation('home')} className="nav-item active">
+                    <a onClick={() => navigate("/home")} className="nav-item active">
                         <Home size={20} />
                         <span className="nav-label">Dashboard</span>
-                    </button>
-                    <button onClick={() => handleNavigation('gis')} className="nav-item">
+                    </a>
+                    <a onClick={() => navigate("/gis")} className="nav-item ">
                         <MapPin size={20} />
                         <span className="nav-label">Map</span>
-                    </button>
-                    <button onClick={() => handleNavigation('dashboard')} className="nav-item">
+                    </a>
+                    <a onClick={() => navigate("/dashboard")} className="nav-item">
                         <BarChart3 size={20} />
                         <span className="nav-label">Analytics</span>
-                    </button>
-                    <button onClick={() => handleNavigation('settings')} className="nav-item">
+                    </a>
+                    <a onClick={() => navigate("/settings")} className="nav-item">
                         <Settings size={20} />
                         <span className="nav-label">Settings</span>
-                    </button>
+                    </a>
                 </div>
             </nav>
         </div>

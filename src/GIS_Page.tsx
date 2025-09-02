@@ -379,19 +379,19 @@ const GISPage: React.FC = () => {
 
             <nav className="sidebar-nav">
                 <div className="nav-items">
-                    <a href="/home" className="nav-item">
+                    <a onClick={() => navigate("/home")} className="nav-item">
                         <Home size={20} />
                         <span className="nav-label">Dashboard</span>
                     </a>
-                    <a href="/gis" className="nav-item active">
+                    <a onClick={() => navigate("/gis")} className="nav-item active">
                         <MapPin size={20} />
                         <span className="nav-label">Map</span>
                     </a>
-                    <a href="/dashboard" className="nav-item">
+                    <a onClick={() => navigate("/dashboard")} className="nav-item">
                         <BarChart3 size={20} />
                         <span className="nav-label">Analytics</span>
                     </a>
-                    <a href="#" className="nav-item">
+                    <a onClick={() => navigate("/settings")} className="nav-item">
                         <Settings size={20} />
                         <span className="nav-label">Settings</span>
                     </a>
@@ -400,6 +400,7 @@ const GISPage: React.FC = () => {
         </div>
     );
 
+    // @ts-ignore
     return (
         <div className="gis-page">
             <Sidebar />
@@ -746,15 +747,15 @@ const GISPage: React.FC = () => {
                 {/* Mobile bottom navigation - Fixed */}
                 {isMobile && (
                     <div className="bottom-nav">
-                        <button onClick={() => handleNavigation('home')} className="nav-button">
+                        <button onClick={() => navigate('/home')} className="nav-button">
                             <Home size={18} />
                             <span className="nav-label">Dashboard</span>
                         </button>
-                        <button onClick={() => handleNavigation('gis')} className="nav-button active">
+                        <button onClick={() => navigate('/gis')} className="nav-button active">
                             <MapPin size={18} />
                             <span className="nav-label">Map</span>
                         </button>
-                        <button onClick={() => handleNavigation('dashboard')} className="nav-button">
+                        <button onClick={() => navigate('/dashboard')} className="nav-button">
                             <BarChart3 size={18} />
                             <span className="nav-label">Analytics</span>
                         </button>

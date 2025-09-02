@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Filter, MapPin, AlertTriangle, Flame, Home, BarChart3, Settings, X, Zap, CloudRain, Bell, ChevronDown, ChevronUp } from 'lucide-react';
 import { useAlerts, requestNotificationPermission, showNotification } from './services/alerts/userAlerts';
 import './GIS_Page.css';
+import {useNavigate} from "react-router-dom";
 
 const GISPage: React.FC = () => {
+    const navigate = useNavigate();
     const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768);
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
     const [filtersExpanded, setFiltersExpanded] = useState<boolean>(false);
@@ -318,12 +320,10 @@ const GISPage: React.FC = () => {
         setSidebarOpen(false);
         switch (page) {
             case 'home':
-                window.location.href = '/home';
-                break;
-            case 'gis':
+                navigate('/home');
                 break;
             case 'dashboard':
-                window.location.href = '/dashboard';
+                navigate('/dashboard');
                 break;
             case 'settings':
                 console.log('Navigate to settings');

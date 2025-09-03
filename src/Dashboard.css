@@ -319,101 +319,6 @@ body, html, #root {
   font-weight: 500;
 }
 
-/* Alert Messages */
-.alert-message {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-radius: 0;
-  border-left: 4px solid;
-  flex-shrink: 0;
-  animation: slideInFromTop 0.3s ease-out;
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(107, 114, 128, 0.1);
-}
-
-@keyframes slideInFromTop {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.alert-message.error {
-  background: rgba(239, 68, 68, 0.1);
-  border-left-color: #ef4444;
-  color: #fca5a5;
-}
-
-.alert-message.warning {
-  background: rgba(245, 158, 11, 0.1);
-  border-left-color: #f59e0b;
-  color: #fbbf24;
-}
-
-.alert-message.info {
-  background: rgba(59, 130, 246, 0.1);
-  border-left-color: #3b82f6;
-  color: #93c5fd;
-}
-
-.alert-message-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-}
-
-.alert-message-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.alert-message-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.alert-message-title {
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.alert-message-description {
-  font-size: 11px;
-  opacity: 0.8;
-  line-height: 1.3;
-}
-
-.alert-message-close {
-  background: none;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s;
-  opacity: 0.7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.alert-message-close:hover {
-  opacity: 1;
-  background: rgba(255, 255, 255, 0.1);
-}
-
 /* Card Sections */
 .cards-section, .charts-section, .analytics-section, .performance-section {
   padding: 0 16px;
@@ -431,7 +336,7 @@ body, html, #root {
   background: rgba(55, 65, 81, 0.6);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(107, 114, 128, 0.2);
-  borderRadius: 12px;
+  border-radius: 12px;
   padding: 16px;
   border-left: 4px solid transparent;
   transition: all 0.2s;
@@ -536,7 +441,7 @@ body, html, #root {
 .charts-section {
   display: flex;
   gap: 16px;
-  min-height: 300px;
+  min-height: 320px;
 }
 
 .card {
@@ -563,11 +468,13 @@ body, html, #root {
   min-width: 0;
   border-left: 4px solid #3b82f6;
   background: rgba(59, 130, 246, 0.05);
+  min-height: 320px;
 }
 
 .small-card {
   flex: 1;
   min-width: 200px;
+  min-height: 320px;
 }
 
 .network-card {
@@ -630,141 +537,61 @@ body, html, #root {
   color: #d1d5db;
 }
 
-/* Chart Container - Enhanced for better stretching */
+/* Chart Container - Fixed sizing for Recharts */
 .chart-container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 250px;
-  overflow: hidden;
-}
-
-/* Sensor Chart - Enhanced layout and stretching - FIXED FOR MOBILE */
-.sensor-chart {
-  position: relative;
-  height: 350px;
-  border-radius: 10px;
-  overflow: visible;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent);
-  flex: 1;
-  display: flex;
-  border: 1px solid rgba(107, 114, 128, 0.2);
-  min-width: 750px;
-}
-
-.chart-y-axis {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 15px 0;
-  margin-right: 15px;
-  font-size: 10px;
-  color: rgba(148, 163, 184, 0.8);
-  font-weight: 600;
-  white-space: nowrap;
-  width: 30px;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  flex-shrink: 0;
-}
-
-.chart-svg-container {
-  flex: 1;
-  height: 100%;
-  position: relative;
-  min-width: 400px;
-  overflow: visible;
-}
-
-.sensor-chart svg {
   width: 100%;
-  height: 100%;
-  display: block;
+  height: 280px;
+  min-height: 280px;
+  position: relative;
   overflow: visible;
 }
 
-.line.water {
-  stroke: #3b82f6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.line.air {
-  stroke: #10b981;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.line.temp {
-  stroke: #fb923c;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.hover-dot.water {
-  fill: #3b82f6;
-}
-
-.hover-dot.air {
-  fill: #10b981;
-}
-
-.hover-dot.temp {
-  fill: #fb923c;
-}
-
-.chart-x-axis {
-  display: flex;
-  justify-content: space-between;
-  padding: 15px 0 0;
-  font-size: 10px;
-  color: rgba(148, 163, 184, 0.8);
-  margin-left: 30px;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-}
-
+/* Custom Tooltip for Recharts */
 .chart-tooltip {
-  position: absolute;
-  background: rgba(31, 41, 55, 0.95);
+  background: rgba(31, 41, 55, 0.95) !important;
   backdrop-filter: blur(20px);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 11px;
-  pointer-events: none;
-  z-index: 10;
-  border: 1px solid rgba(107, 114, 128, 0.2);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-radius: 8px !important;
+  padding: 10px 12px !important;
+  font-size: 11px !important;
+  border: 1px solid rgba(107, 114, 128, 0.2) !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 .tooltip-time {
-  font-weight: 700;
-  margin-bottom: 4px;
-  color: #fff;
+  font-weight: 700 !important;
+  margin-bottom: 4px !important;
+  color: #fff !important;
 }
 
 .tooltip-value {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 2px;
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin-bottom: 2px !important;
 }
 
 .value-label {
-  color: rgba(148, 163, 184, 0.8);
+  color: rgba(148, 163, 184, 0.8) !important;
 }
 
 .value-number {
-  font-weight: 700;
-  color: #fff;
+  font-weight: 700 !important;
+  color: #fff !important;
 }
 
-/* IoT Network - Redesigned for better balance - FIXED FOR MOBILE */
+/* IoT Network - Fixed mobile responsiveness */
 .network-visual {
   display: flex;
   flex-direction: column;
   gap: 16px;
   flex: 1;
-  overflow: visible; /* Changed from hidden to visible */
+  height: 100%;
+  min-height: 0;
+  overflow: visible;
 }
 
 .network-grid {
@@ -772,7 +599,7 @@ body, html, #root {
   flex-direction: column;
   gap: 10px;
   flex: 1;
-  min-height: 0; /* Added to prevent cutting off */
+  min-height: 0;
 }
 
 .network-status-card {
@@ -781,10 +608,11 @@ body, html, #root {
   padding: 12px;
   transition: all 0.2s ease;
   border: 1px solid rgba(107, 114, 128, 0.2);
-  min-height: 80px; /* Added minimum height */
+  min-height: 70px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .network-status-card:hover {
@@ -847,6 +675,7 @@ body, html, #root {
   display: flex;
   justify-content: space-between;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .summary-stat {
@@ -1266,31 +1095,63 @@ body, html, #root {
   background: rgba(255, 255, 255, 0.3);
 }
 
+/* Recharts responsive fixes - Critical for chart sizing */
+.recharts-responsive-container {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  overflow: visible !important;
+}
+
+.recharts-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.recharts-surface {
+  overflow: visible !important;
+}
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(255, 255, 255, 0.1) !important;
+}
+
+.recharts-cartesian-axis-tick-value {
+  fill: rgba(148, 163, 184, 0.8) !important;
+  font-size: 11px !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+}
+
+.recharts-tooltip-wrapper {
+  z-index: 1000 !important;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
   .charts-section {
     flex-direction: column;
+    min-height: auto;
   }
 
   .analytics-section {
     flex-direction: column;
+    min-height: auto;
   }
 
   .perf-grid {
     flex-direction: column;
   }
 
-  .sensor-chart {
-    min-width: auto;
-    overflow-x: auto;
+  .chart-container {
+    height: 260px;
+    min-height: 260px;
   }
 
-  .chart-svg-container {
-    min-width: 300px;
-  }
-
-  .chart-x-axis {
-    min-width: 300px;
+  .small-card {
+    min-height: 280px;
   }
 }
 
@@ -1372,23 +1233,31 @@ body, html, #root {
     padding: 14px;
   }
 
-  .sensor-chart {
-    height: 200px;
-    min-width: auto;
-    overflow-x: auto; /* Added for better mobile scrolling */
-  }
-
   .chart-container {
-    min-height: 200px;
+    height: 240px;
+    min-height: 240px;
   }
 
-  .chart-svg-container {
-    min-width: 250px;
-    overflow-x: auto; /* Added for better mobile scrolling */
+  .chart-card {
+    min-height: 280px;
   }
 
-  .chart-x-axis {
-    min-width: 250px;
+  .small-card {
+    min-height: 280px;
+  }
+
+  .network-visual {
+    height: 100%;
+    min-height: 220px;
+  }
+
+  .network-status-card {
+    min-height: 65px;
+    padding: 10px;
+  }
+
+  .network-value {
+    font-size: 18px;
   }
 
   .metric-selector {
@@ -1453,39 +1322,37 @@ body, html, #root {
     height: 6px;
   }
 
-  /* Mobile fixes for IoT Network section */
-  .network-visual {
-    overflow: visible; /* Ensure content is not hidden */
-  }
-
-  .network-grid {
-    min-height: auto; /* Allow natural height */
-  }
-
-  .network-status-card {
-    min-height: 70px; /* Slightly smaller minimum height for mobile */
+  .recharts-cartesian-axis-tick-value {
+    font-size: 9px !important;
   }
 }
 
-/* Mobile fixes for very small screens */
 @media (max-width: 640px) {
-  .sensor-chart {
-    height: 180px;
-    overflow-x: auto;
+  .chart-container {
+    height: 220px;
+    min-height: 220px;
   }
 
-  .chart-svg-container {
-    overflow-x: auto;
-    min-width: 350px;
+  .chart-card {
+    min-height: 260px;
   }
 
-  .chart-x-axis {
-    min-width: 350px;
+  .small-card {
+    min-height: 260px;
   }
 
   .network-visual {
-    min-height: 160px;
-    overflow: visible; /* Ensure content is not hidden */
+    min-height: 200px;
+    overflow: visible;
+  }
+
+  .network-status-card {
+    min-height: 60px;
+    padding: 8px;
+  }
+
+  .network-value {
+    font-size: 16px;
   }
 
   .prediction-visual-centered {
@@ -1520,6 +1387,23 @@ body, html, #root {
 
   .bar-item {
     min-width: 40px;
+  }
+
+  .recharts-cartesian-axis-tick-value {
+    font-size: 8px !important;
+  }
+
+  .chart-tooltip {
+    font-size: 10px !important;
+    padding: 8px 10px !important;
+  }
+
+  .tooltip-time {
+    font-size: 10px !important;
+  }
+
+  .tooltip-value {
+    font-size: 9px !important;
   }
 }
 
@@ -1562,17 +1446,30 @@ body, html, #root {
     padding: 10px;
   }
 
-  .sensor-chart {
-    height: 160px;
-    overflow-x: auto; /* Ensure horizontal scrolling works */
-  }
-
   .chart-container {
-    min-height: 160px;
+    height: 200px;
+    min-height: 200px;
   }
 
-  .chart-svg-container {
-    min-width: 300px; /* Adjusted for better mobile experience */
+  .chart-card {
+    min-height: 240px;
+  }
+
+  .small-card {
+    min-height: 240px;
+  }
+
+  .network-visual {
+    min-height: 180px;
+  }
+
+  .network-status-card {
+    min-height: 55px;
+    padding: 8px;
+  }
+
+  .network-value {
+    font-size: 14px;
   }
 
   .incidents-card,
@@ -1619,14 +1516,13 @@ body, html, #root {
     gap: 2px;
   }
 
-  /* Additional mobile fixes for IoT Network */
-  .network-status-card {
-    min-height: 65px; /* Adjust for very small screens */
-    padding: 10px;
+  .recharts-cartesian-axis-tick-value {
+    font-size: 7px !important;
   }
 
-  .network-value {
-    font-size: 18px; /* Slightly smaller text */
+  .chart-tooltip {
+    font-size: 9px !important;
+    padding: 6px 8px !important;
   }
 }
 
@@ -1634,11 +1530,7 @@ body, html, #root {
 .dashboard-page,
 .dashboard-content,
 .dashboard-sidebar,
-.dashboard-main,
-.sensor-chart,
-.chart-svg-container,
-.incidents-chart,
-.timeline-horizontal {
+.dashboard-main {
   will-change: transform;
   contain: layout style paint;
 }
@@ -1685,8 +1577,7 @@ body, html, #root {
 .metric-btn:focus,
 .nav-button:focus,
 .mobile-logo-button:focus,
-.close-button:focus,
-.alert-message-close:focus {
+.close-button:focus {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
@@ -1694,6 +1585,6 @@ body, html, #root {
 /* Dark theme optimizations */
 @media (prefers-color-scheme: dark) {
   .chart-tooltip {
-    background: rgba(31, 41, 55, 0.95);
+    background: rgba(31, 41, 55, 0.95) !important;
   }
 }

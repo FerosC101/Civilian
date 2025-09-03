@@ -14,8 +14,18 @@ import {
   Wifi,
   X
 } from 'lucide-react';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
@@ -24,42 +34,70 @@ const Dashboard: React.FC = () => {
   const [sensorsOnline] = useState(243);
   const [riskLevel] = useState<'LOW' | 'MED' | 'HIGH'>('LOW');
   const [currentTime, setCurrentTime] = useState<string>(new Date().toLocaleTimeString());
-  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
-  const water = [30, 32, 31, 33, 35, 34, 36];
-  const air = [60, 58, 61, 62, 64, 63, 65];
-  const temp = [26, 27, 27, 28, 29, 28, 30];
-  const labels = ['1h', '2h', '3h', '4h', '5h', '6h', 'Now'];
+  // Real-time sensor data with more realistic values
+  const sensorData = [
+    {
+      time: '6h ago',
+      timeLabel: '6h',
+      waterLevel: 28.5,
+      airQuality: 72.3,
+      temperature: 24.2
+    },
+    {
+      time: '5h ago',
+      timeLabel: '5h',
+      waterLevel: 29.8,
+      airQuality: 68.7,
+      temperature: 25.1
+    },
+    {
+      time: '4h ago',
+      timeLabel: '4h',
+      waterLevel: 31.2,
+      airQuality: 74.1,
+      temperature: 26.3
+    },
+    {
+      time: '3h ago',
+      timeLabel: '3h',
+      waterLevel: 33.6,
+      airQuality: 69.5,
+      temperature: 27.8
+    },
+    {
+      time: '2h ago',
+      timeLabel: '2h',
+      waterLevel: 35.4,
+      airQuality: 71.9,
+      temperature: 28.4
+    },
+    {
+      time: '1h ago',
+      timeLabel: '1h',
+      waterLevel: 34.7,
+      airQuality: 76.2,
+      temperature: 29.1
+    },
+    {
+      time: 'Now',
+      timeLabel: 'Now',
+      waterLevel: 36.8,
+      airQuality: 78.6,
+      temperature: 29.7
+    }
+  ];
 
-  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
-  const [selectedMetrics, setSelectedMetrics] = useState<Set<'water' | 'air' | 'temp'>>(new Set(['water']));
+  const [selectedMetrics, setSelectedMetrics] = useState<Set<'waterLevel' | 'airQuality' | 'temperature'>>(
+      new Set(['waterLevel'])
+  );
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
 
   const iot = { active: 247, weak: 3, offline: 2 };
   const incidents = { resolved: 25, active: 3, critical: 1, daily: [3, 4, 5, 2, 6, 3, 2] };
   const perf = { response: '2.4s', accuracy: '99.8%', battery: '78%' };
-
-  // Mock alerts for demonstration
-  const mockAlerts = [
-    {
-      id: 'alert-1',
-      type: 'warning',
-      title: 'High Sensor Activity',
-      message: 'Multiple sensors reporting elevated readings in Zone 3',
-      timestamp: new Date().toISOString(),
-    },
-    {
-      id: 'alert-2',
-      type: 'info',
-      title: 'System Update',
-      message: 'Scheduled maintenance completed successfully',
-      timestamp: new Date(Date.now() - 300000).toISOString(),
-    }
-  ];
-
-  const activeAlerts = mockAlerts.filter(alert => !dismissedAlerts.has(alert.id));
 
   // Update clock every second
   useEffect(() => {
@@ -92,33 +130,7 @@ const Dashboard: React.FC = () => {
     { time: '48h', risk: 'LOW' },
   ];
 
-  const seriesPoints = useMemo(() => {
-    const all = water.concat(air).concat(temp);
-    const min = Math.min(...all);
-    const max = Math.max(...all);
-    const toPoints = (arr: number[]) =>
-        arr.map((v, i) => {
-          const x = (i / (arr.length - 1)) * 100;
-          const y = 100 - ((v - min) / (max - min || 1)) * 100;
-          return { x, y, value: v };
-        });
-    return { water: toPoints(water), air: toPoints(air), temp: toPoints(temp) };
-  }, [water, air, temp]);
-
-  const dismissAlert = (alertId: string) => {
-    setDismissedAlerts(prev => new Set([...prev, alertId]));
-  };
-
-  const getAlertIcon = (type: string) => {
-    switch (type) {
-      case 'warning': return AlertCircle;
-      case 'error': return AlertCircle;
-      case 'info': return CheckCircle;
-      default: return AlertCircle;
-    }
-  };
-
-  const toggleMetric = (metric: 'water' | 'air' | 'temp') => {
+  const toggleMetric = (metric: 'waterLevel' | 'airQuality' | 'temperature') => {
     setSelectedMetrics(prev => {
       const newSet = new Set(prev);
       if (newSet.has(metric)) {
@@ -151,12 +163,50 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const getMetricColor = (metric: 'water' | 'air' | 'temp') => {
+  const getMetricColor = (metric: 'waterLevel' | 'airQuality' | 'temperature') => {
     switch (metric) {
-      case 'water': return '#3b82f6';
-      case 'air': return '#10b981';
-      case 'temp': return '#fb923c';
+      case 'waterLevel': return '#3b82f6';
+      case 'airQuality': return '#10b981';
+      case 'temperature': return '#fb923c';
     }
+  };
+
+  const getMetricName = (metric: 'waterLevel' | 'airQuality' | 'temperature') => {
+    switch (metric) {
+      case 'waterLevel': return 'Water Level';
+      case 'airQuality': return 'Air Quality';
+      case 'temperature': return 'Temperature';
+    }
+  };
+
+  const getMetricUnit = (metric: 'waterLevel' | 'airQuality' | 'temperature') => {
+    switch (metric) {
+      case 'waterLevel': return 'cm';
+      case 'airQuality': return 'AQI';
+      case 'temperature': return '°C';
+    }
+  };
+
+  // Custom tooltip for the chart
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+          <div className="chart-tooltip">
+            <div className="tooltip-time">{label}</div>
+            {payload.map((entry: any, index: number) => (
+                <div key={index} className="tooltip-value">
+              <span className="value-label" style={{ color: entry.color }}>
+                {entry.name}:
+              </span>
+                  <span className="value-number">
+                {entry.value} {getMetricUnit(entry.dataKey)}
+              </span>
+                </div>
+            ))}
+          </div>
+      );
+    }
+    return null;
   };
 
   const Sidebar: React.FC = () => (
@@ -241,37 +291,13 @@ const Dashboard: React.FC = () => {
             <div className="top-right">
               <div className="header-alerts">
                 <Bell size={14} />
-                <span className="alerts-count">{activeAlerts.length}</span>
+                <span className="alerts-count">0</span>
               </div>
               <div className="clock">
                 {isMobile ? currentTime.slice(0, 5) : currentTime}
               </div>
             </div>
           </header>
-
-          {/* Alert Messages */}
-          {activeAlerts.map((alert) => {
-            const Icon = getAlertIcon(alert.type);
-            return (
-                <div key={alert.id} className={`alert-message ${alert.type}`}>
-                  <div className="alert-message-content">
-                    <div className="alert-message-icon">
-                      <Icon size={16} />
-                    </div>
-                    <div className="alert-message-text">
-                      <span className="alert-message-title">{alert.title}</span>
-                      <span className="alert-message-description">{alert.message}</span>
-                    </div>
-                  </div>
-                  <button
-                      onClick={() => dismissAlert(alert.id)}
-                      className="alert-message-close"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-            );
-          })}
 
           <div className="dashboard-content">
             {/* Summary Cards */}
@@ -326,20 +352,20 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div className="metric-selector">
                     <button
-                        className={`metric-btn ${selectedMetrics.has('water') ? 'active' : ''}`}
-                        onClick={() => toggleMetric('water')}
+                        className={`metric-btn ${selectedMetrics.has('waterLevel') ? 'active' : ''}`}
+                        onClick={() => toggleMetric('waterLevel')}
                     >
                       Water Level
                     </button>
                     <button
-                        className={`metric-btn ${selectedMetrics.has('air') ? 'active' : ''}`}
-                        onClick={() => toggleMetric('air')}
+                        className={`metric-btn ${selectedMetrics.has('airQuality') ? 'active' : ''}`}
+                        onClick={() => toggleMetric('airQuality')}
                     >
                       Air Quality
                     </button>
                     <button
-                        className={`metric-btn ${selectedMetrics.has('temp') ? 'active' : ''}`}
-                        onClick={() => toggleMetric('temp')}
+                        className={`metric-btn ${selectedMetrics.has('temperature') ? 'active' : ''}`}
+                        onClick={() => toggleMetric('temperature')}
                     >
                       Temperature
                     </button>
@@ -347,135 +373,65 @@ const Dashboard: React.FC = () => {
                 </div>
 
                 <div className="chart-container">
-                  <div
-                      className="sensor-chart"
-                      onMouseLeave={() => setHoverIndex(null)}
-                      role="img"
-                      aria-label="sensor chart"
-                  >
-                    <div className="chart-y-axis">
-                      <span>100</span>
-                      <span>75</span>
-                      <span>50</span>
-                      <span>25</span>
-                      <span>0</span>
-                    </div>
-                    <div className="chart-svg-container">
-                      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-                        {/* Grid lines */}
-                        <line x1="0" y1="0" x2="100" y2="0" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-                        <line x1="0" y1="25" x2="100" y2="25" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-                        <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-                        <line x1="0" y1="75" x2="100" y2="75" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
-                        <line x1="0" y1="100" x2="100" y2="100" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                        data={sensorData}
+                        margin={{
+                          top: 20,
+                          right: 30,
+                          left: 20,
+                          bottom: 20,
+                        }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                      <XAxis
+                          dataKey="timeLabel"
+                          stroke="rgba(148, 163, 184, 0.8)"
+                          fontSize={11}
+                          fontFamily="Inter, system-ui, -apple-system, sans-serif"
+                      />
+                      <YAxis
+                          stroke="rgba(148, 163, 184, 0.8)"
+                          fontSize={11}
+                          fontFamily="Inter, system-ui, -apple-system, sans-serif"
+                      />
+                      <Tooltip content={<CustomTooltip />} />
 
-                        {/* Area fills and lines for each selected metric */}
-                        <defs>
-                          <linearGradient id="waterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3" />
-                            <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.05" />
-                          </linearGradient>
-                          <linearGradient id="airGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
-                            <stop offset="100%" stopColor="#10b981" stopOpacity="0.05" />
-                          </linearGradient>
-                          <linearGradient id="tempGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#fb923c" stopOpacity="0.3" />
-                            <stop offset="100%" stopColor="#fb923c" stopOpacity="0.05" />
-                          </linearGradient>
-                        </defs>
-
-                        {/* Render all selected metrics */}
-                        {Array.from(selectedMetrics).map((metric) => (
-                            <g key={metric}>
-                              <polygon
-                                  className={`area ${metric}`}
-                                  points={`0,100 ${seriesPoints[metric].map(p => `${p.x},${p.y}`).join(' ')} 100,100`}
-                                  fill={`url(#${metric}Gradient)`}
-                              />
-                              <polyline
-                                  className={`line ${metric}`}
-                                  points={seriesPoints[metric].map(p => `${p.x},${p.y}`).join(' ')}
-                                  fill="none"
-                                  stroke={getMetricColor(metric)}
-                                  strokeWidth={3}
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                              />
-                            </g>
-                        ))}
-
-                        {/* Hover indicator line */}
-                        {hoverIndex !== null && (
-                            <line
-                                x1={seriesPoints.water[hoverIndex].x}
-                                y1="0"
-                                x2={seriesPoints.water[hoverIndex].x}
-                                y2="100"
-                                stroke="rgba(255,255,255,0.3)"
-                                strokeWidth="1"
-                                strokeDasharray="2,2"
-                            />
-                        )}
-
-                        {/* Hover dots for all selected metrics */}
-                        {hoverIndex !== null && Array.from(selectedMetrics).map((metric) => (
-                            <circle
-                                key={metric}
-                                cx={seriesPoints[metric][hoverIndex].x}
-                                cy={seriesPoints[metric][hoverIndex].y}
-                                r={4}
-                                fill={getMetricColor(metric)}
-                                stroke="#fff"
-                                strokeWidth="2"
-                            />
-                        ))}
-
-                        {/* Invisible hit areas for hover - Make them wider */}
-                        {seriesPoints.water.map((p, idx) => (
-                            <rect
-                                key={idx}
-                                x={p.x - 12}
-                                y={0}
-                                width="24"
-                                height={100}
-                                fill="transparent"
-                                onMouseEnter={() => setHoverIndex(idx)}
-                                style={{ cursor: 'crosshair' }}
-                            />
-                        ))}
-                      </svg>
-                    </div>
-
-                    <div className="chart-x-axis">
-                      {labels.map((label, i) => (
-                          <span key={i}>{label}</span>
-                      ))}
-                    </div>
-
-                    {hoverIndex !== null && (
-                        <div
-                            className="chart-tooltip"
-                            style={{
-                              left: `${25 + (seriesPoints.water[hoverIndex].x * 0.75)}%`,
-                              top: '20px'
-                            }}
-                        >
-                          <div className="tooltip-time">{labels[hoverIndex] ?? labels[labels.length - 1]}</div>
-                          {Array.from(selectedMetrics).map((metric) => (
-                              <div key={metric} className="tooltip-value">
-                          <span className="value-label" style={{ color: getMetricColor(metric) }}>
-                            {metric === 'water' ? 'Water' : metric === 'air' ? 'Air' : 'Temp'}:
-                          </span>
-                                <span className="value-number">
-                            {seriesPoints[metric][hoverIndex].value}
-                                  {metric === 'temp' ? '°C' : ''}
-                          </span>
-                              </div>
-                          ))}
-                        </div>
-                    )}
-                  </div>
+                      {selectedMetrics.has('waterLevel') && (
+                          <Line
+                              type="monotone"
+                              dataKey="waterLevel"
+                              stroke="#3b82f6"
+                              strokeWidth={3}
+                              dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+                              activeDot={{ r: 6, strokeWidth: 2 }}
+                              name="Water Level"
+                          />
+                      )}
+                      {selectedMetrics.has('airQuality') && (
+                          <Line
+                              type="monotone"
+                              dataKey="airQuality"
+                              stroke="#10b981"
+                              strokeWidth={3}
+                              dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+                              activeDot={{ r: 6, strokeWidth: 2 }}
+                              name="Air Quality"
+                          />
+                      )}
+                      {selectedMetrics.has('temperature') && (
+                          <Line
+                              type="monotone"
+                              dataKey="temperature"
+                              stroke="#fb923c"
+                              strokeWidth={3}
+                              dot={{ fill: '#fb923c', strokeWidth: 2, r: 4 }}
+                              activeDot={{ r: 6, strokeWidth: 2 }}
+                              name="Temperature"
+                          />
+                      )}
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
 

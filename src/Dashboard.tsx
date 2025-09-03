@@ -14,7 +14,7 @@ import {
   Wifi,
   X
 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Chart as ChartJS,
@@ -287,23 +287,6 @@ const Dashboard: React.FC = () => {
         break;
     }
   };
-  // @ts-ignore
-  const getMetricColor = (metric: 'waterLevel' | 'airQuality' | 'temperature') => {
-    switch (metric) {
-      case 'waterLevel': return '#3b82f6';
-      case 'airQuality': return '#10b981';
-      case 'temperature': return '#fb923c';
-    }
-  };
-  // @ts-ignore
-  const getMetricName = (metric: 'waterLevel' | 'airQuality' | 'temperature') => {
-    switch (metric) {
-      case 'waterLevel': return 'Water Level';
-      case 'airQuality': return 'Air Quality';
-      case 'temperature': return 'Temperature';
-    }
-  };
-
   const getMetricUnit = (metric: 'waterLevel' | 'airQuality' | 'temperature') => {
     switch (metric) {
       case 'waterLevel': return 'cm';

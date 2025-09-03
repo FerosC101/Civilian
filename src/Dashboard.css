@@ -92,7 +92,7 @@ body, html, #root {
 .close-button {
   background: none;
   border: none;
-  color: #9ca3af;
+  color: '9ca3af';
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
@@ -720,7 +720,7 @@ body, html, #root {
 
 .bar {
   width: 100%;
-  background: linear-gradient(to top, #f59e0b, #fbbf24);
+  background: linear-gradient(to top, #f59e0b, 'fbbf24');
   border-radius: 6px 6px 0 0;
   position: relative;
   transition: all 0.3s ease;
@@ -1078,7 +1078,7 @@ body, html, #root {
   border-radius: 2px;
 }
 
-/* Responsive Design */
+/* Responsive Design - Improved for mobile */
 @media (max-width: 1200px) {
   .charts-section {
     flex-direction: column;
@@ -1104,7 +1104,7 @@ body, html, #root {
   }
 
   .network-visual {
-    min-height: 200px;
+    min-height: 220px;
     overflow: visible;
   }
 
@@ -1192,20 +1192,20 @@ body, html, #root {
   }
 
   .chart-container {
-    height: 200px;
-    min-height: 200px;
+    height: 220px;
+    min-height: 220px;
   }
 
   .chart-card {
-    min-height: 240px;
+    min-height: 260px;
   }
 
   .small-card {
-    min-height: 240px;
+    min-height: 260px;
   }
 
   .network-visual {
-    min-height: 180px;
+    min-height: 200px;
   }
 
   .network-status-card {
@@ -1219,7 +1219,7 @@ body, html, #root {
 
   .incidents-card,
   .prediction-card {
-    min-height: 160px;
+    min-height: 180px;
   }
 
   .timeline-horizontal {
@@ -1418,7 +1418,7 @@ body, html, #root {
 
   .network-visual {
     height: 100%;
-    min-height: 220px;
+    min-height: 240px;
   }
 
   .network-status-card {
@@ -1461,7 +1461,7 @@ body, html, #root {
 
   .incidents-card,
   .prediction-card {
-    min-height: 200px;
+    min-height: 220px;
   }
 
   .timeline-horizontal {

@@ -137,6 +137,7 @@ body {
     transition: all 0.2s;
     position: relative;
     overflow: hidden;
+    cursor: pointer;
 }
 
 .nav-item::before {
@@ -409,6 +410,103 @@ body {
     animation: spin 1s ease-in-out infinite;
 }
 
+/* Evacuation Banner Styles */
+.evacuation-banner {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.15) 100%);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+    border-left: 4px solid #ef4444;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 20;
+    animation: slideInFromTop 0.3s ease-out;
+}
+
+.evacuation-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.evacuation-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(239, 68, 68, 0.2);
+    border: 2px solid rgba(239, 68, 68, 0.3);
+    border-radius: 50%;
+    color: #fca5a5;
+    flex-shrink: 0;
+    animation: pulse-evacuation 2s infinite;
+}
+
+@keyframes pulse-evacuation {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+.evacuation-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.evacuation-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fca5a5;
+    line-height: 1.3;
+}
+
+.evacuation-description {
+    font-size: 12px;
+    color: #f87171;
+    opacity: 0.9;
+    line-height: 1.3;
+}
+
+.evacuation-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    border: none;
+    color: #ffffff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    flex-shrink: 0;
+    font-family: inherit;
+}
+
+.evacuation-button:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.evacuation-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
 /* Mobile Alerts Toggle */
 .alerts-mobile-toggle {
     background: rgba(31, 41, 55, 0.8);
@@ -547,15 +645,6 @@ body {
     font-size: 10px;
     margin-bottom: 6px;
     line-height: 1.4;
-}
-
-.alert-card-mobile-location {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    color: #9ca3af;
-    font-size: 10px;
-    margin-bottom: 4px;
 }
 
 .alert-card-mobile-areas {
@@ -789,6 +878,10 @@ body {
     color: #10b981;
 }
 
+.legend-icon.evacuation {
+    color: #10b981;
+}
+
 /* Desktop Alerts Sidebar - Redesigned to be less intrusive */
 .alerts-sidebar-desktop {
     background: rgba(31, 41, 55, 0.7);
@@ -891,14 +984,6 @@ body {
     font-size: 11px;
     margin-bottom: 8px;
     line-height: 1.4;
-}
-
-.alert-card-desktop-location {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    color: #9ca3af;
-    font-size: 10px;
 }
 
 .alerts-desktop-more {
@@ -1148,6 +1233,28 @@ body {
         padding: 10px 12px;
     }
 
+    .evacuation-banner {
+        padding: 10px 12px;
+    }
+
+    .evacuation-button {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .evacuation-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .evacuation-title {
+        font-size: 13px;
+    }
+
+    .evacuation-description {
+        font-size: 11px;
+    }
+
     .alert-message-title {
         font-size: 12px;
     }
@@ -1229,11 +1336,6 @@ body {
         margin-bottom: 8px;
     }
 
-    .alert-card-mobile-location {
-        font-size: 10px;
-        margin-bottom: 6px;
-    }
-
     .alert-card-mobile-areas {
         font-size: 10px;
     }
@@ -1260,6 +1362,32 @@ body {
 
     .alert-message {
         padding: 8px 10px;
+    }
+
+    .evacuation-banner {
+        padding: 8px 10px;
+    }
+
+    .evacuation-content {
+        gap: 10px;
+    }
+
+    .evacuation-button {
+        padding: 8px 10px;
+        font-size: 11px;
+    }
+
+    .evacuation-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .evacuation-title {
+        font-size: 12px;
+    }
+
+    .evacuation-description {
+        font-size: 10px;
     }
 
     .alert-message-title {
@@ -1334,10 +1462,6 @@ body {
         font-size: 10px;
     }
 
-    .alert-card-mobile-location {
-        font-size: 9px;
-    }
-
     .alert-card-mobile-areas {
         font-size: 9px;
     }
@@ -1372,6 +1496,12 @@ body {
     .filters-toggle-button:hover,
     .alerts-toggle-button:hover {
         transform: none;
+    }
+
+    .evacuation-button:hover {
+        transform: none;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
 
     .alert-card:hover,
@@ -1444,6 +1574,14 @@ body {
     .pulse-marker {
         animation: none;
     }
+
+    .pulse-evacuation {
+        animation: none;
+    }
+
+    .evacuation-icon {
+        animation: none;
+    }
 }
 
 /* Focus styles for keyboard navigation */
@@ -1455,7 +1593,8 @@ body {
 .nav-item:focus,
 .alert-card-close:focus,
 .alert-card-desktop-close:focus,
-.alert-message-close:focus {
+.alert-message-close:focus,
+.evacuation-button:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
 }
@@ -1472,7 +1611,8 @@ body {
     .bottom-nav,
     .alert-message,
     .filters-container,
-    .alerts-sidebar-desktop {
+    .alerts-sidebar-desktop,
+    .evacuation-banner {
         display: none;
     }
 

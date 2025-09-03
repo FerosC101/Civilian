@@ -17,16 +17,30 @@ import {
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
   Tooltip,
   Legend,
-  ResponsiveContainer
-} from 'recharts';
+  Filler,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
 import './Dashboard.css';
+
+// Register Chart.js components
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+    Filler
+);
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -91,13 +105,124 @@ const Dashboard: React.FC = () => {
   ];
 
   const [selectedMetrics, setSelectedMetrics] = useState<Set<'waterLevel' | 'airQuality' | 'temperature'>>(
-      new Set(['waterLevel'])
+      new Set(['waterLevel', 'airQuality', 'temperature'])
   );
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
 
   const iot = { active: 247, weak: 3, offline: 2 };
   const incidents = { resolved: 25, active: 3, critical: 1, daily: [3, 4, 5, 2, 6, 3, 2] };
   const perf = { response: '2.4s', accuracy: '99.8%', battery: '78%' };
+
+  // Chart options
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        mode: 'index' as const,
+        intersect: false,
+        backgroundColor: 'rgba(31, 41, 55, 0.95)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: 'rgba(107, 114, 128, 0.2)',
+        borderWidth: 1,
+        padding: 12,
+        boxPadding: 6,
+        callbacks: {
+          label: function(context: any) {
+            let label = context.dataset.label || '';
+            if (label) {
+              label += ': ';
+            }
+            if (context.parsed.y !== null) {
+              label += context.parsed.y + ' ' + getMetricUnit(context.dataset.label as 'waterLevel' | 'airQuality' | 'temperature');
+            }
+            return label;
+          }
+        }
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          color: 'rgba(255, 255, 255, 0.1)',
+        },
+        ticks: {
+          color: 'rgba(148, 163, 184, 0.8)',
+          font: {
+            size: 11,
+            family: 'Inter, system-ui, -apple-system, sans-serif'
+          }
+        }
+      },
+      y: {
+        grid: {
+          color: 'rgba(255, 255, 255, 0.1)',
+        },
+        ticks: {
+          color: 'rgba(148, 163, 184, 0.8)',
+          font: {
+            size: 11,
+            family: 'Inter, system-ui, -apple-system, sans-serif'
+          }
+        }
+      },
+    },
+    interaction: {
+      mode: 'nearest' as const,
+      axis: 'x' as const,
+      intersect: false,
+    },
+  };
+
+  // Chart data
+  const chartData = {
+    labels: sensorData.map(data => data.timeLabel),
+    datasets: [
+      {
+        label: 'Water Level',
+        data: selectedMetrics.has('waterLevel') ? sensorData.map(data => data.waterLevel) : [],
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#3b82f6',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      },
+      {
+        label: 'Air Quality',
+        data: selectedMetrics.has('airQuality') ? sensorData.map(data => data.airQuality) : [],
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#10b981',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      },
+      {
+        label: 'Temperature',
+        data: selectedMetrics.has('temperature') ? sensorData.map(data => data.temperature) : [],
+        borderColor: '#fb923c',
+        backgroundColor: 'rgba(251, 146, 60, 0.1)',
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#fb923c',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      },
+    ],
+  };
 
   // Update clock every second
   useEffect(() => {
@@ -162,7 +287,7 @@ const Dashboard: React.FC = () => {
         break;
     }
   };
-
+  // @ts-ignore
   const getMetricColor = (metric: 'waterLevel' | 'airQuality' | 'temperature') => {
     switch (metric) {
       case 'waterLevel': return '#3b82f6';
@@ -170,7 +295,7 @@ const Dashboard: React.FC = () => {
       case 'temperature': return '#fb923c';
     }
   };
-
+  // @ts-ignore
   const getMetricName = (metric: 'waterLevel' | 'airQuality' | 'temperature') => {
     switch (metric) {
       case 'waterLevel': return 'Water Level';
@@ -185,28 +310,6 @@ const Dashboard: React.FC = () => {
       case 'airQuality': return 'AQI';
       case 'temperature': return '°C';
     }
-  };
-
-  // Custom tooltip for the chart
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-          <div className="chart-tooltip">
-            <div className="tooltip-time">{label}</div>
-            {payload.map((entry: any, index: number) => (
-                <div key={index} className="tooltip-value">
-              <span className="value-label" style={{ color: entry.color }}>
-                {entry.name}:
-              </span>
-                  <span className="value-number">
-                {entry.value} {getMetricUnit(entry.dataKey)}
-              </span>
-                </div>
-            ))}
-          </div>
-      );
-    }
-    return null;
   };
 
   const Sidebar: React.FC = () => (
@@ -373,65 +476,7 @@ const Dashboard: React.FC = () => {
                 </div>
 
                 <div className="chart-container">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                        data={sensorData}
-                        margin={{
-                          top: 20,
-                          right: 30,
-                          left: 20,
-                          bottom: 20,
-                        }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                      <XAxis
-                          dataKey="timeLabel"
-                          stroke="rgba(148, 163, 184, 0.8)"
-                          fontSize={11}
-                          fontFamily="Inter, system-ui, -apple-system, sans-serif"
-                      />
-                      <YAxis
-                          stroke="rgba(148, 163, 184, 0.8)"
-                          fontSize={11}
-                          fontFamily="Inter, system-ui, -apple-system, sans-serif"
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-
-                      {selectedMetrics.has('waterLevel') && (
-                          <Line
-                              type="monotone"
-                              dataKey="waterLevel"
-                              stroke="#3b82f6"
-                              strokeWidth={3}
-                              dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
-                              activeDot={{ r: 6, strokeWidth: 2 }}
-                              name="Water Level"
-                          />
-                      )}
-                      {selectedMetrics.has('airQuality') && (
-                          <Line
-                              type="monotone"
-                              dataKey="airQuality"
-                              stroke="#10b981"
-                              strokeWidth={3}
-                              dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
-                              activeDot={{ r: 6, strokeWidth: 2 }}
-                              name="Air Quality"
-                          />
-                      )}
-                      {selectedMetrics.has('temperature') && (
-                          <Line
-                              type="monotone"
-                              dataKey="temperature"
-                              stroke="#fb923c"
-                              strokeWidth={3}
-                              dot={{ fill: '#fb923c', strokeWidth: 2, r: 4 }}
-                              activeDot={{ r: 6, strokeWidth: 2 }}
-                              name="Temperature"
-                          />
-                      )}
-                    </LineChart>
-                  </ResponsiveContainer>
+                  <Line options={chartOptions} data={chartData} />
                 </div>
               </div>
 

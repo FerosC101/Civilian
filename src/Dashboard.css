@@ -537,50 +537,12 @@ body, html, #root {
   color: #d1d5db;
 }
 
-/* Chart Container - Fixed sizing for Recharts */
+/* Chart Container - FIXED for Chart.js */
 .chart-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   width: 100%;
   height: 280px;
   min-height: 280px;
   position: relative;
-  overflow: visible;
-}
-
-/* Custom Tooltip for Recharts */
-.chart-tooltip {
-  background: rgba(31, 41, 55, 0.95) !important;
-  backdrop-filter: blur(20px);
-  border-radius: 8px !important;
-  padding: 10px 12px !important;
-  font-size: 11px !important;
-  border: 1px solid rgba(107, 114, 128, 0.2) !important;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-}
-
-.tooltip-time {
-  font-weight: 700 !important;
-  margin-bottom: 4px !important;
-  color: #fff !important;
-}
-
-.tooltip-value {
-  display: flex !important;
-  justify-content: space-between !important;
-  gap: 8px !important;
-  margin-bottom: 2px !important;
-}
-
-.value-label {
-  color: rgba(148, 163, 184, 0.8) !important;
-}
-
-.value-number {
-  font-weight: 700 !important;
-  color: #fff !important;
 }
 
 /* IoT Network - Fixed mobile responsiveness */
@@ -1095,38 +1057,25 @@ body, html, #root {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Recharts responsive fixes - Critical for chart sizing */
-.recharts-responsive-container {
-  width: 100% !important;
-  height: 100% !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  overflow: visible !important;
-}
-
-.recharts-wrapper {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-.recharts-surface {
-  overflow: visible !important;
-}
-
-.recharts-cartesian-grid-horizontal line,
-.recharts-cartesian-grid-vertical line {
-  stroke: rgba(255, 255, 255, 0.1) !important;
-}
-
-.recharts-cartesian-axis-tick-value {
-  fill: rgba(148, 163, 184, 0.8) !important;
+/* Chart.js custom tooltip */
+.chartjs-tooltip {
+  background: rgba(31, 41, 55, 0.95) !important;
+  backdrop-filter: blur(20px);
+  border-radius: 8px !important;
+  padding: 10px 12px !important;
   font-size: 11px !important;
+  border: 1px solid rgba(107, 114, 128, 0.2) !important;
   font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  color: #fff !important;
 }
 
-.recharts-tooltip-wrapper {
-  z-index: 1000 !important;
+.chartjs-tooltip-key {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 2px;
 }
 
 /* Responsive Design */
@@ -1151,7 +1100,228 @@ body, html, #root {
   }
 
   .small-card {
-    min-height: 280px;
+    min-height: 260px;
+  }
+
+  .network-visual {
+    min-height: 200px;
+    overflow: visible;
+  }
+
+  .network-status-card {
+    min-height: 60px;
+    padding: 8px;
+  }
+
+  .network-value {
+    font-size: 16px;
+  }
+
+  .prediction-visual-centered {
+    min-height: 180px;
+  }
+
+  .timeline-points {
+    min-width: 400px;
+    gap: 8px;
+  }
+
+  .timeline-point-container {
+    flex: 0 0 auto;
+    margin-right: 16px;
+  }
+
+  .timeline-point-container:last-child {
+    margin-right: 0;
+  }
+
+  .incident-stats-centered {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bar-chart-container {
+    overflow-x: auto;
+    padding-bottom: 10px;
+    min-width: 300px;
+  }
+
+  .bar-item {
+    min-width: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-topbar {
+    padding: 8px 10px;
+    height: 44px;
+  }
+
+  .mobile-logo {
+    height: 18px;
+  }
+
+  .mobile-logo-text {
+    font-size: 11px;
+  }
+
+  .live-text {
+    font-size: 10px;
+  }
+
+  .clock {
+    font-size: 10px;
+  }
+
+  .alerts-count {
+    font-size: 10px;
+  }
+
+  .cards-section,
+  .charts-section,
+  .analytics-section,
+  .performance-section {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .metric-card,
+  .card {
+    padding: 10px;
+  }
+
+  .chart-container {
+    height: 200px;
+    min-height: 200px;
+  }
+
+  .chart-card {
+    min-height: 240px;
+  }
+
+  .small-card {
+    min-height: 240px;
+  }
+
+  .network-visual {
+    min-height: 180px;
+  }
+
+  .network-status-card {
+    min-height: 55px;
+    padding: 8px;
+  }
+
+  .network-value {
+    font-size: 14px;
+  }
+
+  .incidents-card,
+  .prediction-card {
+    min-height: 160px;
+  }
+
+  .timeline-horizontal {
+    padding: 15px 0;
+  }
+
+  .timeline-point {
+    width: 10px;
+    height: 10px;
+  }
+
+  .timeline-label {
+    font-size: 8px;
+    bottom: -18px;
+  }
+
+  .risk-legend {
+    gap: 8px;
+  }
+
+  .legend-item {
+    font-size: 9px;
+    padding: 2px 4px;
+  }
+
+  .legend-dot {
+    width: 5px;
+    height: 5px;
+  }
+
+  .bottom-nav {
+    padding: 6px 6px 10px;
+  }
+
+  .nav-button {
+    padding: 4px 6px;
+    font-size: 9px;
+    min-width: 42px;
+    gap: 2px;
+  }
+}
+
+/* Performance optimizations */
+.dashboard-page,
+.dashboard-content,
+.dashboard-sidebar,
+.dashboard-main {
+  will-change: transform;
+  contain: layout style paint;
+}
+
+/* Fix for touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .nav-item:hover,
+  .metric-card:hover,
+  .card:hover,
+  .perf-chip:hover,
+  .network-status-card:hover {
+    transform: none;
+  }
+
+  .nav-button:hover {
+    transform: none;
+    background: none;
+  }
+
+  .mobile-logo-button:hover {
+    background: none;
+  }
+
+  .bar.hovered {
+    transform: none;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .live-dot {
+    animation: none;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+.nav-item:focus,
+.metric-btn:focus,
+.nav-button:focus,
+.mobile-logo-button:focus,
+.close-button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Dark theme optimizations */
+@media (prefers-color-scheme: dark) {
+  .chartjs-tooltip {
+    background: rgba(31, 41, 55, 0.95) !important;
   }
 }
 
@@ -1320,271 +1490,5 @@ body, html, #root {
   .legend-dot {
     width: 6px;
     height: 6px;
-  }
-
-  .recharts-cartesian-axis-tick-value {
-    font-size: 9px !important;
-  }
-}
-
-@media (max-width: 640px) {
-  .chart-container {
-    height: 220px;
-    min-height: 220px;
-  }
-
-  .chart-card {
-    min-height: 260px;
-  }
-
-  .small-card {
-    min-height: 260px;
-  }
-
-  .network-visual {
-    min-height: 200px;
-    overflow: visible;
-  }
-
-  .network-status-card {
-    min-height: 60px;
-    padding: 8px;
-  }
-
-  .network-value {
-    font-size: 16px;
-  }
-
-  .prediction-visual-centered {
-    min-height: 180px;
-  }
-
-  .timeline-points {
-    min-width: 400px;
-    gap: 8px;
-  }
-
-  .timeline-point-container {
-    flex: 0 0 auto;
-    margin-right: 16px;
-  }
-
-  .timeline-point-container:last-child {
-    margin-right: 0;
-  }
-
-  .incident-stats-centered {
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .bar-chart-container {
-    overflow-x: auto;
-    padding-bottom: 10px;
-    min-width: 300px;
-  }
-
-  .bar-item {
-    min-width: 40px;
-  }
-
-  .recharts-cartesian-axis-tick-value {
-    font-size: 8px !important;
-  }
-
-  .chart-tooltip {
-    font-size: 10px !important;
-    padding: 8px 10px !important;
-  }
-
-  .tooltip-time {
-    font-size: 10px !important;
-  }
-
-  .tooltip-value {
-    font-size: 9px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .dashboard-topbar {
-    padding: 8px 10px;
-    height: 44px;
-  }
-
-  .mobile-logo {
-    height: 18px;
-  }
-
-  .mobile-logo-text {
-    font-size: 11px;
-  }
-
-  .live-text {
-    font-size: 10px;
-  }
-
-  .clock {
-    font-size: 10px;
-  }
-
-  .alerts-count {
-    font-size: 10px;
-  }
-
-  .cards-section,
-  .charts-section,
-  .analytics-section,
-  .performance-section {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-
-  .metric-card,
-  .card {
-    padding: 10px;
-  }
-
-  .chart-container {
-    height: 200px;
-    min-height: 200px;
-  }
-
-  .chart-card {
-    min-height: 240px;
-  }
-
-  .small-card {
-    min-height: 240px;
-  }
-
-  .network-visual {
-    min-height: 180px;
-  }
-
-  .network-status-card {
-    min-height: 55px;
-    padding: 8px;
-  }
-
-  .network-value {
-    font-size: 14px;
-  }
-
-  .incidents-card,
-  .prediction-card {
-    min-height: 160px;
-  }
-
-  .timeline-horizontal {
-    padding: 15px 0;
-  }
-
-  .timeline-point {
-    width: 10px;
-    height: 10px;
-  }
-
-  .timeline-label {
-    font-size: 8px;
-    bottom: -18px;
-  }
-
-  .risk-legend {
-    gap: 8px;
-  }
-
-  .legend-item {
-    font-size: 9px;
-    padding: 2px 4px;
-  }
-
-  .legend-dot {
-    width: 5px;
-    height: 5px;
-  }
-
-  .bottom-nav {
-    padding: 6px 6px 10px;
-  }
-
-  .nav-button {
-    padding: 4px 6px;
-    font-size: 9px;
-    min-width: 42px;
-    gap: 2px;
-  }
-
-  .recharts-cartesian-axis-tick-value {
-    font-size: 7px !important;
-  }
-
-  .chart-tooltip {
-    font-size: 9px !important;
-    padding: 6px 8px !important;
-  }
-}
-
-/* Performance optimizations */
-.dashboard-page,
-.dashboard-content,
-.dashboard-sidebar,
-.dashboard-main {
-  will-change: transform;
-  contain: layout style paint;
-}
-
-/* Fix for touch devices */
-@media (hover: none) and (pointer: coarse) {
-  .nav-item:hover,
-  .metric-card:hover,
-  .card:hover,
-  .perf-chip:hover,
-  .network-status-card:hover {
-    transform: none;
-  }
-
-  .nav-button:hover {
-    transform: none;
-    background: none;
-  }
-
-  .mobile-logo-button:hover {
-    background: none;
-  }
-
-  .bar.hovered {
-    transform: none;
-  }
-}
-
-/* Accessibility improvements */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-
-  .live-dot {
-    animation: none;
-  }
-}
-
-/* Focus styles for keyboard navigation */
-.nav-item:focus,
-.metric-btn:focus,
-.nav-button:focus,
-.mobile-logo-button:focus,
-.close-button:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-/* Dark theme optimizations */
-@media (prefers-color-scheme: dark) {
-  .chart-tooltip {
-    background: rgba(31, 41, 55, 0.95) !important;
   }
 }

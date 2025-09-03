@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Filter, MapPin, AlertTriangle, Flame, Home, BarChart3, Settings, X, Zap, CloudRain, Bell, ChevronDown, ChevronUp } from 'lucide-react';
+import { Filter, MapPin, AlertTriangle, Flame, Home, BarChart3, Settings, X, Zap, CloudRain, Bell, ChevronDown, ChevronUp, Navigation, Users } from 'lucide-react';
 import { useAlerts, requestNotificationPermission, showNotification } from './services/alerts/userAlerts';
 import './GIS_Page.css';
 import {useNavigate} from "react-router-dom";
@@ -20,11 +20,72 @@ const GISPage: React.FC = () => {
     const [currentTime, setCurrentTime] = useState<string>(new Date().toLocaleTimeString());
     const [mapLoaded, setMapLoaded] = useState<boolean>(false);
     const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(false);
+    const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+    // @ts-ignore
+    const [directionsService, setDirectionsService] = useState<google.maps.DirectionsService | null>(null);
+    // @ts-ignore
+    const [directionsRenderer, setDirectionsRenderer] = useState<google.maps.DirectionsRenderer | null>(null);
     // @ts-ignore
     const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
     // @ts-ignore
     const [alertMarkers, setAlertMarkers] = useState<google.maps.Marker[]>([]);
+    // @ts-ignore
+    const [evacuationMarkers, setEvacuationMarkers] = useState<google.maps.Marker[]>([]);
     const mapRef = useRef<HTMLDivElement>(null);
+
+    // Mock evacuation centers data for Metro Manila
+    const evacuationCenters = [
+        {
+            id: 'ec1',
+            name: 'Manila City Hall Evacuation Center',
+            address: 'Arroceros Forest Park, Manila',
+            capacity: 500,
+            lat: 14.5995,
+            lng: 120.9842,
+            facilities: ['Medical Station', 'Food Distribution', 'Restrooms'],
+            contact: '(02) 527-4039'
+        },
+        {
+            id: 'ec2',
+            name: 'Quezon City Sports Complex',
+            address: 'Araneta Coliseum Complex, Cubao',
+            capacity: 1200,
+            lat: 14.6507,
+            lng: 121.0517,
+            facilities: ['Medical Station', 'Food Distribution', 'Sleeping Area', 'Restrooms'],
+            contact: '(02) 988-4242'
+        },
+        {
+            id: 'ec3',
+            name: 'Makati Covered Court',
+            address: 'Makati City Hall, Makati',
+            capacity: 300,
+            lat: 14.5547,
+            lng: 121.0244,
+            facilities: ['Medical Station', 'Food Distribution', 'Restrooms'],
+            contact: '(02) 870-2444'
+        },
+        {
+            id: 'ec4',
+            name: 'Pasig City Gymnasium',
+            address: 'Kapitolyo, Pasig City',
+            capacity: 800,
+            lat: 14.5764,
+            lng: 121.0851,
+            facilities: ['Medical Station', 'Food Distribution', 'Sleeping Area', 'Restrooms', 'Security'],
+            contact: '(02) 641-1111'
+        },
+        {
+            id: 'ec5',
+            name: 'Mandaluyong Elementary School',
+            address: 'Highway Hills, Mandaluyong',
+            capacity: 400,
+            lat: 14.5832,
+            lng: 121.0409,
+            facilities: ['Medical Station', 'Food Distribution', 'Restrooms'],
+            contact: '(02) 532-9731'
+        }
+    ];
 
     // Get real-time alerts
     const { alerts, isLoading: alertsLoading, error: alertsError } = useAlerts();
@@ -51,6 +112,28 @@ const GISPage: React.FC = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    // Get user location
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setUserLocation({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    });
+                },
+                (error) => {
+                    console.log('Location access denied or unavailable:', error);
+                    // Default to Metro Manila center if location is not available
+                    setUserLocation({ lat: 14.6091, lng: 121.0223 });
+                }
+            );
+        } else {
+            // Default location if geolocation is not supported
+            setUserLocation({ lat: 14.6091, lng: 121.0223 });
+        }
+    }, []);
+
     // Request notification permission on mount
     useEffect(() => {
         const setupNotifications = async () => {
@@ -60,17 +143,20 @@ const GISPage: React.FC = () => {
         setupNotifications();
     }, []);
 
-    // Show notifications for new alerts
+    // Show notifications for new alerts (without coordinates)
     useEffect(() => {
         if (alerts.length > 0 && notificationsEnabled) {
-            // Get the most recent alert
             const latestAlert = alerts[0];
             const alertTime = new Date(latestAlert.timestamp).getTime();
             const now = Date.now();
 
-            // Only show notification if the alert is less than 30 seconds old
             if (now - alertTime < 30000) {
-                showNotification(latestAlert);
+                // Create alert without coordinates for privacy
+                const privacySafeAlert = {
+                    ...latestAlert,
+                    message: latestAlert.message.replace(/\d+\.\d+,\s*\d+\.\d+/g, '[Location]')
+                };
+                showNotification(privacySafeAlert);
             }
         }
     }, [alerts, notificationsEnabled]);
@@ -78,10 +164,10 @@ const GISPage: React.FC = () => {
     // Initialize Google Maps
     useEffect(() => {
         const initMap = () => {
-            if (mapRef.current && !mapInstance) {
+            if (mapRef.current && !mapInstance && userLocation) {
                 // @ts-ignore
                 const map = new google.maps.Map(mapRef.current, {
-                    center: { lat: 14.6091, lng: 121.0223 }, // Metro Manila center
+                    center: userLocation,
                     zoom: 11,
                     mapTypeId: 'terrain',
                     styles: [
@@ -175,16 +261,48 @@ const GISPage: React.FC = () => {
                     ]
                 });
 
+                // @ts-ignore
+                const directionsServiceInstance = new google.maps.DirectionsService();
+                // @ts-ignore
+                const directionsRendererInstance = new google.maps.DirectionsRenderer({
+                    suppressMarkers: false,
+                    polylineOptions: {
+                        strokeColor: '#3b82f6',
+                        strokeWeight: 4,
+                        strokeOpacity: 0.8
+                    }
+                });
+
+                directionsRendererInstance.setMap(map);
+                setDirectionsService(directionsServiceInstance);
+                setDirectionsRenderer(directionsRendererInstance);
                 setMapInstance(map);
                 setMapLoaded(true);
+
+                // Add user location marker
+                // @ts-ignore
+                new google.maps.Marker({
+                    position: userLocation,
+                    map: map,
+                    title: 'Your Location',
+                    icon: {
+                        // @ts-ignore
+                        path: google.maps.SymbolPath.CIRCLE,
+                        fillColor: '#3b82f6',
+                        fillOpacity: 1,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 3,
+                        scale: 8,
+                    }
+                });
             }
         };
 
         // Check if Google Maps is already loaded
         // @ts-ignore
-        if (window.google && window.google.maps) {
+        if (window.google && window.google.maps && userLocation) {
             initMap();
-        } else {
+        } else if (userLocation) {
             // Load Google Maps API
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBMoAvZUPltUYaThhyQSmpFnufPrWpE7kg&callback=initMap`;
@@ -194,6 +312,76 @@ const GISPage: React.FC = () => {
             window.initMap = initMap;
             document.head.appendChild(script);
         }
+    }, [mapInstance, userLocation]);
+
+    // Add evacuation center markers
+    useEffect(() => {
+        if (!mapInstance) return;
+
+        // Clear existing evacuation markers
+        evacuationMarkers.forEach(marker => marker.setMap(null));
+
+        // Create evacuation center markers
+        const newEvacuationMarkers = evacuationCenters.map(center => {
+            const position = { lat: center.lat, lng: center.lng };
+
+            // @ts-ignore
+            const marker = new google.maps.Marker({
+                position,
+                map: mapInstance,
+                icon: {
+                    // @ts-ignore
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    fillColor: '#10b981',
+                    fillOpacity: 1,
+                    strokeColor: '#ffffff',
+                    strokeWeight: 2,
+                    scale: 8,
+                    rotation: 180
+                },
+                title: `Evacuation Center: ${center.name}`
+            });
+
+            // Create info window for evacuation center
+            const infoContent = `
+                <div style="color: #1f2937; font-family: 'Inter', sans-serif; min-width: 280px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
+                        <div style="width: 16px; height: 16px; border-radius: 50%; background: #10b981;"></div>
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">
+                            ${center.name}
+                        </h3>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="background: #10b98120; color: #10b981; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                            CAPACITY: ${center.capacity}
+                        </span>
+                    </div>
+                    <p style="margin: 8px 0; font-size: 14px; line-height: 1.4; color: #374151;">
+                        ${center.address}
+                    </p>
+                    <div style="margin: 8px 0; font-size: 13px; color: #374151;">
+                        <strong>Facilities:</strong> ${center.facilities.join(', ')}
+                    </div>
+                    <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
+                        <div><strong>Contact:</strong> ${center.contact}</div>
+                    </div>
+                </div>
+            `;
+
+            // @ts-ignore
+            const infoWindow = new google.maps.InfoWindow({
+                content: infoContent,
+                maxWidth: 350
+            });
+
+            marker.addListener('click', () => {
+                infoWindow.open(mapInstance, marker);
+            });
+
+            return marker;
+        });
+
+        setEvacuationMarkers(newEvacuationMarkers);
     }, [mapInstance]);
 
     // Update alert markers when alerts change
@@ -233,7 +421,8 @@ const GISPage: React.FC = () => {
                 animation: alert.severity === 'critical' ? google.maps.Animation.BOUNCE : undefined,
             });
 
-            // Create info window
+            // @ts-ignore
+            // Create info window (without coordinates for privacy)
             // language=HTML
             const infoContent = `
                 <div style="color: #1f2937; font-family: 'Inter', sans-serif; min-width: 250px;">
@@ -244,6 +433,7 @@ const GISPage: React.FC = () => {
                         </h3>
                     </div>
                     <div style="margin-bottom: 8px;">
+                        // @ts-ignore
                         <span style="background: ${getSeverityColor(alert.severity)}20; color: ${getSeverityColor(alert.severity)}; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">
                             ${alert.severity.toUpperCase()}
                         </span>
@@ -253,7 +443,6 @@ const GISPage: React.FC = () => {
                     </p>
                     <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
                         <div><strong>Time:</strong> ${new Date(alert.timestamp).toLocaleString()}</div>
-                        <div><strong>Location:</strong> ${alert.location.lat.toFixed(4)}, ${alert.location.lng.toFixed(4)}</div>
                         ${alert.affectedAreas ? `<div><strong>Areas:</strong> ${alert.affectedAreas.join(', ')}</div>` : ''}
                     </div>
                 </div>
@@ -316,6 +505,62 @@ const GISPage: React.FC = () => {
         }
     };
 
+    const findNearestEvacuationCenter = (userLat: number, userLng: number) => {
+        let nearestCenter = evacuationCenters[0];
+        let shortestDistance = calculateDistance(userLat, userLng, nearestCenter.lat, nearestCenter.lng);
+
+        evacuationCenters.forEach(center => {
+            const distance = calculateDistance(userLat, userLng, center.lat, center.lng);
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                nearestCenter = center;
+            }
+        });
+
+        return nearestCenter;
+    };
+
+    const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+        const R = 6371; // Earth's radius in kilometers
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLng/2) * Math.sin(dLng/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    };
+
+    const handleEvacuation = () => {
+        if (!userLocation || !directionsService || !directionsRenderer) {
+            alert('Location services are not available. Please enable location access.');
+            return;
+        }
+
+        const nearestCenter = findNearestEvacuationCenter(userLocation.lat, userLocation.lng);
+
+        const request = {
+            origin: userLocation,
+            destination: { lat: nearestCenter.lat, lng: nearestCenter.lng },
+            // @ts-ignore
+            travelMode: google.maps.TravelMode.DRIVING
+        };
+
+        directionsService.route(request, (result: any, status: any) => {
+            // @ts-ignore
+            if (status === google.maps.DirectionsStatus.OK) {
+                directionsRenderer.setDirections(result);
+
+                // Show alert with evacuation center info
+                setTimeout(() => {
+                    alert(`Evacuation Route Calculated!\n\nNearest Evacuation Center: ${nearestCenter.name}\nAddress: ${nearestCenter.address}\nCapacity: ${nearestCenter.capacity} people\nContact: ${nearestCenter.contact}\n\nPlease follow the blue route on the map to reach the evacuation center safely.`);
+                }, 1000);
+            } else {
+                alert('Could not calculate evacuation route. Please try again or contact emergency services.');
+            }
+        });
+    };
+
     const handleNavigation = (page: string) => {
         setSidebarOpen(false);
         switch (page) {
@@ -337,6 +582,8 @@ const GISPage: React.FC = () => {
         activeFilters[alert.type as keyof typeof activeFilters] &&
         !dismissedAlerts.has(alert.id as string)
     );
+
+    const hasActiveAlerts = filteredAlerts.length > 0;
 
     const FilterButton: React.FC<{
         type: keyof typeof activeFilters;
@@ -498,6 +745,28 @@ const GISPage: React.FC = () => {
                     </div>
                 )}
 
+                {/* Evacuation Button - Only shows when there are active alerts */}
+                {hasActiveAlerts && (
+                    <div className="evacuation-banner">
+                        <div className="evacuation-content">
+                            <div className="evacuation-icon">
+                                <Navigation size={20} />
+                            </div>
+                            <div className="evacuation-text">
+                                <span className="evacuation-title">Emergency Evacuation Available</span>
+                                <span className="evacuation-description">Get directions to the nearest evacuation center</span>
+                            </div>
+                        </div>
+                        <button
+                            onClick={handleEvacuation}
+                            className="evacuation-button"
+                        >
+                            <Navigation size={16} />
+                            <span>Evacuate Now</span>
+                        </button>
+                    </div>
+                )}
+
                 {/* Mobile Alerts Toggle */}
                 {isMobile && filteredAlerts.length > 0 && (
                     <div className="alerts-mobile-toggle">
@@ -546,12 +815,6 @@ const GISPage: React.FC = () => {
                                             </button>
                                         </div>
                                         <p className="alert-card-mobile-message">{alert.message}</p>
-                                        <div className="alert-card-mobile-location">
-                                            <MapPin size={12} />
-                                            <span>
-                                                Location: {alert.location.lat.toFixed(4)}, {alert.location.lng.toFixed(4)}
-                                            </span>
-                                        </div>
                                         {alert.affectedAreas && (
                                             <div className="alert-card-mobile-areas">
                                                 <strong>Affected Areas:</strong> {alert.affectedAreas.slice(0, 2).join(', ')}{alert.affectedAreas.length > 2 && '...'}
@@ -661,6 +924,10 @@ const GISPage: React.FC = () => {
                                             <CloudRain className="legend-icon weather" size={12} />
                                             <span>Weather</span>
                                         </div>
+                                        <div className="legend-item-compact">
+                                            <Users className="legend-icon evacuation" size={12} />
+                                            <span>Evacuation Center</span>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -706,12 +973,6 @@ const GISPage: React.FC = () => {
                                             </button>
                                         </div>
                                         <p className="alert-card-desktop-message">{alert.message}</p>
-                                        <div className="alert-card-desktop-location">
-                                            <MapPin size={12} />
-                                            <span>
-                                                {alert.location.lat.toFixed(4)}, {alert.location.lng.toFixed(4)}
-                                            </span>
-                                        </div>
                                     </div>
                                 );
                             })}

@@ -360,9 +360,9 @@ const DonationDrives: React.FC = () => {
                         <MapPin size={20} />
                         <span className="nav-label">Map</span>
                     </button>
-                    <button onClick={() => handleNavigation('donations')} className="nav-item active">
+                    <button onClick={() => handleNavigation('dashboard')} className="nav-item">
                         <Heart size={20} />
-                        <span className="nav-label">Donations</span>
+                        <span className="nav-label">Analytics</span>
                     </button>
                     <button onClick={() => handleNavigation('settings')} className="nav-item">
                         <Settings size={20} />

@@ -5,7 +5,6 @@ import * as Chart from 'chart.js';
 import './HomePage.css';
 import {BarController, BarElement, CategoryScale, LinearScale} from "chart.js";
 
-// Register Chart.js components
 Chart.Chart.register(
     Chart.CategoryScale,
     Chart.LinearScale,

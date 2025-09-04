@@ -1,13 +1,13 @@
-//EvacuationCenters.tsx
+// Enhanced EvacuationCenters.tsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-    MapPin, 
-    Home, 
-    BarChart3, 
-    Settings, 
-    X, 
-    Bell, 
+import { useNavigate, useLocation } from 'react-router-dom';
+import {
+    MapPin,
+    Home,
+    BarChart3,
+    Settings,
+    X,
+    Bell,
     Search,
     Navigation,
     Users,
@@ -16,7 +16,9 @@ import {
     Clock,
     Shield,
     AlertTriangle,
-    CheckCircle
+    CheckCircle,
+    ArrowLeft,
+    ExternalLink
 } from 'lucide-react';
 import './EvacuationCenters.css';
 
@@ -32,18 +34,24 @@ interface EvacuationCenter {
     status: 'available' | 'full' | 'limited' | 'maintenance';
     facilities: string[];
     contact: string;
-    distance: number; // in km
+    distance: number;
     type: 'school' | 'gym' | 'community_center' | 'church' | 'government';
     lastUpdated: string;
 }
 
 const EvacuationCenters: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768);
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [selectedCity, setSelectedCity] = useState<string>('all');
+    const [, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+
+    // Check if we came from the GIS page with a selected center
+    const selectedCenterId = location.state?.selectedCenterId;
+    const fromGIS = location.state?.fromGIS || false;
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -61,204 +69,130 @@ const EvacuationCenters: React.FC = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    // Get user location (default to Batangas City)
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setUserLocation({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    });
+                },
+                (error) => {
+                    console.log('Location access denied or unavailable:', error);
+                    // Default to Batangas City center if location is not available
+                    setUserLocation({ lat: 13.7565, lng: 121.0583 });
+                }
+            );
+        } else {
+            setUserLocation({ lat: 13.7565, lng: 121.0583 });
+        }
+    }, []);
+
+    // Updated evacuation centers data to match GIS page locations
     const evacuationCenters: EvacuationCenter[] = [
         {
             id: 1,
-            name: "University of the Philippines Diliman",
-            address: "Quezon Ave, Diliman",
-            city: "Quezon City",
-            latitude: 14.6537,
-            longitude: 121.0685,
-            capacity: 2500,
+            name: "Batangas City Sports Complex",
+            address: "P. Burgos Street",
+            city: "Batangas City",
+            latitude: 13.7565,
+            longitude: 121.0583,
+            capacity: 800,
             currentOccupancy: 0,
             status: 'available',
-            facilities: ['Medical Station', 'Kitchen', 'Restrooms', 'Sleeping Area', 'Communications'],
-            contact: "+63 2 8981 8500",
-            distance: 3.2,
-            type: 'school',
+            facilities: ['Medical Station', 'Food Distribution', 'Restrooms', 'Security'],
+            contact: "(043) 723-6300",
+            distance: 0.5,
+            type: 'gym',
             lastUpdated: "2025-01-15 14:30"
         },
         {
             id: 2,
-            name: "Smart Araneta Coliseum",
-            address: "Araneta Coliseum, Cubao",
-            city: "Quezon City",
-            latitude: 14.6211,
-            longitude: 121.0530,
-            capacity: 15000,
+            name: "Batangas State University Gymnasium",
+            address: "Rizal Avenue Extension",
+            city: "Batangas City",
+            latitude: 13.7542,
+            longitude: 121.0584,
+            capacity: 1000,
             currentOccupancy: 0,
             status: 'available',
-            facilities: ['Medical Station', 'Kitchen', 'Restrooms', 'Security', 'Parking'],
-            contact: "+63 2 8911 5555",
-            distance: 5.8,
-            type: 'gym',
+            facilities: ['Medical Station', 'Food Distribution', 'Sleeping Area', 'Restrooms'],
+            contact: "(043) 425-0139",
+            distance: 0.8,
+            type: 'school',
             lastUpdated: "2025-01-15 14:25"
         },
         {
             id: 3,
-            name: "Manila City Hall",
-            address: "Arroceros St, Ermita",
-            city: "Manila",
-            latitude: 14.5907,
-            longitude: 120.9794,
-            capacity: 800,
+            name: "Batangas City Hall Covered Court",
+            address: "Barangay 3",
+            city: "Batangas City",
+            latitude: 13.7567,
+            longitude: 121.0601,
+            capacity: 600,
             currentOccupancy: 45,
             status: 'available',
-            facilities: ['Medical Station', 'Communications', 'Security', 'Restrooms'],
-            contact: "+63 2 8527 4152",
-            distance: 8.1,
+            facilities: ['Medical Station', 'Food Distribution', 'Restrooms'],
+            contact: "(043) 723-2004",
+            distance: 0.3,
             type: 'government',
             lastUpdated: "2025-01-15 14:20"
         },
         {
             id: 4,
-            name: "De La Salle University Manila",
-            address: "2401 Taft Ave, Malate",
-            city: "Manila",
-            latitude: 14.5648,
-            longitude: 120.9931,
-            capacity: 1800,
-            currentOccupancy: 120,
+            name: "Santa Clara Elementary School",
+            address: "Barangay Santa Clara",
+            city: "Batangas City",
+            latitude: 13.7445,
+            longitude: 121.0421,
+            capacity: 400,
+            currentOccupancy: 0,
             status: 'available',
-            facilities: ['Medical Station', 'Kitchen', 'Restrooms', 'Sleeping Area', 'Library'],
-            contact: "+63 2 8524 4611",
-            distance: 9.3,
+            facilities: ['Medical Station', 'Food Distribution', 'Restrooms', 'Classrooms'],
+            contact: "(043) 723-1234",
+            distance: 2.1,
             type: 'school',
             lastUpdated: "2025-01-15 14:15"
         },
         {
             id: 5,
-            name: "Makati Sports Club",
-            address: "Salcedo St, Legaspi Village",
-            city: "Makati",
-            latitude: 14.5547,
-            longitude: 121.0244,
+            name: "Batangas Port Terminal Covered Area",
+            address: "Batangas Port, Barangay Santa Clara",
+            city: "Batangas City",
+            latitude: 13.7398,
+            longitude: 121.0334,
             capacity: 1200,
-            currentOccupancy: 800,
-            status: 'limited',
-            facilities: ['Medical Station', 'Kitchen', 'Restrooms', 'Gym', 'Pool Area'],
-            contact: "+63 2 8817 9951",
-            distance: 12.7,
-            type: 'gym',
+            currentOccupancy: 0,
+            status: 'available',
+            facilities: ['Medical Station', 'Food Distribution', 'Restrooms', 'Large Covered Area'],
+            contact: "(043) 723-8888",
+            distance: 3.2,
+            type: 'community_center',
             lastUpdated: "2025-01-15 14:10"
         },
         {
             id: 6,
-            name: "Bonifacio Global City Amphitheater",
-            address: "5th Ave, Bonifacio Global City",
-            city: "Taguig",
-            latitude: 14.5515,
-            longitude: 121.0470,
-            capacity: 3000,
+            name: "Pallocan West Elementary School",
+            address: "Barangay Pallocan West",
+            city: "Batangas City",
+            latitude: 13.7623,
+            longitude: 121.0712,
+            capacity: 350,
             currentOccupancy: 0,
             status: 'available',
-            facilities: ['Medical Station', 'Sound System', 'Restrooms', 'Parking', 'Security'],
-            contact: "+63 2 8789 1000",
-            distance: 15.2,
-            type: 'community_center',
-            lastUpdated: "2025-01-15 14:05"
-        },
-        {
-            id: 7,
-            name: "Pasig City Sports Center",
-            address: "F. Legaspi St, San Nicolas",
-            city: "Pasig",
-            latitude: 14.5764,
-            longitude: 121.0851,
-            capacity: 2200,
-            currentOccupancy: 0,
-            status: 'available',
-            facilities: ['Medical Station', 'Kitchen', 'Restrooms', 'Gym', 'Parking'],
-            contact: "+63 2 8641 5000",
-            distance: 7.9,
-            type: 'gym',
-            lastUpdated: "2025-01-15 14:00"
-        },
-        {
-            id: 8,
-            name: "San Juan City National High School",
-            address: "N. Domingo St, San Juan City",
-            city: "San Juan",
-            latitude: 14.6019,
-            longitude: 121.0355,
-            capacity: 1500,
-            currentOccupancy: 0,
-            status: 'available',
-            facilities: ['Medical Station', 'Kitchen', 'Restrooms', 'Classrooms', 'Playground'],
-            contact: "+63 2 8724 1234",
-            distance: 6.4,
+            facilities: ['Medical Station', 'Food Distribution', 'Restrooms'],
+            contact: "(043) 723-5567",
+            distance: 1.8,
             type: 'school',
-            lastUpdated: "2025-01-15 13:55"
-        },
-        {
-            id: 9,
-            name: "Marikina Sports Park",
-            address: "Shoe Ave, Marikina Heights",
-            city: "Marikina",
-            latitude: 14.6417,
-            longitude: 121.1114,
-            capacity: 5000,
-            currentOccupancy: 0,
-            status: 'available',
-            facilities: ['Medical Station', 'Kitchen', 'Restrooms', 'Sports Facilities', 'Parking'],
-            contact: "+63 2 8646 2436",
-            distance: 11.8,
-            type: 'gym',
-            lastUpdated: "2025-01-15 13:50"
-        },
-        {
-            id: 10,
-            name: "Parañaque City Hall",
-            address: "Ninoy Aquino Ave, Parañaque",
-            city: "Parañaque",
-            latitude: 14.4793,
-            longitude: 121.0198,
-            capacity: 1000,
-            currentOccupancy: 0,
-            status: 'available',
-            facilities: ['Medical Station', 'Communications', 'Security', 'Restrooms', 'Meeting Rooms'],
-            contact: "+63 2 8820 7814",
-            distance: 18.5,
-            type: 'government',
-            lastUpdated: "2025-01-15 13:45"
-        },
-        {
-            id: 11,
-            name: "Muntinlupa Sports Complex",
-            address: "National Rd, Tunasan",
-            city: "Muntinlupa",
-            latitude: 14.3754,
-            longitude: 121.0453,
-            capacity: 3500,
-            currentOccupancy: 0,
-            status: 'available',
-            facilities: ['Medical Station', 'Kitchen', 'Restrooms', 'Sports Facilities', 'Parking'],
-            contact: "+63 2 8850 3900",
-            distance: 22.1,
-            type: 'gym',
-            lastUpdated: "2025-01-15 13:40"
-        },
-        {
-            id: 12,
-            name: "Las Piñas Community Center",
-            address: "Real St, Las Piñas",
-            city: "Las Piñas",
-            latitude: 14.4166,
-            longitude: 120.9936,
-            capacity: 1800,
-            currentOccupancy: 200,
-            status: 'available',
-            facilities: ['Medical Station', 'Kitchen', 'Restrooms', 'Meeting Rooms', 'WiFi'],
-            contact: "+63 2 8800 1234",
-            distance: 20.3,
-            type: 'community_center',
-            lastUpdated: "2025-01-15 13:35"
+            lastUpdated: "2025-01-15 14:00"
         }
     ];
 
     const handleNavigation = (page: string) => {
         setSidebarOpen(false);
-        
+
         switch (page) {
             case 'home':
                 navigate('/home');
@@ -275,6 +209,37 @@ const EvacuationCenters: React.FC = () => {
             default:
                 break;
         }
+    };
+
+    const handleGetDirections = (center: EvacuationCenter) => {
+        // Navigate to GIS page with the selected center
+        navigate('/gis', {
+            state: {
+                selectedCenterId: center.id,
+                fromEvacuationCenters: true,
+                centerData: {
+                    id: `ec${center.id}`,
+                    name: center.name,
+                    address: center.address,
+                    capacity: center.capacity,
+                    lat: center.latitude,
+                    lng: center.longitude,
+                    facilities: center.facilities,
+                    contact: center.contact
+                }
+            }
+        });
+    };
+
+    const handleViewOnMap = (center: EvacuationCenter) => {
+        // Navigate to GIS page and focus on this center
+        navigate('/gis', {
+            state: {
+                focusCenterId: center.id,
+                centerLocation: { lat: center.latitude, lng: center.longitude },
+                fromEvacuationCenters: true
+            }
+        });
     };
 
     const getStatusColor = (status: string) => {
@@ -310,12 +275,19 @@ const EvacuationCenters: React.FC = () => {
 
     const filteredCenters = evacuationCenters.filter(center => {
         const matchesSearch = center.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            center.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            center.city.toLowerCase().includes(searchQuery.toLowerCase());
-        
+            center.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            center.city.toLowerCase().includes(searchQuery.toLowerCase());
+
         const matchesCity = selectedCity === 'all' || center.city === selectedCity;
-        
+
         return matchesSearch && matchesCity;
+    });
+
+    // Sort centers to show selected one first if coming from GIS
+    const sortedCenters = [...filteredCenters].sort((a, b) => {
+        if (selectedCenterId && a.id === selectedCenterId) return -1;
+        if (selectedCenterId && b.id === selectedCenterId) return 1;
+        return a.distance - b.distance; // Sort by distance otherwise
     });
 
     const cities = [...new Set(evacuationCenters.map(center => center.city))];
@@ -323,8 +295,8 @@ const EvacuationCenters: React.FC = () => {
     const Sidebar: React.FC = () => (
         <div className={`sidebar ${isMobile ? 'mobile' : 'desktop'} ${isMobile && sidebarOpen ? 'open' : ''}`}>
             <div className="sidebar-header">
-                <button 
-                    onClick={() => navigate('/menu')} 
+                <button
+                    onClick={() => navigate('/menu')}
                     className="logo-container-button">
                     <img
                         src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
@@ -414,10 +386,28 @@ const EvacuationCenters: React.FC = () => {
                     {/* Page Header */}
                     <div className="page-header">
                         <div className="page-title-section">
-                            <h1 className="page-title">Evacuation Centers</h1>
-                            <p className="page-subtitle">Metro Manila Emergency Facilities</p>
+                            <div className="page-title-row">
+                                {fromGIS && (
+                                    <button
+                                        onClick={() => navigate('/gis')}
+                                        className="back-button"
+                                        title="Back to Map"
+                                    >
+                                        <ArrowLeft size={20} />
+                                    </button>
+                                )}
+                                <div>
+                                    <h1 className="page-title">Evacuation Centers</h1>
+                                    <p className="page-subtitle">
+                                        Batangas City Emergency Facilities
+                                        {selectedCenterId && (
+                                            <span className="highlight-text"> - Center #{selectedCenterId} Highlighted</span>
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        
+
                         {/* Search and Filter Section */}
                         <div className="search-filter-section">
                             <div className="search-container">
@@ -430,7 +420,7 @@ const EvacuationCenters: React.FC = () => {
                                     className="search-input"
                                 />
                             </div>
-                            
+
                             <select
                                 value={selectedCity}
                                 onChange={(e) => setSelectedCity(e.target.value)}
@@ -455,7 +445,7 @@ const EvacuationCenters: React.FC = () => {
                                 <div className="summary-label">Total Centers</div>
                             </div>
                         </div>
-                        
+
                         <div className="summary-card available-card">
                             <div className="summary-icon">
                                 <CheckCircle size={24} />
@@ -465,7 +455,7 @@ const EvacuationCenters: React.FC = () => {
                                 <div className="summary-label">Available</div>
                             </div>
                         </div>
-                        
+
                         <div className="summary-card capacity-card">
                             <div className="summary-icon">
                                 <Users size={24} />
@@ -475,7 +465,7 @@ const EvacuationCenters: React.FC = () => {
                                 <div className="summary-label">Total Capacity</div>
                             </div>
                         </div>
-                        
+
                         <div className="summary-card occupied-card">
                             <div className="summary-icon">
                                 <AlertTriangle size={24} />
@@ -489,15 +479,23 @@ const EvacuationCenters: React.FC = () => {
 
                     {/* Centers List */}
                     <div className="centers-grid">
-                        {filteredCenters.map(center => (
-                            <div key={center.id} className="center-card">
+                        {sortedCenters.map(center => (
+                            <div
+                                key={center.id}
+                                className={`center-card ${selectedCenterId === center.id ? 'highlighted' : ''}`}
+                            >
                                 <div className="center-header">
                                     <div className="center-info">
                                         <div className="center-type-icon">
                                             {getTypeIcon(center.type)}
                                         </div>
                                         <div>
-                                            <h3 className="center-name">{center.name}</h3>
+                                            <h3 className="center-name">
+                                                {center.name}
+                                                {selectedCenterId === center.id && (
+                                                    <span className="selected-badge">SELECTED</span>
+                                                )}
+                                            </h3>
                                             <p className="center-address">{center.address}, {center.city}</p>
                                         </div>
                                     </div>
@@ -518,7 +516,7 @@ const EvacuationCenters: React.FC = () => {
                                             <span>Occupied: {center.currentOccupancy.toLocaleString()}</span>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="detail-row">
                                         <div className="detail-item">
                                             <Navigation size={16} />
@@ -557,21 +555,31 @@ const EvacuationCenters: React.FC = () => {
                                         <span>{Math.round((center.currentOccupancy / center.capacity) * 100)}%</span>
                                     </div>
                                     <div className="occupancy-progress">
-                                        <div 
+                                        <div
                                             className="occupancy-fill"
-                                            style={{ 
+                                            style={{
                                                 width: `${(center.currentOccupancy / center.capacity) * 100}%`,
-                                                backgroundColor: center.currentOccupancy / center.capacity > 0.8 ? '#ef4444' : 
-                                                                center.currentOccupancy / center.capacity > 0.6 ? '#f59e0b' : '#10b981'
+                                                backgroundColor: center.currentOccupancy / center.capacity > 0.8 ? '#ef4444' :
+                                                    center.currentOccupancy / center.capacity > 0.6 ? '#f59e0b' : '#10b981'
                                             }}
                                         />
                                     </div>
                                 </div>
 
                                 <div className="center-actions">
-                                    <button className="action-btn directions-btn">
+                                    <button
+                                        className="action-btn directions-btn"
+                                        onClick={() => handleGetDirections(center)}
+                                    >
                                         <Navigation size={16} />
                                         Get Directions
+                                    </button>
+                                    <button
+                                        className="action-btn view-map-btn"
+                                        onClick={() => handleViewOnMap(center)}
+                                    >
+                                        <ExternalLink size={16} />
+                                        View on Map
                                     </button>
                                     <button className="action-btn contact-btn">
                                         <Phone size={16} />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wifi, Building2, AlertTriangle, Radio, Home, BarChart3, Settings, Droplet, X, MapPin, Bell } from 'lucide-react';
+import { Wifi, Building2, AlertTriangle, Radio, Home, BarChart3, Settings, Droplet, X, MapPin, Bell, ChevronDown } from 'lucide-react';
 import './HomePage.css';
 
 const HomePage: React.FC = () => {
@@ -64,22 +64,30 @@ const HomePage: React.FC = () => {
             case 'settings':
                 console.log('Navigate to settings');
                 break;
+            case 'menu':
+                navigate('/menu');
+                break;
             default:
                 break;
         }
     };
 
+    const handleLogoClick = () => {
+        navigate('/menu');
+    };
+
     const Sidebar: React.FC = () => (
         <div className={`sidebar ${isMobile ? 'mobile' : 'desktop'} ${isMobile && sidebarOpen ? 'open' : ''}`}>
             <div className="sidebar-header">
-                <div className="logo-container">
+                <button onClick={handleLogoClick} className="logo-container clickable-logo">
                     <img
                         src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
                         alt="CIVILIAN"
                         className="logo"
                     />
                     <span className="logo-text">CIVILIAN</span>
-                </div>
+                    <ChevronDown size={16} className="logo-arrow" />
+                </button>
                 {isMobile && (
                     <button
                         onClick={() => setSidebarOpen(false)}
@@ -130,8 +138,8 @@ const HomePage: React.FC = () => {
                 <header className="header">
                     {isMobile && (
                         <button
-                            onClick={() => setSidebarOpen(true)}
-                            className="mobile-logo-button"
+                            onClick={handleLogoClick}
+                            className="mobile-logo-button clickable-mobile-logo"
                         >
                             <img
                                 src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
@@ -139,6 +147,7 @@ const HomePage: React.FC = () => {
                                 className="mobile-logo"
                             />
                             <span className="mobile-logo-text">CIVILIAN</span>
+                            <ChevronDown size={12} className="mobile-logo-arrow" />
                         </button>
                     )}
 

@@ -1,4 +1,4 @@
-/* HomePage.css - Updated to match GIS Page styling */
+/* HomePage.css - Updated to match GIS Page styling with clickable logo */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 * {
@@ -81,6 +81,32 @@ body {
     gap: 12px;
 }
 
+/* Clickable Logo Styles */
+.clickable-logo {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    font-family: inherit;
+}
+
+.clickable-logo:hover {
+    background: rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
+}
+
+.clickable-logo:hover .logo-arrow {
+    transform: rotate(180deg);
+    color: #3b82f6;
+}
+
 .logo {
     height: 32px;
     width: auto;
@@ -93,6 +119,12 @@ body {
     font-weight: 700;
     color: #ffffff;
     letter-spacing: -0.5px;
+}
+
+.logo-arrow {
+    color: #9ca3af;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .close-button {
@@ -222,7 +254,7 @@ body {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 4px 8px;
+    padding: 6px 10px;
     border-radius: 8px;
     transition: all 0.2s;
     color: inherit;
@@ -230,7 +262,13 @@ body {
 }
 
 .mobile-logo-button:hover {
-    background: rgba(107, 114, 128, 0.1);
+    background: rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
+}
+
+.clickable-mobile-logo:hover .mobile-logo-arrow {
+    transform: rotate(180deg);
+    color: #3b82f6;
 }
 
 .mobile-logo {
@@ -245,6 +283,12 @@ body {
     font-weight: 700;
     color: #ffffff;
     letter-spacing: -0.3px;
+}
+
+.mobile-logo-arrow {
+    color: #9ca3af;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .live-indicator {
@@ -927,7 +971,9 @@ body {
     .chart-section:hover,
     .alert-status:hover,
     .ai-forecast:hover,
-    .emergency-section:hover {
+    .emergency-section:hover,
+    .clickable-logo:hover,
+    .mobile-logo-button:hover {
         transform: none;
     }
 
@@ -936,12 +982,14 @@ body {
         background: none;
     }
 
-    .mobile-logo-button:hover {
-        background: none;
-    }
-
     .chart-bar:hover {
         transform: none;
+    }
+
+    .clickable-logo:hover .logo-arrow,
+    .clickable-mobile-logo:hover .mobile-logo-arrow {
+        transform: none;
+        color: inherit;
     }
 }
 
@@ -960,6 +1008,11 @@ body {
     .alert-icon {
         animation: none;
     }
+
+    .logo-arrow,
+    .mobile-logo-arrow {
+        transition: none;
+    }
 }
 
 /* Focus styles for keyboard navigation */
@@ -967,7 +1020,8 @@ body {
 .emergency-btn:focus,
 .nav-button:focus,
 .mobile-logo-button:focus,
-.close-button:focus {
+.close-button:focus,
+.clickable-logo:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
 }

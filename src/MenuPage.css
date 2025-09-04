@@ -1,4 +1,4 @@
-/*MenuPage.css*/
+/*MenuPage.css - Complete styling for menu page with clickable logo*/
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 /* Base styles - inherit from Dashboard.css structure */
@@ -62,6 +62,38 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* Clickable Logo Styles */
+.clickable-logo {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  font-family: inherit;
+}
+
+.clickable-logo:hover {
+  background: rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
+}
+
+.clickable-logo:hover .logo-arrow {
+  transform: rotate(180deg);
+  color: #3b82f6;
+}
+
+.logo-arrow {
+  color: #9ca3af;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .logo {
@@ -204,7 +236,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 6px 10px;
   border-radius: 8px;
   transition: all 0.2s;
   color: inherit;
@@ -212,7 +244,19 @@
 }
 
 .mobile-logo-button:hover {
-  background: rgba(107, 114, 128, 0.1);
+  background: rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
+}
+
+.clickable-mobile-logo:hover .mobile-logo-arrow {
+  transform: rotate(180deg);
+  color: #3b82f6;
+}
+
+.mobile-logo-arrow {
+  color: #9ca3af;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .mobile-logo {
@@ -837,6 +881,18 @@
   .mobile-logo-button:hover {
     background: none;
   }
+
+  .clickable-logo:hover,
+  .clickable-mobile-logo:hover {
+    transform: none;
+    background: none;
+  }
+
+  .clickable-logo:hover .logo-arrow,
+  .clickable-mobile-logo:hover .mobile-logo-arrow {
+    transform: none;
+    color: inherit;
+  }
 }
 
 /* Accessibility improvements */
@@ -850,6 +906,11 @@
   .live-dot {
     animation: none;
   }
+
+  .logo-arrow,
+  .mobile-logo-arrow {
+    transition: none;
+  }
 }
 
 /* Focus styles for keyboard navigation */
@@ -858,7 +919,8 @@
 .quick-action-btn:focus,
 .nav-button:focus,
 .mobile-logo-button:focus,
-.close-button:focus {
+.close-button:focus,
+.clickable-logo:focus {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }

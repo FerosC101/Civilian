@@ -14,7 +14,7 @@ import {
   Wifi,
   X
 } from 'lucide-react';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Chart as ChartJS,
@@ -153,7 +153,7 @@ const Dashboard: React.FC = () => {
         ticks: {
           color: 'rgba(148, 163, 184, 0.8)',
           font: {
-            size: 11,
+            size: isMobile ? 9 : 11,
             family: 'Inter, system-ui, -apple-system, sans-serif'
           }
         }
@@ -165,7 +165,7 @@ const Dashboard: React.FC = () => {
         ticks: {
           color: 'rgba(148, 163, 184, 0.8)',
           font: {
-            size: 11,
+            size: isMobile ? 9 : 11,
             family: 'Inter, system-ui, -apple-system, sans-serif'
           }
         }
@@ -192,8 +192,8 @@ const Dashboard: React.FC = () => {
         pointBackgroundColor: '#3b82f6',
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
+        pointRadius: isMobile ? 3 : 4,
+        pointHoverRadius: isMobile ? 5 : 6,
       },
       {
         label: 'Air Quality',
@@ -205,8 +205,8 @@ const Dashboard: React.FC = () => {
         pointBackgroundColor: '#10b981',
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
+        pointRadius: isMobile ? 3 : 4,
+        pointHoverRadius: isMobile ? 5 : 6,
       },
       {
         label: 'Temperature',
@@ -218,8 +218,8 @@ const Dashboard: React.FC = () => {
         pointBackgroundColor: '#fb923c',
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
+        pointRadius: isMobile ? 3 : 4,
+        pointHoverRadius: isMobile ? 5 : 6,
       },
     ],
   };

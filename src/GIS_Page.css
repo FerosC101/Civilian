@@ -1,4 +1,4 @@
-/* GIS Disaster Map CSS - Mobile Optimized Layout with Alert Messages and Location Pins */
+/* GIS Disaster Map CSS - Updated with Evacuation Modal and Features */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 * {
@@ -31,6 +31,272 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
+}
+
+/* Evacuation Modal Styles */
+.evacuation-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    /* Add these properties to prevent flickering */
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+    /* Force hardware acceleration */
+    will-change: opacity, visibility;
+    transform: translateZ(0);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.evacuation-modal {
+    background: linear-gradient(145deg, #1f2937 0%, #374151 100%);
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    /* Add these properties to prevent content jumping */
+    transform: translateY(0);
+    transition: transform 0.3s ease-out;
+    /* Force hardware acceleration */
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.evacuation-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid rgba(107, 114, 128, 0.2);
+    position: relative;
+}
+
+.evacuation-modal-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 12px;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.evacuation-modal h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    flex: 1;
+    line-height: 1.3;
+}
+
+.evacuation-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(107, 114, 128, 0.2);
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.evacuation-modal-close:hover {
+    background: rgba(107, 114, 128, 0.3);
+    color: #ffffff;
+}
+
+.evacuation-modal-content {
+    padding: 0 24px 24px;
+}
+
+.evacuation-center-info {
+    margin-bottom: 24px;
+}
+
+.evacuation-center-info h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.evacuation-center-info h3::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: #10b981;
+    border-radius: 2px;
+}
+
+.center-details {
+    background: rgba(55, 65, 81, 0.5);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.center-details h4 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 8px;
+}
+
+.center-details p {
+    font-size: 14px;
+    color: #d1d5db;
+    margin-bottom: 6px;
+    line-height: 1.5;
+}
+
+.facilities {
+    margin-top: 12px;
+}
+
+.facilities strong {
+    color: #ffffff;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.facility-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.facility-tag {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.evacuation-instructions h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.evacuation-instructions h3::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: #f59e0b;
+    border-radius: 2px;
+}
+
+.instruction-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(55, 65, 81, 0.3);
+    border-radius: 8px;
+    border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.step span:last-child {
+    font-size: 14px;
+    color: #d1d5db;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.evacuation-modal-actions {
+    padding: 16px 24px 24px;
+    border-top: 1px solid rgba(107, 114, 128, 0.2);
+    display: flex;
+    justify-content: center;
+}
+
+.evacuation-modal-button {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border: none;
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    font-family: inherit;
+    min-width: 140px;
+}
+
+.evacuation-modal-button:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
 }
 
 /* Sidebar Styles */
@@ -410,7 +676,7 @@ body {
     animation: spin 1s ease-in-out infinite;
 }
 
-/* Evacuation Banner Styles */
+/* Updated Evacuation Banner Styles */
 .evacuation-banner {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.15) 100%);
     backdrop-filter: blur(20px);
@@ -505,6 +771,17 @@ body {
 .evacuation-button:active {
     transform: translateY(0);
     box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Exit Evacuation Button Style */
+.evacuation-button.exit {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+.evacuation-button.exit:hover {
+    background: linear-gradient(135deg, #4b5563, #374151);
+    box-shadow: 0 6px 16px rgba(107, 114, 128, 0.4);
 }
 
 /* Mobile Alerts Toggle */
@@ -1209,10 +1486,66 @@ body {
     background: rgba(156, 163, 175, 0.7);
 }
 
-/* Responsive Design */
+/* Mobile Responsive Design */
 @media (max-width: 768px) {
     .sidebar.desktop {
         display: none;
+    }
+
+    .evacuation-modal {
+        margin: 10px;
+        max-height: calc(100vh - 40px);
+    }
+
+    .evacuation-modal-header {
+        padding: 20px 20px 12px;
+    }
+
+    .evacuation-modal h2 {
+        font-size: 18px;
+    }
+
+    .evacuation-modal-content {
+        padding: 0 20px 20px;
+    }
+
+    .evacuation-modal-actions {
+        padding: 12px 20px 20px;
+    }
+
+    .center-details {
+        padding: 12px;
+    }
+
+    .center-details h4 {
+        font-size: 16px;
+    }
+
+    .facility-tags {
+        gap: 4px;
+    }
+
+    .facility-tag {
+        padding: 3px 8px;
+        font-size: 11px;
+    }
+
+    .instruction-steps {
+        gap: 8px;
+    }
+
+    .step {
+        padding: 10px;
+    }
+
+    .step-number {
+        width: 20px;
+        height: 20px;
+        font-size: 11px;
+    }
+
+    .step span:last-child {
+        font-size: 13px;
     }
 
     .header {
@@ -1346,6 +1679,63 @@ body {
 }
 
 @media (max-width: 480px) {
+    .evacuation-modal {
+        margin: 5px;
+        max-height: calc(100vh - 20px);
+    }
+
+    .evacuation-modal-header {
+        padding: 16px 16px 10px;
+    }
+
+    .evacuation-modal h2 {
+        font-size: 16px;
+    }
+
+    .evacuation-modal-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .evacuation-modal-content {
+        padding: 0 16px 16px;
+    }
+
+    .evacuation-modal-actions {
+        padding: 10px 16px 16px;
+    }
+
+    .center-details {
+        padding: 10px;
+    }
+
+    .center-details h4 {
+        font-size: 15px;
+    }
+
+    .center-details p {
+        font-size: 13px;
+    }
+
+    .facility-tag {
+        padding: 2px 6px;
+        font-size: 10px;
+    }
+
+    .step {
+        padding: 8px;
+    }
+
+    .step-number {
+        width: 18px;
+        height: 18px;
+        font-size: 10px;
+    }
+
+    .step span:last-child {
+        font-size: 12px;
+    }
+
     .header {
         padding: 8px 10px;
         height: 44px;
@@ -1504,6 +1894,18 @@ body {
         box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
 
+    .evacuation-button.exit:hover {
+        transform: none;
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+        box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+    }
+
+    .evacuation-modal-button:hover {
+        transform: none;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
     .alert-card:hover,
     .alert-card-mobile:hover,
     .alert-card-desktop:hover {
@@ -1582,6 +1984,14 @@ body {
     .evacuation-icon {
         animation: none;
     }
+
+    .evacuation-modal {
+        animation: none;
+    }
+
+    .evacuation-modal-overlay {
+        animation: none;
+    }
 }
 
 /* Focus styles for keyboard navigation */
@@ -1594,7 +2004,9 @@ body {
 .alert-card-close:focus,
 .alert-card-desktop-close:focus,
 .alert-message-close:focus,
-.evacuation-button:focus {
+.evacuation-button:focus,
+.evacuation-modal-button:focus,
+.evacuation-modal-close:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
 }
@@ -1612,7 +2024,8 @@ body {
     .alert-message,
     .filters-container,
     .alerts-sidebar-desktop,
-    .evacuation-banner {
+    .evacuation-banner,
+    .evacuation-modal-overlay {
         display: none;
     }
 

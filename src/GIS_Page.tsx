@@ -1,6 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Filter, MapPin, AlertTriangle, Flame, Home, BarChart3, Settings, X, Zap, CloudRain, Bell, ChevronDown, ChevronUp, Navigation, Users } from 'lucide-react';
-import { useAlerts, requestNotificationPermission, showNotification } from './services/alerts/userAlerts';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+    AlertTriangle,
+    BarChart3,
+    Bell,
+    ChevronDown,
+    ChevronUp,
+    CloudRain,
+    Filter,
+    Flame,
+    Home,
+    MapPin,
+    Navigation,
+    Settings,
+    Shield,
+    X,
+    Zap
+} from 'lucide-react';
+import {requestNotificationPermission, showNotification, useAlerts} from './services/alerts/userAlerts';
 import './GIS_Page.css';
 import {useNavigate} from "react-router-dom";
 
@@ -11,6 +27,15 @@ const GISPage: React.FC = () => {
     const [filtersExpanded, setFiltersExpanded] = useState<boolean>(false);
     const [alertsExpanded, setAlertsExpanded] = useState<boolean>(false);
     const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
+
+    // Unified evacuation state to prevent modal flashing
+    const [evacuationState, setEvacuationState] = useState({
+        isModalOpen: false,
+        isProcessing: false,
+        isEvacuationMode: false,
+        evacuationDetails: null
+    });
+
     const [activeFilters, setActiveFilters] = useState({
         earthquake: true,
         flood: true,
@@ -33,57 +58,67 @@ const GISPage: React.FC = () => {
     const [evacuationMarkers, setEvacuationMarkers] = useState<google.maps.Marker[]>([]);
     const mapRef = useRef<HTMLDivElement>(null);
 
-    // Mock evacuation centers data for Metro Manila
+    // Mock evacuation centers data for Batangas City (updated location)
     const evacuationCenters = [
         {
             id: 'ec1',
-            name: 'Manila City Hall Evacuation Center',
-            address: 'Arroceros Forest Park, Manila',
-            capacity: 500,
-            lat: 14.5995,
-            lng: 120.9842,
-            facilities: ['Medical Station', 'Food Distribution', 'Restrooms'],
-            contact: '(02) 527-4039'
+            name: 'Batangas City Sports Complex',
+            address: 'P. Burgos Street, Batangas City',
+            capacity: 800,
+            lat: 13.7565,
+            lng: 121.0583,
+            facilities: ['Medical Station', 'Food Distribution', 'Restrooms', 'Security'],
+            contact: '(043) 723-6300'
         },
         {
             id: 'ec2',
-            name: 'Quezon City Sports Complex',
-            address: 'Araneta Coliseum Complex, Cubao',
-            capacity: 1200,
-            lat: 14.6507,
-            lng: 121.0517,
+            name: 'Batangas State University Gymnasium',
+            address: 'Rizal Avenue Extension, Batangas City',
+            capacity: 1000,
+            lat: 13.7542,
+            lng: 121.0584,
             facilities: ['Medical Station', 'Food Distribution', 'Sleeping Area', 'Restrooms'],
-            contact: '(02) 988-4242'
+            contact: '(043) 425-0139'
         },
         {
             id: 'ec3',
-            name: 'Makati Covered Court',
-            address: 'Makati City Hall, Makati',
-            capacity: 300,
-            lat: 14.5547,
-            lng: 121.0244,
+            name: 'Batangas City Hall Covered Court',
+            address: 'Barangay 3, Batangas City',
+            capacity: 600,
+            lat: 13.7567,
+            lng: 121.0601,
             facilities: ['Medical Station', 'Food Distribution', 'Restrooms'],
-            contact: '(02) 870-2444'
+            contact: '(043) 723-2004'
         },
         {
             id: 'ec4',
-            name: 'Pasig City Gymnasium',
-            address: 'Kapitolyo, Pasig City',
-            capacity: 800,
-            lat: 14.5764,
-            lng: 121.0851,
-            facilities: ['Medical Station', 'Food Distribution', 'Sleeping Area', 'Restrooms', 'Security'],
-            contact: '(02) 641-1111'
+            name: 'Santa Clara Elementary School',
+            address: 'Barangay Santa Clara, Batangas City',
+            capacity: 400,
+            lat: 13.7445,
+            lng: 121.0421,
+            facilities: ['Medical Station', 'Food Distribution', 'Restrooms', 'Classrooms'],
+            contact: '(043) 723-1234'
         },
         {
             id: 'ec5',
-            name: 'Mandaluyong Elementary School',
-            address: 'Highway Hills, Mandaluyong',
-            capacity: 400,
-            lat: 14.5832,
-            lng: 121.0409,
+            name: 'Batangas Port Terminal Covered Area',
+            address: 'Batangas Port, Barangay Santa Clara',
+            capacity: 1200,
+            lat: 13.7398,
+            lng: 121.0334,
+            facilities: ['Medical Station', 'Food Distribution', 'Restrooms', 'Large Covered Area'],
+            contact: '(043) 723-8888'
+        },
+        {
+            id: 'ec6',
+            name: 'Pallocan West Elementary School',
+            address: 'Barangay Pallocan West, Batangas City',
+            capacity: 350,
+            lat: 13.7623,
+            lng: 121.0712,
             facilities: ['Medical Station', 'Food Distribution', 'Restrooms'],
-            contact: '(02) 532-9731'
+            contact: '(043) 723-5567'
         }
     ];
 
@@ -112,7 +147,7 @@ const GISPage: React.FC = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Get user location
+    // Get user location (default to Batangas City)
     useEffect(() => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -124,13 +159,13 @@ const GISPage: React.FC = () => {
                 },
                 (error) => {
                     console.log('Location access denied or unavailable:', error);
-                    // Default to Metro Manila center if location is not available
-                    setUserLocation({ lat: 14.6091, lng: 121.0223 });
+                    // Default to Batangas City center if location is not available
+                    setUserLocation({ lat: 13.7565, lng: 121.0583 });
                 }
             );
         } else {
             // Default location if geolocation is not supported
-            setUserLocation({ lat: 14.6091, lng: 121.0223 });
+            setUserLocation({ lat: 13.7565, lng: 121.0583 });
         }
     }, []);
 
@@ -168,7 +203,7 @@ const GISPage: React.FC = () => {
                 // @ts-ignore
                 const map = new google.maps.Map(mapRef.current, {
                     center: userLocation,
-                    zoom: 11,
+                    zoom: 13,
                     mapTypeId: 'terrain',
                     styles: [
                         {
@@ -314,30 +349,37 @@ const GISPage: React.FC = () => {
         }
     }, [mapInstance, userLocation]);
 
-    // Add evacuation center markers
+    // Add evacuation center markers only when in evacuation mode - Updated with stable dependencies
     useEffect(() => {
         if (!mapInstance) return;
 
         // Clear existing evacuation markers
         evacuationMarkers.forEach(marker => marker.setMap(null));
 
+        // Only show evacuation centers when in evacuation mode
+        if (!evacuationState.isEvacuationMode) {
+            setEvacuationMarkers([]);
+            return;
+        }
+
         // Create evacuation center markers
         const newEvacuationMarkers = evacuationCenters.map(center => {
             const position = { lat: center.lat, lng: center.lng };
 
+            // Custom evacuation center icon
             // @ts-ignore
             const marker = new google.maps.Marker({
                 position,
                 map: mapInstance,
                 icon: {
                     // @ts-ignore
-                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
                     fillColor: '#10b981',
                     fillOpacity: 1,
                     strokeColor: '#ffffff',
                     strokeWeight: 2,
-                    scale: 8,
-                    rotation: 180
+                    scale: 10,
+                    rotation: 0
                 },
                 title: `Evacuation Center: ${center.name}`
             });
@@ -382,7 +424,7 @@ const GISPage: React.FC = () => {
         });
 
         setEvacuationMarkers(newEvacuationMarkers);
-    }, [mapInstance]);
+    }, [mapInstance, evacuationState.isEvacuationMode]); // More stable dependency
 
     // Update alert markers when alerts change
     useEffect(() => {
@@ -421,9 +463,7 @@ const GISPage: React.FC = () => {
                 animation: alert.severity === 'critical' ? google.maps.Animation.BOUNCE : undefined,
             });
 
-            // @ts-ignore
             // Create info window (without coordinates for privacy)
-            // language=HTML
             const infoContent = `
                 <div style="color: #1f2937; font-family: 'Inter', sans-serif; min-width: 250px;">
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
@@ -433,7 +473,6 @@ const GISPage: React.FC = () => {
                         </h3>
                     </div>
                     <div style="margin-bottom: 8px;">
-                        // @ts-ignore
                         <span style="background: ${getSeverityColor(alert.severity)}20; color: ${getSeverityColor(alert.severity)}; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">
                             ${alert.severity.toUpperCase()}
                         </span>
@@ -531,11 +570,24 @@ const GISPage: React.FC = () => {
         return R * c;
     };
 
+    // Updated evacuation handler with unified state management
     const handleEvacuation = () => {
+        // Prevent multiple clicks
+        if (evacuationState.isProcessing || evacuationState.isModalOpen) {
+            return;
+        }
+
         if (!userLocation || !directionsService || !directionsRenderer) {
             alert('Location services are not available. Please enable location access.');
             return;
         }
+
+        // Set processing state - single state update
+        setEvacuationState(prev => ({
+            ...prev,
+            isProcessing: true,
+            isEvacuationMode: true
+        }));
 
         const nearestCenter = findNearestEvacuationCenter(userLocation.lat, userLocation.lng);
 
@@ -551,13 +603,49 @@ const GISPage: React.FC = () => {
             if (status === google.maps.DirectionsStatus.OK) {
                 directionsRenderer.setDirections(result);
 
-                // Show alert with evacuation center info
-                setTimeout(() => {
-                    alert(`Evacuation Route Calculated!\n\nNearest Evacuation Center: ${nearestCenter.name}\nAddress: ${nearestCenter.address}\nCapacity: ${nearestCenter.capacity} people\nContact: ${nearestCenter.contact}\n\nPlease follow the blue route on the map to reach the evacuation center safely.`);
-                }, 1000);
+                // Single state update with all necessary data
+                // @ts-ignore
+                setEvacuationState(prev => ({
+                    ...prev,
+                    isProcessing: false,
+                    isModalOpen: true,
+                    evacuationDetails: {
+                        center: nearestCenter,
+                        route: result
+                    }
+                }));
             } else {
                 alert('Could not calculate evacuation route. Please try again or contact emergency services.');
+                // Reset state on error
+                setEvacuationState(prev => ({
+                    ...prev,
+                    isProcessing: false,
+                    isModalOpen: false,
+                    isEvacuationMode: false,
+                    evacuationDetails: null
+                }));
             }
+        });
+    };
+
+    // Updated modal close handler
+    const closeEvacuationModal = () => {
+        setEvacuationState(prev => ({
+            ...prev,
+            isModalOpen: false
+        }));
+    };
+
+    // Updated exit evacuation handler
+    const handleExitEvacuation = () => {
+        if (directionsRenderer) {
+            directionsRenderer.setDirections({routes: []});
+        }
+        setEvacuationState({
+            isModalOpen: false,
+            isProcessing: false,
+            isEvacuationMode: false,
+            evacuationDetails: null
         });
     };
 
@@ -647,7 +735,85 @@ const GISPage: React.FC = () => {
         </div>
     );
 
-    // @ts-ignore
+    // Updated Evacuation Modal Component - More stable rendering
+    const EvacuationModal: React.FC = () => {
+        // More stable condition - only check if modal should be open and has details
+        if (!evacuationState.isModalOpen || !evacuationState.evacuationDetails) {
+            return null;
+        }
+        // @HTML=
+        // @ts-ignore
+        const {capacity, name, contact, facilities, address} = evacuationState.evacuationDetails.center;
+        return (
+            <div className="evacuation-modal-overlay">
+                <div className="evacuation-modal">
+                    <div className="evacuation-modal-header">
+                        <div className="evacuation-modal-icon">
+                            <Shield size={24} />
+                        </div>
+                        <h2>Evacuation Route Calculated</h2>
+                        <button
+                            onClick={closeEvacuationModal}
+                            className="evacuation-modal-close"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+                    <div className="evacuation-modal-content">
+                        <div className="evacuation-center-info">
+                            <h3>Nearest Evacuation Center</h3>
+                            <div className="center-details">
+                                <h4>{name}</h4>
+                                <p><strong>Address:</strong> {address}</p>
+                                <p><strong>Capacity:</strong> {capacity} people</p>
+                                <p><strong>Contact:</strong> {contact}</p>
+                                <div className="facilities">
+                                    <strong>Facilities:</strong>
+                                    <div className="facility-tags">
+                                        {facilities.map((facility: string, index: number) => (
+                                            <span key={index} className="facility-tag">{facility}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="evacuation-instructions">
+                            <h3>Instructions</h3>
+                            <div className="instruction-steps">
+                                <div className="step">
+                                    <span className="step-number">1</span>
+                                    <span>Follow the blue route displayed on the map</span>
+                                </div>
+                                <div className="step">
+                                    <span className="step-number">2</span>
+                                    <span>Stay calm and drive carefully</span>
+                                </div>
+                                <div className="step">
+                                    <span className="step-number">3</span>
+                                    <span>Bring essential items and documents</span>
+                                </div>
+                                <div className="step">
+                                    <span className="step-number">4</span>
+                                    <span>Follow instructions from evacuation center staff</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="evacuation-modal-actions">
+                        <button
+                            onClick={closeEvacuationModal}
+                            className="evacuation-modal-button understand"
+                        >
+                            I Understand
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="gis-page">
             <Sidebar />
@@ -659,6 +825,9 @@ const GISPage: React.FC = () => {
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
+
+            {/* Evacuation Modal - Conditionally rendered */}
+            <EvacuationModal />
 
             {/* Main content */}
             <div className="main-content">
@@ -745,25 +914,46 @@ const GISPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Evacuation Button - Only shows when there are active alerts */}
-                {hasActiveAlerts && (
+                {/* Evacuation Banner - Shows for active alerts OR evacuation mode */}
+                {(hasActiveAlerts || evacuationState.isEvacuationMode) && (
                     <div className="evacuation-banner">
                         <div className="evacuation-content">
                             <div className="evacuation-icon">
                                 <Navigation size={20} />
                             </div>
                             <div className="evacuation-text">
-                                <span className="evacuation-title">Emergency Evacuation Available</span>
-                                <span className="evacuation-description">Get directions to the nearest evacuation center</span>
+                                <span className="evacuation-title">
+                                    {evacuationState.isEvacuationMode ? 'Evacuation Mode Active' : 'Emergency Evacuation Available'}
+                                </span>
+                                <span className="evacuation-description">
+                                    {evacuationState.isEvacuationMode
+                                        ? 'Evacuation centers visible on map'
+                                        : 'Get directions to the nearest evacuation center'
+                                    }
+                                </span>
                             </div>
                         </div>
-                        <button
-                            onClick={handleEvacuation}
-                            className="evacuation-button"
-                        >
-                            <Navigation size={16} />
-                            <span>Evacuate Now</span>
-                        </button>
+                        {evacuationState.isEvacuationMode ? (
+                            <button
+                                onClick={handleExitEvacuation}
+                                className="evacuation-button exit"
+                                disabled={evacuationState.isProcessing}
+                            >
+                                <X size={16} />
+                                <span>Exit Evacuation</span>
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleEvacuation}
+                                className="evacuation-button"
+                                disabled={evacuationState.isProcessing || evacuationState.isModalOpen}
+                            >
+                                <Navigation size={16} />
+                                <span>
+                                    {evacuationState.isProcessing ? 'Calculating...' : 'Evacuate Now'}
+                                </span>
+                            </button>
+                        )}
                     </div>
                 )}
 
@@ -924,10 +1114,12 @@ const GISPage: React.FC = () => {
                                             <CloudRain className="legend-icon weather" size={12} />
                                             <span>Weather</span>
                                         </div>
-                                        <div className="legend-item-compact">
-                                            <Users className="legend-icon evacuation" size={12} />
-                                            <span>Evacuation Center</span>
-                                        </div>
+                                        {evacuationState.isEvacuationMode && (
+                                            <div className="legend-item-compact">
+                                                <Shield className="legend-icon evacuation" size={12} />
+                                                <span>Evacuation Center</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -999,7 +1191,7 @@ const GISPage: React.FC = () => {
                             <div className="loading-spinner"></div>
                             <div className="loading-text">
                                 <div style={{marginBottom: '10px'}}>Loading map...</div>
-                                <div style={{fontSize: '12px', color: '#9ca3af'}}>Metro Manila</div>
+                                <div style={{fontSize: '12px', color: '#9ca3af'}}>Batangas City</div>
                             </div>
                         </div>
                     )}

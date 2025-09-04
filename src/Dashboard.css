@@ -92,7 +92,7 @@ body, html, #root {
 .close-button {
   background: none;
   border: none;
-  color: '9ca3af';
+  color: #9ca3af;
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
@@ -537,15 +537,20 @@ body, html, #root {
   color: #d1d5db;
 }
 
-/* Chart Container - FIXED for Chart.js */
+/* Chart Container - FIXED for Chart.js and Mobile */
 .chart-container {
   width: 100%;
   height: 280px;
   min-height: 280px;
   position: relative;
+  flex: 1;
+  display: flex;
+  overflow: hidden;
 }
 
-/* IoT Network - Fixed mobile responsiveness */
+
+
+/* IoT Network - FIXED Mobile Responsiveness */
 .network-visual {
   display: flex;
   flex-direction: column;
@@ -559,7 +564,7 @@ body, html, #root {
 .network-grid {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   flex: 1;
   min-height: 0;
 }
@@ -567,10 +572,10 @@ body, html, #root {
 .network-status-card {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  padding: 12px;
+  padding: 14px;
   transition: all 0.2s ease;
   border: 1px solid rgba(107, 114, 128, 0.2);
-  min-height: 70px;
+  min-height: 75px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -586,7 +591,7 @@ body, html, #root {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .network-label {
@@ -599,9 +604,10 @@ body, html, #root {
 
 .network-value {
   font-weight: 800;
-  font-size: 20px;
+  font-size: 22px;
   color: #ffffff;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
+  line-height: 1;
 }
 
 .network-sub {
@@ -633,17 +639,17 @@ body, html, #root {
 
 .network-summary {
   border-top: 1px solid rgba(107, 114, 128, 0.2);
-  padding-top: 12px;
+  padding-top: 14px;
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
   flex-shrink: 0;
 }
 
 .summary-stat {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   flex: 1;
   text-align: center;
 }
@@ -656,7 +662,7 @@ body, html, #root {
 }
 
 .summary-value {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #ffffff;
 }
@@ -720,7 +726,7 @@ body, html, #root {
 
 .bar {
   width: 100%;
-  background: linear-gradient(to top, #f59e0b, 'fbbf24');
+  background: linear-gradient(to top, #f59e0b, #fbbf24);
   border-radius: 6px 6px 0 0;
   position: relative;
   transition: all 0.3s ease;
@@ -1078,148 +1084,209 @@ body, html, #root {
   border-radius: 2px;
 }
 
-/* Responsive Design - Improved for mobile */
-@media (max-width: 1200px) {
+/* MOBILE RESPONSIVE FIXES - CRITICAL SECTION */
+@media (max-width: 768px) {
+  .dashboard-sidebar.desktop {
+    display: none;
+  }
+
+  .dashboard-topbar {
+    padding: 10px 12px;
+    height: 50px;
+    justify-content: space-between;
+  }
+
+  .live-text {
+    font-size: 11px;
+  }
+
+  .clock {
+    font-size: 11px;
+  }
+
+  .alerts-count {
+    font-size: 11px;
+  }
+
+  .mobile-logo {
+    height: 20px;
+  }
+
+  .mobile-logo-text {
+    font-size: 12px;
+  }
+
+  .dashboard-content {
+    padding-bottom: 85px;
+    gap: 14px;
+  }
+
+  .cards-section, .charts-section, .analytics-section, .performance-section {
+    padding: 0 12px;
+  }
+
+  .cards-section {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .metric-card {
+    padding: 12px;
+  }
+
+  .metric-header {
+    gap: 10px;
+  }
+
+  .metric-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .metric-card .metric-value {
+    font-size: 20px;
+  }
+
+  /* CRITICAL MOBILE CHART FIXES */
   .charts-section {
     flex-direction: column;
+    gap: 14px;
     min-height: auto;
   }
 
-  .analytics-section {
-    flex-direction: column;
-    min-height: auto;
-  }
-
-  .perf-grid {
-    flex-direction: column;
+  .chart-card {
+    min-height: 350px;
+    max-height: 350px;
+    width: 100%;
+    overflow: hidden;
   }
 
   .chart-container {
-    height: 260px;
-    min-height: 260px;
+    height: 260px !important;
+    min-height: 260px !important;
+    max-height: 260px !important;
+    width: 100% !important;
+    position: relative;
+    overflow: hidden;
   }
 
+  .chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+
+  /* CRITICAL IOT NETWORK MOBILE FIXES */
   .small-card {
-    min-height: 260px;
+    min-height: 320px;
+    max-height: 320px;
+    width: 100%;
+    overflow: hidden;
   }
 
   .network-visual {
-    min-height: 220px;
-    overflow: visible;
+    height: 100%;
+    min-height: 280px;
+    max-height: 280px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .network-grid {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .network-status-card {
-    min-height: 60px;
-    padding: 8px;
+    min-height: 65px;
+    max-height: 65px;
+    padding: 10px 12px;
+    flex-shrink: 0;
+    overflow: hidden;
   }
 
   .network-value {
     font-size: 16px;
+    line-height: 1;
+    margin-bottom: 2px;
   }
 
-  .prediction-visual-centered {
-    min-height: 180px;
+  .network-sub {
+    font-size: 9px;
   }
 
-  .timeline-points {
-    min-width: 400px;
-    gap: 8px;
+  .network-label {
+    font-size: 10px;
   }
 
-  .timeline-point-container {
-    flex: 0 0 auto;
-    margin-right: 16px;
+  .network-summary {
+    flex-shrink: 0;
+    padding-top: 10px;
+    margin-top: auto;
+    min-height: 45px;
+    max-height: 45px;
   }
 
-  .timeline-point-container:last-child {
-    margin-right: 0;
+  .summary-label {
+    font-size: 9px;
   }
 
-  .incident-stats-centered {
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .bar-chart-container {
-    overflow-x: auto;
-    padding-bottom: 10px;
-    min-width: 300px;
-  }
-
-  .bar-item {
-    min-width: 40px;
-  }
-}
-
-@media (max-width: 480px) {
-  .dashboard-topbar {
-    padding: 8px 10px;
-    height: 44px;
-  }
-
-  .mobile-logo {
-    height: 18px;
-  }
-
-  .mobile-logo-text {
+  .summary-value {
     font-size: 11px;
   }
 
-  .live-text {
-    font-size: 10px;
+  .analytics-section {
+    flex-direction: column;
+    gap: 14px;
+    min-height: auto;
   }
 
-  .clock {
-    font-size: 10px;
-  }
-
-  .alerts-count {
-    font-size: 10px;
-  }
-
-  .cards-section,
-  .charts-section,
-  .analytics-section,
-  .performance-section {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-
-  .metric-card,
   .card {
-    padding: 10px;
+    padding: 12px;
   }
 
-  .chart-container {
-    height: 220px;
-    min-height: 220px;
+  .metric-selector {
+    gap: 4px;
+    padding: 3px;
+    flex-wrap: wrap;
   }
 
-  .chart-card {
-    min-height: 260px;
+  .metric-btn {
+    padding: 5px 8px;
+    font-size: 10px;
   }
 
-  .small-card {
-    min-height: 260px;
+  .perf-grid {
+    flex-direction: column;
+    gap: 12px;
   }
 
-  .network-visual {
-    min-height: 200px;
+  .perf-chip {
+    padding: 12px;
   }
 
-  .network-status-card {
-    min-height: 55px;
-    padding: 8px;
+  .chip-icon {
+    width: 32px;
+    height: 32px;
   }
 
-  .network-value {
-    font-size: 14px;
+  .chip-value {
+    font-size: 16px;
   }
 
   .incidents-card,
   .prediction-card {
-    min-height: 180px;
+    min-height: 200px;
   }
 
   .timeline-horizontal {
@@ -1259,6 +1326,146 @@ body, html, #root {
     font-size: 9px;
     min-width: 42px;
     gap: 2px;
+  }
+}
+
+/* ULTRA SMALL MOBILE FIXES */
+@media (max-width: 480px) {
+  .dashboard-topbar {
+    padding: 8px 8px;
+    height: 44px;
+  }
+
+  .mobile-logo {
+    height: 18px;
+  }
+
+  .mobile-logo-text {
+    font-size: 10px;
+  }
+
+  .live-text {
+    font-size: 10px;
+  }
+
+  .clock {
+    font-size: 10px;
+  }
+
+  .alerts-count {
+    font-size: 10px;
+  }
+
+  .cards-section,
+  .charts-section,
+  .analytics-section,
+  .performance-section {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .metric-card,
+  .card {
+    padding: 10px;
+  }
+
+  /* ULTRA CRITICAL MOBILE CHART FIXES */
+  .chart-card {
+    min-height: 320px;
+    max-height: 320px;
+  }
+
+  .chart-container {
+    height: 240px !important;
+    min-height: 240px !important;
+    max-height: 240px !important;
+  }
+
+  /* ULTRA CRITICAL IOT NETWORK MOBILE FIXES */
+  .small-card {
+    min-height: 290px;
+    max-height: 290px;
+  }
+
+  .network-visual {
+    min-height: 250px;
+    max-height: 250px;
+  }
+
+  .network-status-card {
+    min-height: 55px;
+    max-height: 55px;
+    padding: 8px 10px;
+  }
+
+  .network-value {
+    font-size: 14px;
+  }
+
+  .network-sub {
+    font-size: 8px;
+  }
+
+  .network-label {
+    font-size: 9px;
+  }
+
+  .network-summary {
+    min-height: 40px;
+    max-height: 40px;
+    padding-top: 8px;
+  }
+
+  .summary-label {
+    font-size: 8px;
+  }
+
+  .summary-value {
+    font-size: 10px;
+  }
+
+  .incidents-card,
+  .prediction-card {
+    min-height: 180px;
+  }
+
+  .timeline-horizontal {
+    padding: 15px 0;
+  }
+
+  .timeline-point {
+    width: 8px;
+    height: 8px;
+  }
+
+  .timeline-label {
+    font-size: 7px;
+    bottom: -16px;
+  }
+
+  .risk-legend {
+    gap: 6px;
+  }
+
+  .legend-item {
+    font-size: 8px;
+    padding: 2px 3px;
+  }
+
+  .legend-dot {
+    width: 4px;
+    height: 4px;
+  }
+
+  .bottom-nav {
+    padding: 5px 5px 8px;
+  }
+
+  .nav-button {
+    padding: 3px 5px;
+    font-size: 8px;
+    min-width: 38px;
+    gap: 1px;
   }
 }
 
@@ -1325,170 +1532,25 @@ body, html, #root {
   }
 }
 
+/* FORCE CONTAINER SIZES - CRITICAL FOR MOBILE */
 @media (max-width: 768px) {
-  .dashboard-sidebar.desktop {
-    display: none;
+  .chart-card, .small-card {
+    overflow: hidden !important;
+    position: relative;
   }
 
-  .dashboard-topbar {
-    padding: 10px 12px;
-    height: 48px;
-    justify-content: space-between;
+  .chart-container, .network-visual {
+    overflow: hidden !important;
+    position: relative;
+    width: 100% !important;
   }
 
-  .live-text {
-    font-size: 11px;
-  }
-
-  .clock {
-    font-size: 11px;
-  }
-
-  .alerts-count {
-    font-size: 11px;
-  }
-
-  .mobile-logo {
-    height: 20px;
-  }
-
-  .mobile-logo-text {
-    font-size: 12px;
-  }
-
-  .dashboard-content {
-    padding-bottom: 80px;
-    gap: 16px;
-  }
-
-  .cards-section, .charts-section, .analytics-section, .performance-section {
-    padding: 0 12px;
-  }
-
-  .cards-section {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .metric-card {
-    padding: 14px;
-  }
-
-  .metric-header {
-    gap: 10px;
-  }
-
-  .metric-icon {
-    width: 36px;
-    height: 36px;
-  }
-
-  .metric-card .metric-value {
-    font-size: 20px;
-  }
-
-  .charts-section {
-    flex-direction: column;
-    gap: 12px;
-    min-height: auto;
-  }
-
-  .analytics-section {
-    flex-direction: column;
-    gap: 12px;
-    min-height: auto;
-  }
-
-  .card {
-    padding: 14px;
-  }
-
-  .chart-container {
-    height: 240px;
-    min-height: 240px;
-  }
-
-  .chart-card {
-    min-height: 280px;
-  }
-
-  .small-card {
-    min-height: 280px;
-  }
-
-  .network-visual {
-    height: 100%;
-    min-height: 240px;
-  }
-
-  .network-status-card {
-    min-height: 65px;
-    padding: 10px;
-  }
-
-  .network-value {
-    font-size: 18px;
-  }
-
-  .metric-selector {
-    gap: 4px;
-    padding: 3px;
-    flex-wrap: wrap;
-  }
-
-  .metric-btn {
-    padding: 5px 8px;
-    font-size: 10px;
-  }
-
-  .perf-grid {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .perf-chip {
-    padding: 14px;
-  }
-
-  .chip-icon {
-    width: 36px;
-    height: 36px;
-  }
-
-  .chip-value {
-    font-size: 16px;
-  }
-
-  .incidents-card,
-  .prediction-card {
-    min-height: 220px;
-  }
-
-  .timeline-horizontal {
-    padding: 20px 0;
-  }
-
-  .timeline-point {
-    width: 12px;
-    height: 12px;
-  }
-
-  .timeline-label {
-    font-size: 9px;
-    bottom: -20px;
-  }
-
-  .risk-legend {
-    gap: 10px;
-  }
-
-  .legend-item {
-    font-size: 10px;
-    padding: 3px 6px;
-  }
-
-  .legend-dot {
-    width: 6px;
-    height: 6px;
+  .chart-container > div,
+  .chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
   }
 }

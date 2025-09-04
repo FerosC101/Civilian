@@ -694,7 +694,7 @@ const GISPage: React.FC = () => {
     const Sidebar: React.FC = () => (
         <div className={`sidebar ${isMobile ? 'mobile' : 'desktop'} ${isMobile && sidebarOpen ? 'open' : ''}`}>
             <div className="sidebar-header">
-                <div className="logo-container">
+                <div className="logo-container" onClick={() => window.location.href = '/menu'} style={{ cursor: 'pointer' }}>
                     <img
                         src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
                         alt="CIVILIAN"

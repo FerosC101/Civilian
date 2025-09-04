@@ -61,7 +61,8 @@ const HomePage: React.FC = () => {
                 }
 
                 chartInstance.current = new Chart.Chart(ctx, {
-                    type: 'bar',
+                    type: "bar",
+                    plugins: [],
                     data: {
                         labels: chartData.map(d => d.label),
                         datasets: [{
@@ -91,7 +92,7 @@ const HomePage: React.FC = () => {
                                 displayColors: false,
                                 titleFont: {
                                     size: 14,
-                                    weight: '600'
+                                    weight: 600
                                 },
                                 bodyFont: {
                                     size: 13
@@ -111,13 +112,12 @@ const HomePage: React.FC = () => {
                                 beginAtZero: true,
                                 grid: {
                                     color: 'rgba(107, 114, 128, 0.2)',
-                                    drawBorder: false
                                 },
                                 ticks: {
                                     color: '#9ca3af',
                                     font: {
                                         size: 11,
-                                        weight: '500'
+                                        weight: 500
                                     },
                                     stepSize: 2,
                                     callback: function(value) {
@@ -133,7 +133,7 @@ const HomePage: React.FC = () => {
                                     color: '#9ca3af',
                                     font: {
                                         size: 11,
-                                        weight: '600'
+                                        weight: 600
                                     }
                                 }
                             }

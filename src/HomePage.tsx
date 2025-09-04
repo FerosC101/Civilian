@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Wifi, Building2, AlertTriangle, Radio, Home, BarChart3, Settings, Droplet, X, MapPin, Bell, ChevronDown } from 'lucide-react';
 import * as Chart from 'chart.js';
 import './HomePage.css';
+import {BarController, BarElement, CategoryScale, LinearScale} from "chart.js";
 
 // Register Chart.js components
 Chart.Chart.register(
@@ -13,6 +14,10 @@ Chart.Chart.register(
     Chart.Tooltip,
     Chart.Legend
 );
+
+// @ts-ignore
+Chart.Chart.register(BarController, BarElement, CategoryScale, LinearScale);
+
 
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
@@ -61,8 +66,7 @@ const HomePage: React.FC = () => {
                 }
 
                 chartInstance.current = new Chart.Chart(ctx, {
-                    type: "bar",
-                    plugins: [],
+                    type: 'bar',
                     data: {
                         labels: chartData.map(d => d.label),
                         datasets: [{
@@ -112,6 +116,8 @@ const HomePage: React.FC = () => {
                                 beginAtZero: true,
                                 grid: {
                                     color: 'rgba(107, 114, 128, 0.2)',
+                                    // @ts-ignore
+                                    drawBorder: false
                                 },
                                 ticks: {
                                     color: '#9ca3af',

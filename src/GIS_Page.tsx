@@ -661,9 +661,16 @@ const GISPage: React.FC = () => {
             case 'settings':
                 console.log('Navigate to settings');
                 break;
+            case 'menu':
+                navigate('/menu');
+                break;
             default:
                 break;
         }
+    };
+
+    const handleLogoClick = () => {
+        navigate('/menu');
     };
 
     const filteredAlerts = alerts.filter(alert =>
@@ -694,14 +701,15 @@ const GISPage: React.FC = () => {
     const Sidebar: React.FC = () => (
         <div className={`sidebar ${isMobile ? 'mobile' : 'desktop'} ${isMobile && sidebarOpen ? 'open' : ''}`}>
             <div className="sidebar-header">
-                <div className="logo-container" onClick={() => window.location.href = '/menu'} style={{ cursor: 'pointer' }}>
+                <button onClick={handleLogoClick} className="logo-container clickable-logo">
                     <img
                         src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
                         alt="CIVILIAN"
                         className="logo"
                     />
                     <span className="logo-text">CIVILIAN</span>
-                </div>
+                    <ChevronDown size={16} className="logo-arrow" />
+                </button>
                 {isMobile && (
                     <button
                         onClick={() => setSidebarOpen(false)}
@@ -741,7 +749,6 @@ const GISPage: React.FC = () => {
         if (!evacuationState.isModalOpen || !evacuationState.evacuationDetails) {
             return null;
         }
-        // @HTML=
         // @ts-ignore
         const {capacity, name, contact, facilities, address} = evacuationState.evacuationDetails.center;
         return (
@@ -835,8 +842,8 @@ const GISPage: React.FC = () => {
                 <header className="header">
                     {isMobile && (
                         <button
-                            onClick={() => setSidebarOpen(true)}
-                            className="mobile-logo-button"
+                            onClick={handleLogoClick}
+                            className="mobile-logo-button clickable-mobile-logo"
                         >
                             <img
                                 src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
@@ -844,6 +851,7 @@ const GISPage: React.FC = () => {
                                 className="mobile-logo"
                             />
                             <span className="mobile-logo-text">CIVILIAN</span>
+                            <ChevronDown size={12} className="mobile-logo-arrow" />
                         </button>
                     )}
 

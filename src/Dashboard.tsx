@@ -4,7 +4,7 @@ import {
   BarChart3,
   Battery,
   Bell,
-  CheckCircle,
+  CheckCircle, ChevronDown,
   Cpu,
   Gauge,
   Home,
@@ -295,17 +295,22 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const handleLogoClick = () => {
+    navigate('/menu');
+  };
+
   const Sidebar: React.FC = () => (
       <div className={`dashboard-sidebar ${isMobile ? 'mobile' : 'desktop'} ${isMobile && sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <div className="logo-container">
+          <button onClick={handleLogoClick} className="logo-container clickable-logo">
             <img
                 src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
                 alt="CIVILIAN"
                 className="logo"
             />
             <span className="logo-text">CIVILIAN</span>
-          </div>
+            <ChevronDown size={16} className="logo-arrow" />
+          </button>
           {isMobile && (
               <button
                   onClick={() => setSidebarOpen(false)}
@@ -356,8 +361,8 @@ const Dashboard: React.FC = () => {
             <div className="top-left">
               {isMobile && (
                   <button
-                      onClick={() => setSidebarOpen(true)}
-                      className="mobile-logo-button"
+                      onClick={handleLogoClick}
+                      className="mobile-logo-button clickable-mobile-logo"
                   >
                     <img
                         src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
@@ -365,13 +370,13 @@ const Dashboard: React.FC = () => {
                         className="mobile-logo"
                     />
                     <span className="mobile-logo-text">CIVILIAN</span>
+                    <ChevronDown size={12} className="mobile-logo-arrow" />
                   </button>
               )}
               <div className="live-indicator">
                 <span className="live-dot" />
                 <span className="live-text">LIVE</span>
               </div>
-              {!isMobile && <div className="page-title">Analytics Dashboard</div>}
             </div>
 
             <div className="top-right">

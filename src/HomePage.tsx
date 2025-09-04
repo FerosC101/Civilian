@@ -1,13 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Wifi, Building2, AlertTriangle, Radio, Home, BarChart3, Settings, Droplet, X, MapPin, Bell, ChevronDown } from 'lucide-react';
+import * as Chart from 'chart.js';
 import './HomePage.css';
+
+// Register Chart.js components
+Chart.Chart.register(
+    Chart.CategoryScale,
+    Chart.LinearScale,
+    Chart.BarElement,
+    Chart.Title,
+    Chart.Tooltip,
+    Chart.Legend
+);
 
 const HomePage: React.FC = () => {
     const navigate = useNavigate();
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768);
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+    const chartRef = useRef<HTMLCanvasElement>(null);
+    const chartInstance = useRef<Chart.Chart | null>(null);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -37,17 +50,119 @@ const HomePage: React.FC = () => {
         { value: 2, label: 'Sun', type: 'weather' }
     ];
 
-    const maxValue = Math.max(...chartData.map(d => d.value));
+    // Initialize Chart.js
+    useEffect(() => {
+        if (chartRef.current) {
+            const ctx = chartRef.current.getContext('2d');
+            if (ctx) {
+                // Destroy existing chart if it exists
+                if (chartInstance.current) {
+                    chartInstance.current.destroy();
+                }
 
-    const getBarColor = (type: string) => {
-        switch (type) {
-            case 'earthquake': return '#3b82f6';
-            case 'fire': return '#3b82f6';
-            case 'flood': return '#3b82f6';
-            case 'weather': return '#3b82f6';
-            default: return '#3b82f6';
+                // @ts-ignore
+                chartInstance.current = new Chart.Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.map(d => d.label),
+                        datasets: [{
+                            label: 'Incident Alerts',
+                            data: chartData.map(d => d.value),
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 20, 25, 0.95)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#d1d5db',
+                                borderColor: 'rgba(59, 130, 246, 0.5)',
+                                borderWidth: 1,
+                                cornerRadius: 8,
+                                displayColors: false,
+                                titleFont: {
+                                    size: 14,
+                                    // @ts-ignore
+                                    weight: '600'
+                                },
+                                bodyFont: {
+                                    size: 13
+                                },
+                                callbacks: {
+                                    title: function(context) {
+                                        return context[0].label;
+                                    },
+                                    label: function(context) {
+                                        return `${context.parsed.y} incidents`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(107, 114, 128, 0.2)',
+                                    // @ts-ignore
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: '#9ca3af',
+                                    font: {
+                                        size: 11,
+                                        // @ts-ignore
+                                        weight: '500'
+                                    },
+                                    stepSize: 2,
+                                    callback: function(value) {
+                                        return Number.isInteger(value as number) ? value : '';
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#9ca3af',
+                                    font: {
+                                        size: 11,
+                                        // @ts-ignore
+                                        weight: '600'
+                                    }
+                                }
+                            }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        animation: {
+                            duration: 1000,
+                            easing: 'easeInOutCubic'
+                        }
+                    }
+                });
+            }
         }
-    };
+
+        // Cleanup function
+        return () => {
+            if (chartInstance.current) {
+                chartInstance.current.destroy();
+            }
+        };
+    }, [isMobile]); // Re-render chart when mobile state changes
 
     const handleNavigation = (page: string) => {
         setSidebarOpen(false);
@@ -183,20 +298,8 @@ const HomePage: React.FC = () => {
                             <h3>Daily Incident Alerts</h3>
                             <span className="chart-subtitle">This Week's Activity</span>
                         </div>
-                        <div className="chart-container">
-                            {chartData.map((item, index) => (
-                                <div key={index} className="chart-bar">
-                                    <div className="bar-value">{item.value}</div>
-                                    <div
-                                        className="bar-fill"
-                                        style={{
-                                            height: `${(item.value / maxValue) * 100}%`,
-                                            backgroundColor: getBarColor(item.type)
-                                        }}
-                                    ></div>
-                                    <span className="bar-label">{item.label}</span>
-                                </div>
-                            ))}
+                        <div className="chart-wrapper">
+                            <canvas ref={chartRef} className="chart-canvas"></canvas>
                         </div>
                     </div>
 

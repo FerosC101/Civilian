@@ -11,6 +11,7 @@ import SignUpPage from './SignUpPage.tsx';
 import HomePage from "./HomePage.tsx";
 import EvacuationCenters from "./EvacuationCenters.tsx";
 import MenuPage from "./MenuPage.tsx";
+import DonationDrive from "./DonationDrive.tsx";
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/evacuation" element={<EvacuationCenters />} />
                 <Route path="/menu" element={<MenuPage />} />
+                <Route path="/donations" element={<DonationDrive />} />
             </Routes>
         </Router>
     </StrictMode>,

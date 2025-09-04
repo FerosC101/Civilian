@@ -62,6 +62,9 @@ const Menu: React.FC = () => {
       case 'cityoverview':
         navigate('/evacuation');
         break;
+      case 'donations':
+        navigate('/donations');
+        break;
       default:
         break;
     }
@@ -138,7 +141,7 @@ const Menu: React.FC = () => {
       subtitle: 'Donation Organizations',
       icon: DollarSign,
       color: 'blue',
-      action: () => console.log('Donations clicked')
+      action: () => handleNavigation('donations')
     }
   ];
 

@@ -60,94 +60,94 @@ const HomePage: React.FC = () => {
                     chartInstance.current.destroy();
                 }
 
-                chartInstance.current = new Chart.Chart(ctx,
-                    {
-                        data: {
-                            labels: chartData.map(d => d.label),
-                            datasets: [{
-                                label: 'Incident Alerts',
-                                data: chartData.map(d => d.value),
-                                backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                                borderColor: 'rgba(59, 130, 246, 1)',
-                                borderWidth: 2,
-                                borderRadius: 8,
-                                borderSkipped: false,
-                            }]
-                        },
-                        options: {
-                            animation: {
-                                duration: 1000,
-                                easing: 'easeInOutCubic'
+                chartInstance.current = new Chart.Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.map(d => d.label),
+                        datasets: [{
+                            label: 'Incident Alerts',
+                            data: chartData.map(d => d.value),
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
                             },
-                            interaction: {
-                                intersect: false,
-                                mode: 'index'
-                            },
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    display: false
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 20, 25, 0.95)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#d1d5db',
+                                borderColor: 'rgba(59, 130, 246, 0.5)',
+                                borderWidth: 1,
+                                cornerRadius: 8,
+                                displayColors: false,
+                                titleFont: {
+                                    size: 14,
+                                    weight: '600'
                                 },
-                                tooltip: {
-                                    backgroundColor: 'rgba(15, 20, 25, 0.95)',
-                                    titleColor: '#ffffff',
-                                    bodyColor: '#d1d5db',
-                                    borderColor: 'rgba(59, 130, 246, 0.5)',
-                                    borderWidth: 1,
-                                    cornerRadius: 8,
-                                    displayColors: false,
-                                    titleFont: {
-                                        size: 14,
-                                        weight: 600
-                                    },
-                                    bodyFont: {
-                                        size: 13
-                                    },
-                                    callbacks: {
-                                        title: function (context) {
-                                            return context[0].label;
-                                        },
-                                        label: function (context) {
-                                            return `${context.parsed.y} incidents`;
-                                        }
-                                    }
-                                }
-                            },
-                            responsive: true,
-                            scales: {
-                                x: {
-                                    grid: {
-                                        display: false
-                                    },
-                                    ticks: {
-                                        color: '#9ca3af',
-                                        font: {
-                                            size: 11,
-                                            weight: 600
-                                        }
-                                    }
+                                bodyFont: {
+                                    size: 13
                                 },
-                                y: {
-                                    beginAtZero: true,
-                                    grid: {
-                                        color: 'rgba(107, 114, 128, 0.2)',
+                                callbacks: {
+                                    title: function(context) {
+                                        return context[0].label;
                                     },
-                                    ticks: {
-                                        callback: function (value) {
-                                            return Number.isInteger(value as number) ? value : '';
-                                        },
-                                        color: '#9ca3af',
-                                        font: {
-                                            size: 11,
-                                            weight: 500
-                                        },
-                                        stepSize: 2
+                                    label: function(context) {
+                                        return `${context.parsed.y} incidents`;
                                     }
                                 }
                             }
                         },
-                        type: 'bar'
-                    });
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(107, 114, 128, 0.2)',
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: '#9ca3af',
+                                    font: {
+                                        size: 11,
+                                        weight: '500'
+                                    },
+                                    stepSize: 2,
+                                    callback: function(value) {
+                                        return Number.isInteger(value as number) ? value : '';
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#9ca3af',
+                                    font: {
+                                        size: 11,
+                                        weight: '600'
+                                    }
+                                }
+                            }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        },
+                        animation: {
+                            duration: 1000,
+                            easing: 'easeInOutCubic'
+                        }
+                    }
+                });
             }
         }
 

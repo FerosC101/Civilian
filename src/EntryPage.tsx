@@ -28,7 +28,6 @@ const EntryPage: React.FC = () => {
     };
 
     const handleGuestLogin = () => {
-        console.log('Guest login clicked');
         navigate('/home');
     };
 

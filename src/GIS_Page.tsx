@@ -12,9 +12,9 @@ import {
     MapPin,
     Navigation,
     Settings,
-    Shield,
     X,
-    Zap
+    Zap,
+    Building2
 } from 'lucide-react';
 import {requestNotificationPermission, showNotification, useAlerts} from './services/alerts/userAlerts';
 import './GIS_Page.css';
@@ -58,7 +58,7 @@ const GISPage: React.FC = () => {
     const [evacuationMarkers, setEvacuationMarkers] = useState<google.maps.Marker[]>([]);
     const mapRef = useRef<HTMLDivElement>(null);
 
-    // Mock evacuation centers data for Batangas City (updated location)
+    // Mock evacuation centers data for Batangas City
     const evacuationCenters = [
         {
             id: 'ec1',
@@ -349,7 +349,7 @@ const GISPage: React.FC = () => {
         }
     }, [mapInstance, userLocation]);
 
-    // Add evacuation center markers only when in evacuation mode - Updated with stable dependencies
+    // Add evacuation center markers only when in evacuation mode - UPDATED WITH BUILDING ICON
     useEffect(() => {
         if (!mapInstance) return;
 
@@ -362,53 +362,55 @@ const GISPage: React.FC = () => {
             return;
         }
 
-        // Create evacuation center markers
+        // Create evacuation center markers with Building2-style appearance
         const newEvacuationMarkers = evacuationCenters.map(center => {
             const position = { lat: center.lat, lng: center.lng };
 
-            // Custom evacuation center icon
+            // Create custom evacuation center marker using a building-like appearance
             // @ts-ignore
             const marker = new google.maps.Marker({
                 position,
                 map: mapInstance,
                 icon: {
                     // @ts-ignore
-                    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
                     fillColor: '#10b981',
-                    fillOpacity: 1,
+                    fillOpacity: 0.9,
                     strokeColor: '#ffffff',
                     strokeWeight: 2,
-                    scale: 10,
-                    rotation: 0
+                    scale: 8,
+                    rotation: 0,
+                    // @ts-ignore
+                    anchor: new google.maps.Point(0, 5)
                 },
-                title: `Evacuation Center: ${center.name}`
+                title: `Evacuation Center: ${center.name}`,
             });
 
             // Create info window for evacuation center
             const infoContent = `
-                <div style="color: #1f2937; font-family: 'Inter', sans-serif; min-width: 280px;">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
-                        <div style="width: 16px; height: 16px; border-radius: 50%; background: #10b981;"></div>
-                        <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">
-                            ${center.name}
-                        </h3>
-                    </div>
-                    <div style="margin-bottom: 8px;">
-                        <span style="background: #10b98120; color: #10b981; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">
-                            CAPACITY: ${center.capacity}
-                        </span>
-                    </div>
-                    <p style="margin: 8px 0; font-size: 14px; line-height: 1.4; color: #374151;">
-                        ${center.address}
-                    </p>
-                    <div style="margin: 8px 0; font-size: 13px; color: #374151;">
-                        <strong>Facilities:</strong> ${center.facilities.join(', ')}
-                    </div>
-                    <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
-                        <div><strong>Contact:</strong> ${center.contact}</div>
-                    </div>
-                </div>
-            `;
+                        <div style="color: #1f2937; font-family: 'Inter', sans-serif; min-width: 280px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
+                                <div style="width: 16px; height: 16px; border-radius: 4px; background: #10b981;"></div>
+                                <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">
+                                    ${center.name}
+                                </h3>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <span style="background: #10b98120; color: #10b981; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                                    CAPACITY: ${center.capacity}
+                                </span>
+                            </div>
+                            <p style="margin: 8px 0; font-size: 14px; line-height: 1.4; color: #374151;">
+                                ${center.address}
+                            </p>
+                            <div style="margin: 8px 0; font-size: 13px; color: #374151;">
+                                <strong>Facilities:</strong> ${center.facilities.join(', ')}
+                            </div>
+                            <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
+                                <div><strong>Contact:</strong> ${center.contact}</div>
+                            </div>
+                        </div>
+                    `;
 
             // @ts-ignore
             const infoWindow = new google.maps.InfoWindow({
@@ -424,7 +426,7 @@ const GISPage: React.FC = () => {
         });
 
         setEvacuationMarkers(newEvacuationMarkers);
-    }, [mapInstance, evacuationState.isEvacuationMode]); // More stable dependency
+    }, [mapInstance, evacuationState.isEvacuationMode]);
 
     // Update alert markers when alerts change
     useEffect(() => {
@@ -464,28 +466,29 @@ const GISPage: React.FC = () => {
             });
 
             // Create info window (without coordinates for privacy)
+            // language=HTML
             const infoContent = `
-                <div style="color: #1f2937; font-family: 'Inter', sans-serif; min-width: 250px;">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
-                        <div style="width: 16px; height: 16px; border-radius: 50%; background: ${getSeverityColor(alert.severity)};"></div>
-                        <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">
-                            ${alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} Alert
-                        </h3>
-                    </div>
-                    <div style="margin-bottom: 8px;">
-                        <span style="background: ${getSeverityColor(alert.severity)}20; color: ${getSeverityColor(alert.severity)}; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">
-                            ${alert.severity.toUpperCase()}
-                        </span>
-                    </div>
-                    <p style="margin: 8px 0; font-size: 14px; line-height: 1.4; color: #374151;">
-                        ${alert.message}
-                    </p>
-                    <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
-                        <div><strong>Time:</strong> ${new Date(alert.timestamp).toLocaleString()}</div>
-                        ${alert.affectedAreas ? `<div><strong>Areas:</strong> ${alert.affectedAreas.join(', ')}</div>` : ''}
-                    </div>
-                </div>
-            `;
+                        <div style="color: #1f2937; font-family: 'Inter', sans-serif; min-width: 250px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
+                                <div style="width: 16px; height: 16px; border-radius: 50%; background: ${getSeverityColor(alert.severity)};"></div>
+                                <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">
+                                    ${alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} Alert
+                                </h3>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <span style="background: ${getSeverityColor(alert.severity)}20; color: ${getSeverityColor(alert.severity)}; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                                    ${alert.severity.toUpperCase()}
+                                </span>
+                            </div>
+                            <p style="margin: 8px 0; font-size: 14px; line-height: 1.4; color: #374151;">
+                                ${alert.message}
+                            </p>
+                            <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
+                                <div><strong>Time:</strong> ${new Date(alert.timestamp).toLocaleString()}</div>
+                                ${alert.affectedAreas ? `<div><strong>Areas:</strong> ${alert.affectedAreas.join(', ')}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
             // @ts-ignore
             const infoWindow = new google.maps.InfoWindow({
                 content: infoContent,
@@ -680,6 +683,7 @@ const GISPage: React.FC = () => {
 
     const hasActiveAlerts = filteredAlerts.length > 0;
 
+    // IMPROVED FILTER BUTTON WITH RESPONSIVE TEXT HANDLING
     const FilterButton: React.FC<{
         type: keyof typeof activeFilters;
         icon: React.ComponentType<{ size: number }>;
@@ -687,16 +691,33 @@ const GISPage: React.FC = () => {
         color: string;
         active: boolean;
         count: number;
-    }> = ({ type, icon: Icon, label, color, active, count }) => (
-        <button
-            onClick={() => toggleFilter(type)}
-            className={`filter-button ${active ? `active ${color}` : 'inactive'}`}
-        >
-            <Icon size={14} />
-            <span className="filter-label">{isMobile ? label.split(' ')[0] : label}</span>
-            {count > 0 && <span className="filter-count">{count}</span>}
-        </button>
-    );
+    }> = ({ type, icon: Icon, label, color, active, count }) => {
+        const getResponsiveLabel = () => {
+            if (window.innerWidth < 360) {
+                // Very small screens: show first 4 characters
+                return label.slice(0, 4);
+            } else if (window.innerWidth < 480) {
+                // Small screens: show first word or 6 characters
+                return label.includes(' ') ? label.split(' ')[0] : label.slice(0, 6);
+            } else if (isMobile) {
+                // Mobile: show first word
+                return label.split(' ')[0];
+            }
+            // Desktop: show full label
+            return label;
+        };
+
+        return (
+            <button
+                onClick={() => toggleFilter(type)}
+                className={`filter-button ${active ? `active ${color}` : 'inactive'}`}
+            >
+                <Icon size={14} />
+                <span className="filter-label">{getResponsiveLabel()}</span>
+                {count > 0 && <span className="filter-count">{count}</span>}
+            </button>
+        );
+    };
 
     const Sidebar: React.FC = () => (
         <div className={`sidebar ${isMobile ? 'mobile' : 'desktop'} ${isMobile && sidebarOpen ? 'open' : ''}`}>
@@ -743,78 +764,91 @@ const GISPage: React.FC = () => {
         </div>
     );
 
-    // Updated Evacuation Modal Component - More stable rendering
+    // COMPLETELY REWRITTEN EVACUATION MODAL WITH PROPER SCROLLING
     const EvacuationModal: React.FC = () => {
-        // More stable condition - only check if modal should be open and has details
+        // Only render if modal should be open and has details
         if (!evacuationState.isModalOpen || !evacuationState.evacuationDetails) {
             return null;
         }
+
         // @ts-ignore
-        const {capacity, name, contact, facilities, address} = evacuationState.evacuationDetails.center;
+        const { capacity, name, contact, facilities, address } = evacuationState.evacuationDetails.center;
+
         return (
-            <div className="evacuation-modal-overlay">
-                <div className="evacuation-modal">
-                    <div className="evacuation-modal-header">
-                        <div className="evacuation-modal-icon">
-                            <Shield size={24} />
+            <div className="evacuation-modal-overlay" onClick={closeEvacuationModal}>
+                <div className="evacuation-modal-wrapper" onClick={(e) => e.stopPropagation()}>
+                    <div className="evacuation-modal">
+                        <div className="evacuation-modal-header">
+                            <div className="evacuation-modal-icon">
+                                <Building2 size={24} />
+                            </div>
+                            <h2>Evacuation Route Calculated</h2>
+                            <button
+                                onClick={closeEvacuationModal}
+                                className="evacuation-modal-close"
+                            >
+                                <X size={20} />
+                            </button>
                         </div>
-                        <h2>Evacuation Route Calculated</h2>
-                        <button
-                            onClick={closeEvacuationModal}
-                            className="evacuation-modal-close"
-                        >
-                            <X size={20} />
-                        </button>
-                    </div>
-                    <div className="evacuation-modal-content">
-                        <div className="evacuation-center-info">
-                            <h3>Nearest Evacuation Center</h3>
-                            <div className="center-details">
-                                <h4>{name}</h4>
-                                <p><strong>Address:</strong> {address}</p>
-                                <p><strong>Capacity:</strong> {capacity} people</p>
-                                <p><strong>Contact:</strong> {contact}</p>
-                                <div className="facilities">
-                                    <strong>Facilities:</strong>
-                                    <div className="facility-tags">
-                                        {facilities.map((facility: string, index: number) => (
-                                            <span key={index} className="facility-tag">{facility}</span>
-                                        ))}
+
+                        <div className="evacuation-modal-content">
+                            <div className="evacuation-center-info">
+                                <h3>Nearest Evacuation Center</h3>
+                                <div className="center-details">
+                                    <h4>{name}</h4>
+                                    <p><strong>Address:</strong> {address}</p>
+                                    <p><strong>Capacity:</strong> {capacity} people</p>
+                                    <p><strong>Contact:</strong> {contact}</p>
+                                    <div className="facilities">
+                                        <strong>Facilities:</strong>
+                                        <div className="facility-tags">
+                                            {facilities.map((facility: string, index: number) => (
+                                                <span key={index} className="facility-tag">{facility}</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="evacuation-instructions">
+                                <h3>Evacuation Instructions</h3>
+                                <div className="instruction-steps">
+                                    <div className="step">
+                                        <span className="step-number">1</span>
+                                        <span>Follow the blue route displayed on the map to reach your designated evacuation center</span>
+                                    </div>
+                                    <div className="step">
+                                        <span className="step-number">2</span>
+                                        <span>Stay calm and drive carefully. Avoid flooded roads and follow traffic authorities</span>
+                                    </div>
+                                    <div className="step">
+                                        <span className="step-number">3</span>
+                                        <span>Bring essential items: water, food, medications, important documents, and emergency supplies</span>
+                                    </div>
+                                    <div className="step">
+                                        <span className="step-number">4</span>
+                                        <span>Report to evacuation center staff upon arrival and follow their instructions</span>
+                                    </div>
+                                    <div className="step">
+                                        <span className="step-number">5</span>
+                                        <span>Keep your phone charged and stay informed through official emergency channels</span>
+                                    </div>
+                                    <div className="step">
+                                        <span className="step-number">6</span>
+                                        <span>Do not return home until authorities declare it safe to do so</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="evacuation-instructions">
-                            <h3>Instructions</h3>
-                            <div className="instruction-steps">
-                                <div className="step">
-                                    <span className="step-number">1</span>
-                                    <span>Follow the blue route displayed on the map</span>
-                                </div>
-                                <div className="step">
-                                    <span className="step-number">2</span>
-                                    <span>Stay calm and drive carefully</span>
-                                </div>
-                                <div className="step">
-                                    <span className="step-number">3</span>
-                                    <span>Bring essential items and documents</span>
-                                </div>
-                                <div className="step">
-                                    <span className="step-number">4</span>
-                                    <span>Follow instructions from evacuation center staff</span>
-                                </div>
-                            </div>
+                        <div className="evacuation-modal-actions">
+                            <button
+                                onClick={closeEvacuationModal}
+                                className="evacuation-modal-button understand"
+                            >
+                                I Understand
+                            </button>
                         </div>
-                    </div>
-
-                    <div className="evacuation-modal-actions">
-                        <button
-                            onClick={closeEvacuationModal}
-                            className="evacuation-modal-button understand"
-                        >
-                            I Understand
-                        </button>
                     </div>
                 </div>
             </div>
@@ -833,7 +867,7 @@ const GISPage: React.FC = () => {
                 />
             )}
 
-            {/* Evacuation Modal - Conditionally rendered */}
+            {/* Evacuation Modal - FIXED SCROLLING */}
             <EvacuationModal />
 
             {/* Main content */}
@@ -930,15 +964,15 @@ const GISPage: React.FC = () => {
                                 <Navigation size={20} />
                             </div>
                             <div className="evacuation-text">
-                                <span className="evacuation-title">
-                                    {evacuationState.isEvacuationMode ? 'Evacuation Mode Active' : 'Emergency Evacuation Available'}
-                                </span>
+                                        <span className="evacuation-title">
+                                            {evacuationState.isEvacuationMode ? 'Evacuation Mode Active' : 'Emergency Evacuation Available'}
+                                        </span>
                                 <span className="evacuation-description">
-                                    {evacuationState.isEvacuationMode
-                                        ? 'Evacuation centers visible on map'
-                                        : 'Get directions to the nearest evacuation center'
-                                    }
-                                </span>
+                                            {evacuationState.isEvacuationMode
+                                                ? 'Evacuation centers visible on map'
+                                                : 'Get directions to the nearest evacuation center'
+                                            }
+                                        </span>
                             </div>
                         </div>
                         {evacuationState.isEvacuationMode ? (
@@ -958,8 +992,8 @@ const GISPage: React.FC = () => {
                             >
                                 <Navigation size={16} />
                                 <span>
-                                    {evacuationState.isProcessing ? 'Calculating...' : 'Evacuate Now'}
-                                </span>
+                                            {evacuationState.isProcessing ? 'Calculating...' : 'Evacuate Now'}
+                                        </span>
                             </button>
                         )}
                     </div>
@@ -972,10 +1006,10 @@ const GISPage: React.FC = () => {
                             onClick={() => setAlertsExpanded(!alertsExpanded)}
                             className="alerts-toggle-button"
                         >
-                            <span>
-                                <AlertTriangle size={16} />
-                                Active Alerts ({filteredAlerts.length})
-                            </span>
+                                    <span>
+                                        <AlertTriangle size={16} />
+                                        Active Alerts ({filteredAlerts.length})
+                                    </span>
                             {alertsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </button>
                     </div>
@@ -1002,8 +1036,8 @@ const GISPage: React.FC = () => {
                                                     {alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} Alert - {alert.severity.toUpperCase()}
                                                 </h4>
                                                 <span className="alert-card-mobile-time">
-                                                    {new Date(alert.timestamp).toLocaleString()}
-                                                </span>
+                                                            {new Date(alert.timestamp).toLocaleString()}
+                                                        </span>
                                             </div>
                                             <button
                                                 onClick={() => dismissAlert(alert.id)}
@@ -1037,10 +1071,10 @@ const GISPage: React.FC = () => {
                             onClick={() => setFiltersExpanded(!filtersExpanded)}
                             className="filters-toggle-button"
                         >
-                            <span>
-                                <Filter size={16} />
-                                Filters ({Object.values(activeFilters).filter(Boolean).length}/4)
-                            </span>
+                                    <span>
+                                        <Filter size={16} />
+                                        Filters ({Object.values(activeFilters).filter(Boolean).length}/4)
+                                    </span>
                             {filtersExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </button>
                     </div>
@@ -1124,7 +1158,7 @@ const GISPage: React.FC = () => {
                                         </div>
                                         {evacuationState.isEvacuationMode && (
                                             <div className="legend-item-compact">
-                                                <Shield className="legend-icon evacuation" size={12} />
+                                                <Building2 className="legend-icon evacuation" size={12} />
                                                 <span>Evacuation Center</span>
                                             </div>
                                         )}
@@ -1135,7 +1169,7 @@ const GISPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Active Alerts Sidebar - Desktop Only - Redesigned to be less intrusive */}
+                {/* Active Alerts Sidebar - Desktop Only */}
                 {!isMobile && filteredAlerts.length > 0 && (
                     <div className="alerts-sidebar-desktop">
                         <div className="alerts-sidebar-header">
@@ -1162,8 +1196,8 @@ const GISPage: React.FC = () => {
                                                     {alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} - {alert.severity.toUpperCase()}
                                                 </h4>
                                                 <span className="alert-card-desktop-time">
-                                                    {new Date(alert.timestamp).toLocaleTimeString()}
-                                                </span>
+                                                            {new Date(alert.timestamp).toLocaleTimeString()}
+                                                        </span>
                                             </div>
                                             <button
                                                 onClick={() => dismissAlert(alert.id)}
@@ -1205,7 +1239,7 @@ const GISPage: React.FC = () => {
                     )}
                 </div>
 
-                {/* Mobile bottom navigation - Fixed */}
+                {/* Mobile bottom navigation */}
                 {isMobile && (
                     <div className="bottom-nav">
                         <button onClick={() => navigate('/home')} className="nav-button">
@@ -1229,6 +1263,4 @@ const GISPage: React.FC = () => {
             </div>
         </div>
     );
-};
-
-export default GISPage;
+}; export default GISPage;

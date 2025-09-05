@@ -1,4 +1,4 @@
-/* GIS Disaster Map CSS - Updated with Evacuation Modal and Features */
+/* GIS Disaster Map CSS - Updated with Fixed Modal Scrolling and Responsiveness */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 * {
@@ -33,33 +33,30 @@ body {
     bottom: 0;
 }
 
-/* Evacuation Modal Styles */
+/* Evacuation Modal Styles - COMPLETELY FIXED FOR PROPER SCROLLING */
 .evacuation-modal-overlay {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(8px);
+    z-index: 1000;
+    padding: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.evacuation-modal-wrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    min-height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
-    padding: 20px;
-    /* Add these properties to prevent flickering */
-    opacity: 1;
-    visibility: visible;
-    transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
-    /* Force hardware acceleration */
-    will-change: opacity, visibility;
-    transform: translateZ(0);
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+    padding: 20px 0;
 }
 
 .evacuation-modal {
@@ -67,28 +64,8 @@ body {
     border-radius: 16px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
     border: 1px solid rgba(59, 130, 246, 0.3);
-    max-width: 600px;
     width: 100%;
-    max-height: 80vh;
-    overflow-y: auto;
-    /* Add these properties to prevent content jumping */
-    transform: translateY(0);
-    transition: transform 0.3s ease-out;
-    /* Force hardware acceleration */
-    will-change: transform;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-}
-
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    position: relative;
 }
 
 .evacuation-modal-header {
@@ -98,6 +75,7 @@ body {
     padding: 24px 24px 16px;
     border-bottom: 1px solid rgba(107, 114, 128, 0.2);
     position: relative;
+    flex-shrink: 0;
 }
 
 .evacuation-modal-icon {
@@ -134,6 +112,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 10;
 }
 
 .evacuation-modal-close:hover {
@@ -142,7 +121,7 @@ body {
 }
 
 .evacuation-modal-content {
-    padding: 0 24px 24px;
+    padding: 16px 24px;
 }
 
 .evacuation-center-info {
@@ -213,6 +192,10 @@ body {
     font-size: 12px;
     font-weight: 500;
     border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.evacuation-instructions {
+    margin-bottom: 0;
 }
 
 .evacuation-instructions h3 {
@@ -566,7 +549,7 @@ body {
     font-weight: 500;
 }
 
-/* Alert Messages - Redesigned */
+/* Alert Messages */
 .alert-message {
     display: flex;
     align-items: center;
@@ -676,7 +659,7 @@ body {
     animation: spin 1s ease-in-out infinite;
 }
 
-/* Updated Evacuation Banner Styles */
+/* Evacuation Banner */
 .evacuation-banner {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.15) 100%);
     backdrop-filter: blur(20px);
@@ -773,7 +756,6 @@ body {
     box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
-/* Exit Evacuation Button Style */
 .evacuation-button.exit {
     background: linear-gradient(135deg, #6b7280, #4b5563);
     box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
@@ -911,7 +893,6 @@ body {
     transition: all 0.2s;
     flex-shrink: 0;
 }
-
 .alert-card-mobile-close:hover {
     color: #ffffff;
     background: rgba(107, 114, 128, 0.2);
@@ -980,7 +961,7 @@ body {
     gap: 8px;
 }
 
-/* Combined Filters and Legend Container */
+/* Filters Container */
 .filters-container {
     background: rgba(31, 41, 55, 0.8);
     backdrop-filter: blur(20px);
@@ -1014,6 +995,7 @@ body {
     color: #9ca3af;
     font-size: 14px;
     font-weight: 500;
+    white-space: nowrap;
 }
 
 .filter-buttons {
@@ -1038,9 +1020,8 @@ body {
     overflow: hidden;
     font-family: inherit;
     white-space: nowrap;
-    flex: 1;
+    flex-shrink: 0;
     justify-content: center;
-    min-width: 0;
 }
 
 .filter-button.inactive {
@@ -1055,7 +1036,6 @@ body {
     transform: translateY(-1px);
 }
 
-/* Toned down filter colors */
 .filter-button.active.earthquake {
     background: rgba(139, 92, 246, 0.3);
     border: 1px solid rgba(139, 92, 246, 0.4);
@@ -1096,7 +1076,7 @@ body {
     text-align: center;
 }
 
-/* Legend Section - Desktop Only */
+/* Legend Section */
 .legend-section {
     display: flex;
     align-items: center;
@@ -1159,7 +1139,7 @@ body {
     color: #10b981;
 }
 
-/* Desktop Alerts Sidebar - Redesigned to be less intrusive */
+/* Desktop Alerts Sidebar */
 .alerts-sidebar-desktop {
     background: rgba(31, 41, 55, 0.7);
     backdrop-filter: blur(20px);
@@ -1277,7 +1257,7 @@ body {
     flex-shrink: 0;
 }
 
-/* Map Container - Maximized */
+/* Map Container */
 .map-container {
     flex: 1;
     position: relative;
@@ -1300,7 +1280,7 @@ body {
     height: 100% !important;
 }
 
-/* Google Maps Container Styles */
+/* Google Maps Styles */
 .gm-style {
     font-family: 'Inter', sans-serif !important;
 }
@@ -1319,7 +1299,6 @@ body {
     overflow: visible !important;
 }
 
-/* Custom Map Marker Styles */
 .custom-marker {
     position: relative;
     display: flex;
@@ -1352,7 +1331,6 @@ body {
     }
 }
 
-/* Map Info Window Styles */
 .map-info-window {
     font-family: 'Inter', sans-serif;
     min-width: 250px;
@@ -1413,7 +1391,7 @@ body {
     text-align: center;
 }
 
-/* Bottom Navigation (Mobile) - Fixed to match HomePage */
+/* Bottom Navigation */
 .bottom-nav {
     background: rgba(31, 41, 55, 0.95);
     backdrop-filter: blur(20px);
@@ -1452,7 +1430,6 @@ body {
     color: #3b82f6;
 }
 
-/* Loading spinner */
 .loading-spinner {
     width: 28px;
     height: 28px;
@@ -1468,7 +1445,7 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* Custom Scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
     width: 4px;
 }
@@ -1486,15 +1463,25 @@ body {
     background: rgba(156, 163, 175, 0.7);
 }
 
-/* Mobile Responsive Design */
+/* Mobile Responsive - UPDATED MODAL SCROLLING FOR MOBILE */
 @media (max-width: 768px) {
     .sidebar.desktop {
         display: none;
     }
 
+    /* FIXED MODAL FOR MOBILE */
+    .evacuation-modal-overlay {
+        padding: 10px;
+        align-items: flex-start;
+    }
+
+    .evacuation-modal-wrapper {
+        margin-top: 5vh;
+        margin-bottom: 5vh;
+    }
+
     .evacuation-modal {
-        margin: 10px;
-        max-height: calc(100vh - 40px);
+        border-radius: 12px;
     }
 
     .evacuation-modal-header {
@@ -1506,7 +1493,7 @@ body {
     }
 
     .evacuation-modal-content {
-        padding: 0 20px 20px;
+        padding: 0 20px 16px;
     }
 
     .evacuation-modal-actions {
@@ -1521,17 +1508,13 @@ body {
         font-size: 16px;
     }
 
-    .facility-tags {
-        gap: 4px;
+    .center-details p {
+        font-size: 13px;
     }
 
     .facility-tag {
-        padding: 3px 8px;
-        font-size: 11px;
-    }
-
-    .instruction-steps {
-        gap: 8px;
+        padding: 2px 6px;
+        font-size: 10px;
     }
 
     .step {
@@ -1541,11 +1524,35 @@ body {
     .step-number {
         width: 20px;
         height: 20px;
-        font-size: 11px;
+        font-size: 10px;
     }
 
     .step span:last-child {
         font-size: 13px;
+    }
+
+    /* BETTER FILTER LAYOUT FOR SMALL SCREENS */
+    .filter-buttons {
+        gap: 6px;
+    }
+
+    .filter-button {
+        padding: 8px 10px;
+        font-size: 11px;
+    }
+
+    .filter-label {
+        font-size: 11px;
+        max-width: 60px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .filter-count {
+        font-size: 9px;
+        padding: 1px 4px;
+        min-width: 14px;
     }
 
     .header {
@@ -1568,6 +1575,10 @@ body {
 
     .evacuation-banner {
         padding: 10px 12px;
+    }
+
+    .evacuation-content {
+        gap: 10px;
     }
 
     .evacuation-button {
@@ -1596,17 +1607,17 @@ body {
         font-size: 10px;
     }
 
-    .filter-buttons {
-        gap: 6px;
+    .mobile-logo {
+        height: 20px;
     }
 
-    .filter-button {
-        padding: 6px 8px;
-        font-size: 11px;
+    .mobile-logo-text {
+        font-size: 12px;
     }
 
-    .filter-label {
-        font-size: 11px;
+    .live-dot {
+        width: 5px;
+        height: 5px;
     }
 
     .live-text {
@@ -1631,57 +1642,44 @@ body {
         min-width: 42px;
     }
 
-    /* Hide desktop alerts sidebar on mobile */
+    .alerts-mobile-content {
+        padding: 6px 12px 8px;
+    }
+
+    .alert-card-mobile {
+        padding: 10px;
+    }
+
+    .alert-card-mobile-title {
+        font-size: 11px;
+    }
+
+    .alert-card-mobile-message {
+        font-size: 10px;
+    }
+
+    .alert-card-mobile-areas {
+        font-size: 9px;
+    }
+
     .alerts-sidebar-desktop {
         display: none;
     }
 
-    /* Hide legend section on mobile */
     .legend-section {
         display: none;
     }
-
-    /* Mobile alert cards adjustments */
-    .alert-card-mobile {
-        padding: 12px;
-    }
-
-    .alert-card-mobile-header {
-        margin-bottom: 8px;
-    }
-
-    .alert-card-mobile-icon {
-        width: 24px;
-        height: 24px;
-    }
-
-    .alert-card-mobile-title {
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .alert-card-mobile-time {
-        font-size: 10px;
-    }
-
-    .alert-card-mobile-message {
-        font-size: 11px;
-        margin-bottom: 8px;
-    }
-
-    .alert-card-mobile-areas {
-        font-size: 10px;
-    }
-
-    .alert-card-mobile-close {
-        padding: 4px;
-    }
 }
 
+/* VERY SMALL SCREENS */
 @media (max-width: 480px) {
-    .evacuation-modal {
-        margin: 5px;
-        max-height: calc(100vh - 20px);
+    .evacuation-modal-overlay {
+        padding: 5px;
+    }
+
+    .evacuation-modal-wrapper {
+        margin-top: 2vh;
+        margin-bottom: 2vh;
     }
 
     .evacuation-modal-header {
@@ -1698,7 +1696,7 @@ body {
     }
 
     .evacuation-modal-content {
-        padding: 0 16px 16px;
+        padding: 0 16px 12px;
     }
 
     .evacuation-modal-actions {
@@ -1714,12 +1712,12 @@ body {
     }
 
     .center-details p {
-        font-size: 13px;
+        font-size: 12px;
     }
 
     .facility-tag {
         padding: 2px 6px;
-        font-size: 10px;
+        font-size: 9px;
     }
 
     .step {
@@ -1729,11 +1727,35 @@ body {
     .step-number {
         width: 18px;
         height: 18px;
-        font-size: 10px;
+        font-size: 9px;
     }
 
     .step span:last-child {
         font-size: 12px;
+    }
+
+    /* BETTER FILTER LAYOUT FOR VERY SMALL SCREENS */
+    .filter-buttons {
+        gap: 4px;
+    }
+
+    .filter-button {
+        font-size: 10px;
+        padding: 6px 8px;
+        flex: 1 1 calc(50% - 2px);
+        min-width: 0;
+        max-width: calc(50% - 2px);
+    }
+
+    .filter-label {
+        font-size: 10px;
+        max-width: 40px;
+    }
+
+    .filter-count {
+        font-size: 8px;
+        padding: 1px 3px;
+        min-width: 12px;
     }
 
     .header {
@@ -1756,10 +1778,6 @@ body {
 
     .evacuation-banner {
         padding: 8px 10px;
-    }
-
-    .evacuation-content {
-        gap: 10px;
     }
 
     .evacuation-button {
@@ -1788,43 +1806,6 @@ body {
         font-size: 9px;
     }
 
-    .filter-buttons {
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .filter-button {
-        width: 100%;
-        justify-content: center;
-        padding: 8px 12px;
-        font-size: 11px;
-    }
-
-    .mobile-logo {
-        height: 20px;
-    }
-
-    .mobile-logo-text {
-        font-size: 12px;
-    }
-
-    .live-dot {
-        width: 5px;
-        height: 5px;
-    }
-
-    .live-text {
-        font-size: 10px;
-    }
-
-    .clock {
-        font-size: 10px;
-    }
-
-    .alerts-count {
-        font-size: 10px;
-    }
-
     .bottom-nav {
         padding: 4px 6px 8px;
     }
@@ -1837,23 +1818,25 @@ body {
     }
 
     .alerts-mobile-content {
-        padding: 6px 10px 8px;
+        padding: 4px 10px 6px;
     }
+}
 
-    .alert-card-mobile {
-        padding: 10px;
-    }
-
-    .alert-card-mobile-title {
-        font-size: 11px;
-    }
-
-    .alert-card-mobile-message {
-        font-size: 10px;
-    }
-
-    .alert-card-mobile-areas {
+/* EXTREMELY SMALL SCREENS */
+@media (max-width: 360px) {
+    .filter-button {
         font-size: 9px;
+        padding: 5px 6px;
+    }
+
+    .filter-label {
+        max-width: 35px;
+    }
+
+    .filter-count {
+        font-size: 7px;
+        padding: 1px 2px;
+        min-width: 10px;
     }
 }
 
@@ -1864,7 +1847,7 @@ body {
     contain: layout style paint;
 }
 
-/* Fix for touch devices */
+/* Touch device fixes */
 @media (hover: none) and (pointer: coarse) {
     .nav-item:hover {
         transform: none;
@@ -1922,35 +1905,7 @@ body {
     }
 }
 
-/* High DPI Display Support */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .loading-spinner,
-    .loading-spinner-small {
-        border-width: 1px;
-    }
-}
-
-/* Dark mode optimizations */
-@media (prefers-color-scheme: dark) {
-    .map-info-window {
-        background: #1f2937;
-        color: #f9fafb;
-    }
-
-    .map-info-header {
-        border-bottom-color: #374151;
-    }
-
-    .map-info-content {
-        color: #d1d5db;
-    }
-
-    .map-info-details {
-        color: #9ca3af;
-    }
-}
-
-/* Accessibility improvements */
+/* Accessibility */
 @media (prefers-reduced-motion: reduce) {
     * {
         animation-duration: 0.01ms !important;
@@ -1973,28 +1928,12 @@ body {
         animation: none;
     }
 
-    .pulse-marker {
-        animation: none;
-    }
-
-    .pulse-evacuation {
-        animation: none;
-    }
-
     .evacuation-icon {
-        animation: none;
-    }
-
-    .evacuation-modal {
-        animation: none;
-    }
-
-    .evacuation-modal-overlay {
         animation: none;
     }
 }
 
-/* Focus styles for keyboard navigation */
+/* Focus styles */
 .filter-button:focus,
 .nav-button:focus,
 .alerts-toggle-button:focus,

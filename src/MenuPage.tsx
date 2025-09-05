@@ -62,6 +62,12 @@ const Menu: React.FC = () => {
       case 'cityoverview':
         navigate('/evacuation');
         break;
+      case 'help':
+        navigate('/help');
+        break;
+      case 'news':
+        navigate('/news');
+        break;
       default:
         break;
     }
@@ -114,7 +120,7 @@ const Menu: React.FC = () => {
       subtitle: 'Guides & troubleshooting',
       icon: HelpCircle,
       color: 'purple',
-      action: () => console.log('Help clicked')
+      action: () => handleNavigation('help')
     },
     {
       id: 'news',
@@ -122,7 +128,7 @@ const Menu: React.FC = () => {
       subtitle: 'City alerts & announcements',
       icon: Newspaper,
       color: 'orange',
-      action: () => console.log('News clicked')
+      action: () => handleNavigation('news')
     },
     {
       id: 'cityoverview',

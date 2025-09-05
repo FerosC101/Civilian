@@ -771,12 +771,16 @@ const GISPage: React.FC = () => {
             return null;
         }
 
+        const handleContentClick = (e: React.MouseEvent) => {
+            e.stopPropagation();
+        };
+
         // @ts-ignore
         const { capacity, name, contact, facilities, address } = evacuationState.evacuationDetails.center;
 
         return (
             <div className="evacuation-modal-overlay" onClick={closeEvacuationModal}>
-                <div className="evacuation-modal-wrapper" onClick={(e) => e.stopPropagation()}>
+                <div className="evacuation-modal-wrapper" onClick={handleContentClick}>
                     <div className="evacuation-modal">
                         <div className="evacuation-modal-header">
                             <div className="evacuation-modal-icon">

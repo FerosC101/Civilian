@@ -2,7 +2,6 @@ import {
     AlertTriangle,
     Bell,
     Clock,
-    Heart,
     Home,
     Info,
     Mail,
@@ -12,9 +11,6 @@ import {
     Settings,
     Shield,
     X,
-    Truck,
-    Users,
-    Zap,
     Activity, Globe, BarChart3
 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';

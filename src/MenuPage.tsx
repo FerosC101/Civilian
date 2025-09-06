@@ -68,6 +68,9 @@ const Menu: React.FC = () => {
       case 'contacts':
         navigate('/contacts');
         break;
+      case 'about':
+        navigate('/about');
+        break;
       default:
         break;
     }
@@ -104,7 +107,7 @@ const Menu: React.FC = () => {
       subtitle: 'App info, mission & support',
       icon: Info,
       color: 'blue',
-      action: () => console.log('About clicked')
+      action: () => handleNavigation('about')
     },
     {
       id: 'emergency',

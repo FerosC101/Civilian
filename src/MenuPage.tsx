@@ -65,6 +65,9 @@ const Menu: React.FC = () => {
       case 'donations':
         navigate('/donations');
         break;
+      case 'contacts':
+        navigate('/contacts');
+        break;
       default:
         break;
     }
@@ -109,7 +112,7 @@ const Menu: React.FC = () => {
       subtitle: 'Quick dial safety services',
       icon: Phone,
       color: 'red',
-      action: () => console.log('Emergency contacts clicked')
+      action: () => handleNavigation('contacts')
     },
     {
       id: 'help',

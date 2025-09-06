@@ -12,7 +12,8 @@ import {
     Target,
     Users,
     X,
-    Bell
+    Bell,
+    BarChart3
 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -282,8 +283,8 @@ const DonationDrives: React.FC = () => {
             case 'gis':
                 navigate('/gis');
                 break;
-            case 'donations':
-                navigate('/donations');
+            case 'analytics':
+                navigate('/dashboard');
                 break;
             case 'settings':
                 navigate('/settings');
@@ -360,8 +361,8 @@ const DonationDrives: React.FC = () => {
                         <MapPin size={20} />
                         <span className="nav-label">Map</span>
                     </button>
-                    <button onClick={() => handleNavigation('dashboard')} className="nav-item">
-                        <Heart size={20} />
+                    <button onClick={() => handleNavigation('analytics')} className="nav-item">
+                        <BarChart3 size={20} />
                         <span className="nav-label">Analytics</span>
                     </button>
                     <button onClick={() => handleNavigation('settings')} className="nav-item">
@@ -620,9 +621,9 @@ const DonationDrives: React.FC = () => {
                             <MapPin size={20} />
                             <span>Map</span>
                         </button>
-                        <button onClick={() => handleNavigation('donations')} className="nav-button active">
-                            <Heart size={20} />
-                            <span>Donations</span>
+                        <button onClick={() => handleNavigation('analytics')} className="nav-button">
+                            <BarChart3 size={20} />
+                            <span>Analytics</span>
                         </button>
                         <button onClick={() => handleNavigation('settings')} className="nav-button">
                             <Settings size={20} />

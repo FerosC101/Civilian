@@ -657,3 +657,4 @@ const NewsUpdates: React.FC = () => {
 };
 
 export default NewsUpdates;
+

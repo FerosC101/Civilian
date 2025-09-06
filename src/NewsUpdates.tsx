@@ -127,7 +127,7 @@ const NewsUpdates: React.FC = () => {
             icon: <CheckCircle size={20} />,
             source: 'Technology Department',
             severity: 'info',
-            imageUrl: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=250&fit=crop',
+            imageUrl: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?w=400&h=250&fit=crop',
             tags: ['technology', 'improvement', 'sensors']
         },
         {
@@ -216,7 +216,7 @@ const NewsUpdates: React.FC = () => {
             source: 'Philippine Red Cross',
             location: 'Community Center',
             severity: 'info',
-            imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=250&fit=crop',
+            imageUrl: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?w=400&h=250&fit=crop',
             tags: ['training', 'first-aid', 'certification']
         }
     ]);

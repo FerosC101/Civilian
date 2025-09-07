@@ -1,4 +1,4 @@
-/*MenuPage.css - Complete styling for menu page with clickable logo*/
+/*MenuPage.css - Complete styling for menu page with fixed sidebar matching GIS page*/
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 /* Base styles - inherit from Dashboard.css structure */
@@ -16,7 +16,7 @@
   bottom: 0;
 }
 
-/* Sidebar - Reuse Dashboard sidebar styles */
+/* Sidebar - Updated to match GIS page exactly */
 .menu-sidebar {
   background: rgba(15, 20, 25, 0.95);
   backdrop-filter: blur(20px);
@@ -128,7 +128,7 @@
   background: rgba(107, 114, 128, 0.1);
 }
 
-/* Navigation */
+/* Navigation - Updated to match GIS page */
 .sidebar-nav {
   flex: 1;
   margin-top: 20px;

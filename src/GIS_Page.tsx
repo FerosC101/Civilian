@@ -468,27 +468,27 @@ const GISPage: React.FC = () => {
             // Create info window (without coordinates for privacy)
             // language=HTML
             const infoContent = `
-                        <div style="color: #1f2937; font-family: 'Inter', sans-serif; min-width: 250px;">
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
-                                <div style="width: 16px; height: 16px; border-radius: 50%; background: ${getSeverityColor(alert.severity)};"></div>
-                                <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">
-                                    ${alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} Alert
-                                </h3>
-                            </div>
-                            <div style="margin-bottom: 8px;">
+                <div style="color: #1f2937; font-family: 'Inter', sans-serif; min-width: 250px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
+                        <div style="width: 16px; height: 16px; border-radius: 50%; background: ${getSeverityColor(alert.severity)};"></div>
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">
+                            ${alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} Alert
+                        </h3>
+                    </div>
+                    <div style="margin-bottom: 8px;">
                                 <span style="background: ${getSeverityColor(alert.severity)}20; color: ${getSeverityColor(alert.severity)}; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">
                                     ${alert.severity.toUpperCase()}
                                 </span>
-                            </div>
-                            <p style="margin: 8px 0; font-size: 14px; line-height: 1.4; color: #374151;">
-                                ${alert.message}
-                            </p>
-                            <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
-                                <div><strong>Time:</strong> ${new Date(alert.timestamp).toLocaleString()}</div>
-                                ${alert.affectedAreas ? `<div><strong>Areas:</strong> ${alert.affectedAreas.join(', ')}</div>` : ''}
-                            </div>
-                        </div>
-                    `;
+                    </div>
+                    <p style="margin: 8px 0; font-size: 14px; line-height: 1.4; color: #374151;">
+                        ${alert.message}
+                    </p>
+                    <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
+                        <div><strong>Time:</strong> ${new Date(alert.timestamp).toLocaleString()}</div>
+                        ${alert.affectedAreas ? `<div><strong>Areas:</strong> ${alert.affectedAreas.join(', ')}</div>` : ''}
+                    </div>
+                </div>
+            `;
             // @ts-ignore
             const infoWindow = new google.maps.InfoWindow({
                 content: infoContent,
@@ -765,13 +765,80 @@ const GISPage: React.FC = () => {
     );
 
     // COMPLETELY REWRITTEN EVACUATION MODAL WITH PROPER SCROLLING
+    // Replace your EvacuationModal component with this fixed version:
+
     const EvacuationModal: React.FC = () => {
+        // Body scroll control effect - MORE AGGRESSIVE APPROACH
+        useEffect(() => {
+            if (evacuationState.isModalOpen && evacuationState.evacuationDetails) {
+                // CRITICAL: Multiple scroll prevention approaches
+                const originalStyle = window.getComputedStyle(document.body);
+                const originalOverflow = originalStyle.overflow;
+                const originalPosition = originalStyle.position;
+                const originalWidth = originalStyle.width;
+                const originalHeight = originalStyle.height;
+
+                // Apply multiple scroll locks
+                document.body.classList.add('modal-open');
+                document.body.style.overflow = 'hidden';
+                document.body.style.position = 'fixed';
+                document.body.style.width = '100%';
+                document.body.style.height = '100%';
+                document.documentElement.style.overflow = 'hidden';
+
+                // Prevent scroll on root elements
+                const gisPage = document.querySelector('.gis-page') as HTMLElement;
+                if (gisPage) {
+                    gisPage.style.overflow = 'hidden';
+                }
+
+                return () => {
+                    // Restore original styles
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = originalOverflow;
+                    document.body.style.position = originalPosition;
+                    document.body.style.width = originalWidth;
+                    document.body.style.height = originalHeight;
+                    document.documentElement.style.overflow = 'auto';
+
+                    if (gisPage) {
+                        gisPage.style.overflow = '';
+                    }
+                };
+            }
+        }, [evacuationState.isModalOpen, evacuationState.evacuationDetails]);
+
         // Only render if modal should be open and has details
         if (!evacuationState.isModalOpen || !evacuationState.evacuationDetails) {
             return null;
         }
 
+        // CRITICAL: Enhanced event handlers to prevent all scroll interference
+        const handleOverlayClick = (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (e.target === e.currentTarget) {
+                closeEvacuationModal();
+            }
+        };
+
         const handleContentClick = (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        // Enhanced touch handling for mobile
+        const handleTouchMove = (e: React.TouchEvent) => {
+            // Allow scrolling within the modal overlay
+            e.stopPropagation();
+        };
+
+        const handleTouchStart = (e: React.TouchEvent) => {
+            e.stopPropagation();
+        };
+
+        const handleWheel = (e: React.WheelEvent) => {
+            // Allow scrolling within the modal
             e.stopPropagation();
         };
 
@@ -779,9 +846,47 @@ const GISPage: React.FC = () => {
         const { capacity, name, contact, facilities, address } = evacuationState.evacuationDetails.center;
 
         return (
-            <div className="evacuation-modal-overlay" onClick={closeEvacuationModal}>
-                <div className="evacuation-modal-wrapper" onClick={handleContentClick}>
-                    <div className="evacuation-modal">
+            <div
+                className="evacuation-modal-overlay"
+                onClick={handleOverlayClick}
+                onTouchMove={handleTouchMove}
+                onTouchStart={handleTouchStart}
+                onWheel={handleWheel}
+                style={{
+                    // CRITICAL: Inline styles to override everything
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 10000,
+                    overflowY: 'scroll',
+                    overflowX: 'hidden',
+                    WebkitOverflowScrolling: 'touch',
+                    display: 'block',
+                    height: '100vh',
+                    overflowAnchor: 'none'
+                }}
+            >
+                <div
+                    className="evacuation-modal-wrapper"
+                    style={{
+                        // CRITICAL: Ensure proper height for scrolling
+                        minHeight: 'calc(100vh + 100px)',
+                        paddingTop: '40px',
+                        paddingBottom: '40px'
+                    }}
+                >
+                    <div
+                        className="evacuation-modal"
+                        onClick={handleContentClick}
+                        style={{
+                            // CRITICAL: Ensure no height constraints
+                            height: 'auto',
+                            maxHeight: 'none',
+                            overflow: 'visible'
+                        }}
+                    >
                         <div className="evacuation-modal-header">
                             <div className="evacuation-modal-icon">
                                 <Building2 size={24} />
@@ -968,15 +1073,15 @@ const GISPage: React.FC = () => {
                                 <Navigation size={20} />
                             </div>
                             <div className="evacuation-text">
-                                        <span className="evacuation-title">
-                                            {evacuationState.isEvacuationMode ? 'Evacuation Mode Active' : 'Emergency Evacuation Available'}
-                                        </span>
+                                <span className="evacuation-title">
+                                    {evacuationState.isEvacuationMode ? 'Evacuation Mode Active' : 'Emergency Evacuation Available'}
+                                </span>
                                 <span className="evacuation-description">
-                                            {evacuationState.isEvacuationMode
-                                                ? 'Evacuation centers visible on map'
-                                                : 'Get directions to the nearest evacuation center'
-                                            }
-                                        </span>
+                                    {evacuationState.isEvacuationMode
+                                        ? 'Evacuation centers visible on map'
+                                        : 'Get directions to the nearest evacuation center'
+                                    }
+                                </span>
                             </div>
                         </div>
                         {evacuationState.isEvacuationMode ? (
@@ -996,8 +1101,8 @@ const GISPage: React.FC = () => {
                             >
                                 <Navigation size={16} />
                                 <span>
-                                            {evacuationState.isProcessing ? 'Calculating...' : 'Evacuate Now'}
-                                        </span>
+                                    {evacuationState.isProcessing ? 'Calculating...' : 'Evacuate Now'}
+                                </span>
                             </button>
                         )}
                     </div>
@@ -1010,10 +1115,10 @@ const GISPage: React.FC = () => {
                             onClick={() => setAlertsExpanded(!alertsExpanded)}
                             className="alerts-toggle-button"
                         >
-                                    <span>
-                                        <AlertTriangle size={16} />
-                                        Active Alerts ({filteredAlerts.length})
-                                    </span>
+                            <span>
+                                <AlertTriangle size={16} />
+                                Active Alerts ({filteredAlerts.length})
+                            </span>
                             {alertsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </button>
                     </div>
@@ -1040,8 +1145,8 @@ const GISPage: React.FC = () => {
                                                     {alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} Alert - {alert.severity.toUpperCase()}
                                                 </h4>
                                                 <span className="alert-card-mobile-time">
-                                                            {new Date(alert.timestamp).toLocaleString()}
-                                                        </span>
+                                                    {new Date(alert.timestamp).toLocaleString()}
+                                                </span>
                                             </div>
                                             <button
                                                 onClick={() => dismissAlert(alert.id)}
@@ -1075,10 +1180,10 @@ const GISPage: React.FC = () => {
                             onClick={() => setFiltersExpanded(!filtersExpanded)}
                             className="filters-toggle-button"
                         >
-                                    <span>
-                                        <Filter size={16} />
-                                        Filters ({Object.values(activeFilters).filter(Boolean).length}/4)
-                                    </span>
+                            <span>
+                                <Filter size={16} />
+                                Filters ({Object.values(activeFilters).filter(Boolean).length}/4)
+                            </span>
                             {filtersExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                         </button>
                     </div>
@@ -1200,8 +1305,8 @@ const GISPage: React.FC = () => {
                                                     {alert.type.charAt(0).toUpperCase() + alert.type.slice(1)} - {alert.severity.toUpperCase()}
                                                 </h4>
                                                 <span className="alert-card-desktop-time">
-                                                            {new Date(alert.timestamp).toLocaleTimeString()}
-                                                        </span>
+                                                    {new Date(alert.timestamp).toLocaleTimeString()}
+                                                </span>
                                             </div>
                                             <button
                                                 onClick={() => dismissAlert(alert.id)}
@@ -1267,4 +1372,6 @@ const GISPage: React.FC = () => {
             </div>
         </div>
     );
-}; export default GISPage;
+};
+
+export default GISPage;

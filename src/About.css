@@ -454,8 +454,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 80px;
-    height: 80px;
+    width: 30px;
+    height: 30px;
     border-radius: 20px;
     background: rgba(59, 130, 246, 0.1);
     color: #3b82f6;
@@ -470,7 +470,7 @@ body {
 }
 
 .card-title {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     color: #ffffff;
     line-height: 1.3;

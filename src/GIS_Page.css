@@ -1,4 +1,4 @@
-/* GIS Disaster Map CSS - Updated with Fixed Modal Scrolling and Responsiveness */
+/* GIS Disaster Map CSS - FIXED MODAL SCROLLING ISSUES */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 * {
@@ -20,6 +20,36 @@ body {
     overflow: hidden;
 }
 
+/* FIXED: Modal open state for body scroll control - REMOVED PROBLEMATIC RULES */
+body.modal-open {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+body.modal-open .gis-page {
+    overflow: hidden !important;
+}
+
+/* REMOVED: These problematic rules that caused scroll-to-top issues
+body.modal-open * {
+    scroll-behavior: auto !important;
+}
+
+body.modal-open .evacuation-modal-overlay {
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+body.modal-open .evacuation-modal-overlay {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+*/
+
 .gis-page {
     height: 100vh;
     width: 100vw;
@@ -33,41 +63,54 @@ body {
     bottom: 0;
 }
 
+/* FIXED: COMPLETELY REWRITTEN MODAL CSS - CLEAN SCROLLING */
 .evacuation-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
-    z-index: 1000;
-    padding: 20px;
-    overflow-y: auto;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(8px) !important;
+    z-index: 10000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    /* CLEAN: Simplified scrolling behavior */
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: block !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
 }
 
-
 .evacuation-modal-wrapper {
-    width: 100%;
-    max-width: 600px;
-    margin: 40px auto;
-    display: flex;
-    flex-direction: column;
+    width: 100% !important;
+    max-width: 600px !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+    display: block !important;
+    position: relative !important;
+    min-height: 100vh !important;
+    padding-top: 40px !important;
+    padding-bottom: 40px !important;
+    box-sizing: border-box !important;
 }
 
 .evacuation-modal {
-    background: linear-gradient(145deg, #1f2937 0%, #374151 100%);
-    border-radius: 16px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    width: 100%;
-    position: relative;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
+    background: linear-gradient(145deg, #1f2937 0%, #374151 100%) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+    border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    width: 100% !important;
+    position: static !important;
+    display: block !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
 }
 
 .evacuation-modal-header {
@@ -123,10 +166,12 @@ body {
 }
 
 .evacuation-modal-content {
-    padding: 16px 24px;
-    overflow-y: auto;
-    flex: 1;
+    padding: 16px 24px !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
 }
+
 .evacuation-center-info {
     margin-bottom: 24px;
 }
@@ -262,6 +307,7 @@ body {
     border-top: 1px solid rgba(107, 114, 128, 0.2);
     display: flex;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .evacuation-modal-button {
@@ -896,6 +942,7 @@ body {
     transition: all 0.2s;
     flex-shrink: 0;
 }
+
 .alert-card-mobile-close:hover {
     color: #ffffff;
     background: rgba(107, 114, 128, 0.2);
@@ -1466,7 +1513,7 @@ body {
     background: rgba(156, 163, 175, 0.7);
 }
 
-/* Mobile Responsive - UPDATED MODAL SCROLLING FOR MOBILE */
+/* Mobile Responsive - FIXED MODAL SCROLLING FOR MOBILE */
 @media (max-width: 768px) {
     .sidebar.desktop {
         display: none;
@@ -1474,17 +1521,19 @@ body {
 
     /* FIXED MODAL FOR MOBILE */
     .evacuation-modal-overlay {
-        padding: 10px;
-        align-items: flex-start;
+        padding: 0 !important;
+        -webkit-overflow-scrolling: touch;
     }
 
     .evacuation-modal-wrapper {
-        margin-top: 5vh;
-        margin-bottom: 5vh;
+        padding: 10px !important;
+        padding-top: 20px !important;
+        padding-bottom: 20px !important;
+        min-height: 100vh !important;
     }
 
     .evacuation-modal {
-        border-radius: 12px;
+        margin: 0 !important;
     }
 
     .evacuation-modal-header {
@@ -1677,12 +1726,13 @@ body {
 /* VERY SMALL SCREENS */
 @media (max-width: 480px) {
     .evacuation-modal-overlay {
-        padding: 5px;
+        padding: 0;
     }
 
     .evacuation-modal-wrapper {
-        margin-top: 2vh;
-        margin-bottom: 2vh;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        padding: 5px;
     }
 
     .evacuation-modal-header {

@@ -159,12 +159,10 @@ const GISPage: React.FC = () => {
                 },
                 (error) => {
                     console.log('Location access denied or unavailable:', error);
-                    // Default to Batangas City center if location is not available
                     setUserLocation({ lat: 13.7565, lng: 121.0583 });
                 }
             );
         } else {
-            // Default location if geolocation is not supported
             setUserLocation({ lat: 13.7565, lng: 121.0583 });
         }
     }, []);
@@ -186,7 +184,6 @@ const GISPage: React.FC = () => {
             const now = Date.now();
 
             if (now - alertTime < 30000) {
-                // Create alert without coordinates for privacy
                 const privacySafeAlert = {
                     ...latestAlert,
                     message: latestAlert.message.replace(/\d+\.\d+,\s*\d+\.\d+/g, '[Location]')
@@ -333,12 +330,10 @@ const GISPage: React.FC = () => {
             }
         };
 
-        // Check if Google Maps is already loaded
         // @ts-ignore
         if (window.google && window.google.maps && userLocation) {
             initMap();
         } else if (userLocation) {
-            // Load Google Maps API
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBMoAvZUPltUYaThhyQSmpFnufPrWpE7kg&callback=initMap`;
             script.async = true;
@@ -349,24 +344,22 @@ const GISPage: React.FC = () => {
         }
     }, [mapInstance, userLocation]);
 
-    // Add evacuation center markers only when in evacuation mode - UPDATED WITH BUILDING ICON
+    // Add evacuation center markers only when in evacuation mode
     useEffect(() => {
         if (!mapInstance) return;
 
         // Clear existing evacuation markers
         evacuationMarkers.forEach(marker => marker.setMap(null));
 
-        // Only show evacuation centers when in evacuation mode
         if (!evacuationState.isEvacuationMode) {
             setEvacuationMarkers([]);
             return;
         }
 
-        // Create evacuation center markers with Building2-style appearance
+        // Create evacuation center markers
         const newEvacuationMarkers = evacuationCenters.map(center => {
             const position = { lat: center.lat, lng: center.lng };
 
-            // Create custom evacuation center marker using a building-like appearance
             // @ts-ignore
             const marker = new google.maps.Marker({
                 position,
@@ -386,31 +379,30 @@ const GISPage: React.FC = () => {
                 title: `Evacuation Center: ${center.name}`,
             });
 
-            // Create info window for evacuation center
             const infoContent = `
-                        <div style="color: #1f2937; font-family: 'Inter', sans-serif; min-width: 280px;">
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
-                                <div style="width: 16px; height: 16px; border-radius: 4px; background: #10b981;"></div>
-                                <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">
-                                    ${center.name}
-                                </h3>
-                            </div>
-                            <div style="margin-bottom: 8px;">
-                                <span style="background: #10b98120; color: #10b981; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">
-                                    CAPACITY: ${center.capacity}
-                                </span>
-                            </div>
-                            <p style="margin: 8px 0; font-size: 14px; line-height: 1.4; color: #374151;">
-                                ${center.address}
-                            </p>
-                            <div style="margin: 8px 0; font-size: 13px; color: #374151;">
-                                <strong>Facilities:</strong> ${center.facilities.join(', ')}
-                            </div>
-                            <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
-                                <div><strong>Contact:</strong> ${center.contact}</div>
-                            </div>
-                        </div>
-                    `;
+                <div style="color: #1f2937; font-family: 'Inter', sans-serif; min-width: 280px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
+                        <div style="width: 16px; height: 16px; border-radius: 4px; background: #10b981;"></div>
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">
+                            ${center.name}
+                        </h3>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="background: #10b98120; color: #10b981; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                            CAPACITY: ${center.capacity}
+                        </span>
+                    </div>
+                    <p style="margin: 8px 0; font-size: 14px; line-height: 1.4; color: #374151;">
+                        ${center.address}
+                    </p>
+                    <div style="margin: 8px 0; font-size: 13px; color: #374151;">
+                        <strong>Facilities:</strong> ${center.facilities.join(', ')}
+                    </div>
+                    <div style="margin-top: 8px; font-size: 12px; color: #6b7280;">
+                        <div><strong>Contact:</strong> ${center.contact}</div>
+                    </div>
+                </div>
+            `;
 
             // @ts-ignore
             const infoWindow = new google.maps.InfoWindow({
@@ -466,7 +458,6 @@ const GISPage: React.FC = () => {
             });
 
             // Create info window (without coordinates for privacy)
-            // language=HTML
             const infoContent = `
                 <div style="color: #1f2937; font-family: 'Inter', sans-serif; min-width: 250px;">
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
@@ -476,9 +467,9 @@ const GISPage: React.FC = () => {
                         </h3>
                     </div>
                     <div style="margin-bottom: 8px;">
-                                <span style="background: ${getSeverityColor(alert.severity)}20; color: ${getSeverityColor(alert.severity)}; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">
-                                    ${alert.severity.toUpperCase()}
-                                </span>
+                        <span style="background: ${getSeverityColor(alert.severity)}20; color: ${getSeverityColor(alert.severity)}; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                            ${alert.severity.toUpperCase()}
+                        </span>
                     </div>
                     <p style="margin: 8px 0; font-size: 14px; line-height: 1.4; color: #374151;">
                         ${alert.message}
@@ -529,21 +520,21 @@ const GISPage: React.FC = () => {
 
     const getAlertColor = (type: string) => {
         switch (type) {
-            case 'earthquake': return '#8B5CF6'; // Purple
-            case 'fire': return '#EF4444'; // Red
-            case 'flood': return '#3B82F6'; // Blue
-            case 'weather': return '#10B981'; // Green
-            default: return '#6B7280'; // Gray
+            case 'earthquake': return '#8B5CF6';
+            case 'fire': return '#EF4444';
+            case 'flood': return '#3B82F6';
+            case 'weather': return '#10B981';
+            default: return '#6B7280';
         }
     };
 
     const getSeverityColor = (severity: string) => {
         switch (severity) {
-            case 'critical': return '#DC2626'; // Red
-            case 'high': return '#EA580C'; // Orange
-            case 'medium': return '#D97706'; // Amber
-            case 'low': return '#65A30D'; // Lime
-            default: return '#6B7280'; // Gray
+            case 'critical': return '#DC2626';
+            case 'high': return '#EA580C';
+            case 'medium': return '#D97706';
+            case 'low': return '#65A30D';
+            default: return '#6B7280';
         }
     };
 
@@ -575,7 +566,6 @@ const GISPage: React.FC = () => {
 
     // Updated evacuation handler with unified state management
     const handleEvacuation = () => {
-        // Prevent multiple clicks
         if (evacuationState.isProcessing || evacuationState.isModalOpen) {
             return;
         }
@@ -585,7 +575,6 @@ const GISPage: React.FC = () => {
             return;
         }
 
-        // Set processing state - single state update
         setEvacuationState(prev => ({
             ...prev,
             isProcessing: true,
@@ -606,7 +595,6 @@ const GISPage: React.FC = () => {
             if (status === google.maps.DirectionsStatus.OK) {
                 directionsRenderer.setDirections(result);
 
-                // Single state update with all necessary data
                 // @ts-ignore
                 setEvacuationState(prev => ({
                     ...prev,
@@ -619,7 +607,6 @@ const GISPage: React.FC = () => {
                 }));
             } else {
                 alert('Could not calculate evacuation route. Please try again or contact emergency services.');
-                // Reset state on error
                 setEvacuationState(prev => ({
                     ...prev,
                     isProcessing: false,
@@ -631,7 +618,6 @@ const GISPage: React.FC = () => {
         });
     };
 
-    // Updated modal close handler
     const closeEvacuationModal = () => {
         setEvacuationState(prev => ({
             ...prev,
@@ -639,7 +625,6 @@ const GISPage: React.FC = () => {
         }));
     };
 
-    // Updated exit evacuation handler
     const handleExitEvacuation = () => {
         if (directionsRenderer) {
             directionsRenderer.setDirections({routes: []});
@@ -683,7 +668,6 @@ const GISPage: React.FC = () => {
 
     const hasActiveAlerts = filteredAlerts.length > 0;
 
-    // IMPROVED FILTER BUTTON WITH RESPONSIVE TEXT HANDLING
     const FilterButton: React.FC<{
         type: keyof typeof activeFilters;
         icon: React.ComponentType<{ size: number }>;
@@ -694,16 +678,12 @@ const GISPage: React.FC = () => {
     }> = ({ type, icon: Icon, label, color, active, count }) => {
         const getResponsiveLabel = () => {
             if (window.innerWidth < 360) {
-                // Very small screens: show first 4 characters
                 return label.slice(0, 4);
             } else if (window.innerWidth < 480) {
-                // Small screens: show first word or 6 characters
                 return label.includes(' ') ? label.split(' ')[0] : label.slice(0, 6);
             } else if (isMobile) {
-                // Mobile: show first word
                 return label.split(' ')[0];
             }
-            // Desktop: show full label
             return label;
         };
 
@@ -764,21 +744,17 @@ const GISPage: React.FC = () => {
         </div>
     );
 
-    // COMPLETELY REWRITTEN EVACUATION MODAL WITH PROPER SCROLLING
-    // Replace your EvacuationModal component with this fixed version:
-
+    // Fixed Evacuation Modal with proper scrolling
     const EvacuationModal: React.FC = () => {
-        // Body scroll control effect - MORE AGGRESSIVE APPROACH
+        // Body scroll control effect
         useEffect(() => {
             if (evacuationState.isModalOpen && evacuationState.evacuationDetails) {
-                // CRITICAL: Multiple scroll prevention approaches
                 const originalStyle = window.getComputedStyle(document.body);
                 const originalOverflow = originalStyle.overflow;
                 const originalPosition = originalStyle.position;
                 const originalWidth = originalStyle.width;
                 const originalHeight = originalStyle.height;
 
-                // Apply multiple scroll locks
                 document.body.classList.add('modal-open');
                 document.body.style.overflow = 'hidden';
                 document.body.style.position = 'fixed';
@@ -786,14 +762,12 @@ const GISPage: React.FC = () => {
                 document.body.style.height = '100%';
                 document.documentElement.style.overflow = 'hidden';
 
-                // Prevent scroll on root elements
                 const gisPage = document.querySelector('.gis-page') as HTMLElement;
                 if (gisPage) {
                     gisPage.style.overflow = 'hidden';
                 }
 
                 return () => {
-                    // Restore original styles
                     document.body.classList.remove('modal-open');
                     document.body.style.overflow = originalOverflow;
                     document.body.style.position = originalPosition;
@@ -808,12 +782,10 @@ const GISPage: React.FC = () => {
             }
         }, [evacuationState.isModalOpen, evacuationState.evacuationDetails]);
 
-        // Only render if modal should be open and has details
         if (!evacuationState.isModalOpen || !evacuationState.evacuationDetails) {
             return null;
         }
 
-        // CRITICAL: Enhanced event handlers to prevent all scroll interference
         const handleOverlayClick = (e: React.MouseEvent) => {
             e.preventDefault();
             e.stopPropagation();
@@ -827,9 +799,7 @@ const GISPage: React.FC = () => {
             e.stopPropagation();
         };
 
-        // Enhanced touch handling for mobile
         const handleTouchMove = (e: React.TouchEvent) => {
-            // Allow scrolling within the modal overlay
             e.stopPropagation();
         };
 
@@ -838,7 +808,6 @@ const GISPage: React.FC = () => {
         };
 
         const handleWheel = (e: React.WheelEvent) => {
-            // Allow scrolling within the modal
             e.stopPropagation();
         };
 
@@ -853,7 +822,6 @@ const GISPage: React.FC = () => {
                 onTouchStart={handleTouchStart}
                 onWheel={handleWheel}
                 style={{
-                    // CRITICAL: Inline styles to override everything
                     position: 'fixed',
                     top: 0,
                     left: 0,
@@ -871,7 +839,6 @@ const GISPage: React.FC = () => {
                 <div
                     className="evacuation-modal-wrapper"
                     style={{
-                        // CRITICAL: Ensure proper height for scrolling
                         minHeight: 'calc(100vh + 100px)',
                         paddingTop: '40px',
                         paddingBottom: '40px'
@@ -881,7 +848,6 @@ const GISPage: React.FC = () => {
                         className="evacuation-modal"
                         onClick={handleContentClick}
                         style={{
-                            // CRITICAL: Ensure no height constraints
                             height: 'auto',
                             maxHeight: 'none',
                             overflow: 'visible'
@@ -976,7 +942,7 @@ const GISPage: React.FC = () => {
                 />
             )}
 
-            {/* Evacuation Modal - FIXED SCROLLING */}
+            {/* Evacuation Modal */}
             <EvacuationModal />
 
             {/* Main content */}
@@ -1065,7 +1031,7 @@ const GISPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Evacuation Banner - Shows for active alerts OR evacuation mode */}
+                {/* Evacuation Banner */}
                 {(hasActiveAlerts || evacuationState.isEvacuationMode) && (
                     <div className="evacuation-banner">
                         <div className="evacuation-content">
@@ -1189,7 +1155,7 @@ const GISPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Filter controls and Map legend - Desktop or Expanded Mobile */}
+                {/* Filter controls and Map legend */}
                 {(!isMobile || filtersExpanded) && (
                     <div className="filters-container">
                         <div className="filters-wrapper">
@@ -1204,7 +1170,6 @@ const GISPage: React.FC = () => {
                                 <div className="filter-buttons">
                                     <FilterButton
                                         type="earthquake"
-                                        // @ts-ignore
                                         icon={Zap}
                                         label="Earthquake"
                                         color="earthquake"
@@ -1214,7 +1179,6 @@ const GISPage: React.FC = () => {
 
                                     <FilterButton
                                         type="flood"
-                                        // @ts-ignore
                                         icon={AlertTriangle}
                                         label="Flood Warning"
                                         color="flood"
@@ -1224,7 +1188,6 @@ const GISPage: React.FC = () => {
 
                                     <FilterButton
                                         type="fire"
-                                        // @ts-ignore
                                         icon={Flame}
                                         label="Fire Warning"
                                         color="fire"
@@ -1234,7 +1197,6 @@ const GISPage: React.FC = () => {
 
                                     <FilterButton
                                         type="weather"
-                                        // @ts-ignore
                                         icon={CloudRain}
                                         label="Weather Alert"
                                         color="weather"

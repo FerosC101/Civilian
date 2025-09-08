@@ -458,6 +458,7 @@ const GISPage: React.FC = () => {
             });
 
             // Create info window (without coordinates for privacy)
+            // language=HTML
             const infoContent = `
                 <div style="color: #1f2937; font-family: 'Inter', sans-serif; min-width: 250px;">
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
@@ -930,6 +931,7 @@ const GISPage: React.FC = () => {
         );
     };
 
+    // @ts-ignore
     return (
         <div className="gis-page">
             <Sidebar />
@@ -1170,6 +1172,7 @@ const GISPage: React.FC = () => {
                                 <div className="filter-buttons">
                                     <FilterButton
                                         type="earthquake"
+                                        // @ts-ignore
                                         icon={Zap}
                                         label="Earthquake"
                                         color="earthquake"
@@ -1179,6 +1182,7 @@ const GISPage: React.FC = () => {
 
                                     <FilterButton
                                         type="flood"
+                                        // @ts-ignore
                                         icon={AlertTriangle}
                                         label="Flood Warning"
                                         color="flood"
@@ -1188,6 +1192,7 @@ const GISPage: React.FC = () => {
 
                                     <FilterButton
                                         type="fire"
+                                        // @ts-ignore
                                         icon={Flame}
                                         label="Fire Warning"
                                         color="fire"
@@ -1197,6 +1202,7 @@ const GISPage: React.FC = () => {
 
                                     <FilterButton
                                         type="weather"
+                                        // @ts-ignore
                                         icon={CloudRain}
                                         label="Weather Alert"
                                         color="weather"

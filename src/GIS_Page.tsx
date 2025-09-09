@@ -885,36 +885,6 @@ const GISPage: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-
-                            <div className="evacuation-instructions">
-                                <h3>Evacuation Instructions</h3>
-                                <div className="instruction-steps">
-                                    <div className="step">
-                                        <span className="step-number">1</span>
-                                        <span>Follow the blue route displayed on the map to reach your designated evacuation center</span>
-                                    </div>
-                                    <div className="step">
-                                        <span className="step-number">2</span>
-                                        <span>Stay calm and drive carefully. Avoid flooded roads and follow traffic authorities</span>
-                                    </div>
-                                    <div className="step">
-                                        <span className="step-number">3</span>
-                                        <span>Bring essential items: water, food, medications, important documents, and emergency supplies</span>
-                                    </div>
-                                    <div className="step">
-                                        <span className="step-number">4</span>
-                                        <span>Report to evacuation center staff upon arrival and follow their instructions</span>
-                                    </div>
-                                    <div className="step">
-                                        <span className="step-number">5</span>
-                                        <span>Keep your phone charged and stay informed through official emergency channels</span>
-                                    </div>
-                                    <div className="step">
-                                        <span className="step-number">6</span>
-                                        <span>Do not return home until authorities declare it safe to do so</span>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <div className="evacuation-modal-actions">

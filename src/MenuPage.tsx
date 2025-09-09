@@ -14,7 +14,8 @@ import {
   Route,
   Settings,
   X,
-  ChevronDown
+  ChevronDown,
+  Menu as MenuIcon
 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -39,6 +40,9 @@ const Menu: React.FC = () => {
     const handleResize = () => {
       const newIsMobile = window.innerWidth <= 768;
       setIsMobile(newIsMobile);
+      if (!newIsMobile) {
+        setSidebarOpen(false);
+      }
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -79,15 +83,12 @@ const Menu: React.FC = () => {
   const handleMenuAction = (action: string) => {
     switch (action) {
       case 'alert':
-        // Handle alert action
         console.log('Alert triggered');
         break;
       case 'route':
-        // Handle route action
         console.log('Route triggered');
         break;
       case 'help':
-        // Handle help action
         console.log('Help triggered');
         break;
       default:
@@ -96,8 +97,11 @@ const Menu: React.FC = () => {
   };
 
   const handleLogoClick = () => {
-    // Already on menu page, could show a dropdown or just stay
     console.log('Already on menu page');
+  };
+
+  const handleMobileMenuToggle = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
   const menuItems = [
@@ -237,16 +241,16 @@ const Menu: React.FC = () => {
             <div className="top-left">
               {isMobile && (
                   <button
-                      onClick={() => setSidebarOpen(true)}
+                      onClick={handleMobileMenuToggle}
                       className="mobile-logo-button clickable-mobile-logo"
                   >
+                    <MenuIcon size={20} />
                     <img
                         src="https://res.cloudinary.com/drrzinr9v/image/upload/v1756178197/CIVILIAN_LOGO_wwg5cm.png"
                         alt="CIVILIAN"
                         className="mobile-logo"
                     />
                     <span className="mobile-logo-text">CIVILIAN</span>
-                    <ChevronDown size={12} className="mobile-logo-arrow" />
                   </button>
               )}
               <div className="live-indicator">
